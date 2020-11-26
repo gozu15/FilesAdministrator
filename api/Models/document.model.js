@@ -3,6 +3,7 @@ const schema = mongoose.Schema;
 let DocumentModel =  new schema({
     identify_number:{type:String, required:true},   
     tittle:{type:String, required:true},
+    document_name:{type:String, required:true},
     court_name:{type:String, required:true},
     created_at    : { type: Date }, 
     updated_at    : { type: Date }

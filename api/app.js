@@ -1,12 +1,17 @@
 const express = require("express");
 const app = express();
+const routerMiddleware = express.Router();
 const body_parser = require("body-parser");
 const cors_config = require("cors");
 const multi_party = require('connect-multiparty');
+const jwt = require('jsonwebtoken');
+const config = require('./config/config');
 const PORT = process.env.PORT || 3000;
 
 const mongoose = require('mongoose');
 const db = mongoose.connection;
+//const routerMiddleware = express.Router(); 
+
 
 function init(){
   mongoose.connect('mongodb://localhost/dbexample', {useNewUrlParser: true})
@@ -24,6 +29,10 @@ function init(){
 let multiPartyMiddelwere = multi_party({
   uploadDir: './uploads'
 });
+
+
+//MIDDLEWARES
+app.set('llave',config.key)
 //BODY PARSER
 app.use(
   body_parser.urlencoded({
@@ -44,9 +53,27 @@ app.use(cors_config());
 //   res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
 //   next();
 // });
+routerMiddleware.use((req,res,next)=>{
+  const token = req.headers['access-token'];
+  if (token) {
+    jwt.verify(token, app.get('llave'), (err, decoded) => {      
+      if (err) {
+        return res.json({ mensaje: 'Token inválida' });    
+      } else {
+          req.decoded = decoded;    
+          next();
+        }
+      });
+    } else {
+      res.send({ 
+          mensaje: 'Token no proveída.' 
+      });
+    }
+}) 
 
-require("./routes/documents.route")(app, multiPartyMiddelwere);
+require("./routes/documents.route")(app, multiPartyMiddelwere,routerMiddleware);
+require("./routes/auth.route")(app, jwt);
 
 module.exports = {  
-  init
+  init  
 };
