@@ -8,7 +8,9 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-
+  textHello:string;
+  idhello:string;
+  helloData=[];
    uploadedFiles: Array<File>;
   constructor(
     public documentService: DocumentService,
@@ -18,6 +20,65 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.obtenerDatos();
   }
+
+  //HELLO INIT
+  cleandt(){
+    this.textHello=null;
+    this.idhello=null;
+  }
+  createhello(){
+    let data ={
+      text : this.textHello
+    }
+    this.documentService.createHello(data).subscribe(resolve =>{
+      console.log('this is resolve',resolve);
+    });
+  }
+  gethello(){
+    this.helloData=[];
+     this.documentService.getHello().subscribe((resolve:any)=>{
+      console.log('this is resolve',resolve);
+      resolve.message.forEach(element =>{
+        this.helloData.push(element);
+      })
+
+    });
+  }
+
+  gethellobyID(){
+    this.helloData=[];
+    let data = {
+      id:this.idhello
+    }
+
+     this.documentService.getHellobyId(data).subscribe((resolve:any)=>{
+      console.log('this is resolve',resolve);
+      resolve.message.forEach(element =>{
+        this.helloData.push(element);
+      })
+
+    });
+  }
+
+  updatehello(){
+    let data = {
+      text:this.textHello,
+      id:this.idhello
+    }
+     this.documentService.updateHello(data).subscribe(resolve =>{
+      console.log('this is resolve',resolve);
+    });
+  }
+
+  deletehello(){
+    let data = {
+      id:this.idhello
+    }
+     this.documentService.deleteHello(data).subscribe(resolve =>{
+      console.log('this is resolve',resolve);
+    });
+  }
+  //HELLO END
 
   obtenerDatos() {
     this.documentService.getApiDocument().subscribe((resolve) => {

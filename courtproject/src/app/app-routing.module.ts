@@ -9,8 +9,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 
 const routes: Routes = [
   {path:'home', component:HomeComponent},
-  //{path:'administrator', component:AdministratorComponent},
-  {path:'administrator', loadChildren: () => import ('./administrator/administrator.module' ).then(mod => mod.AdministratorModule),canActivate: [AuthGuard]},
+  //{path:'administrator', component:AdministratorComponent},//canActivate: [AuthGuard]
+  {path:'administrator', loadChildren: () => import ('./administrator/administrator.module' ).then(mod => mod.AdministratorModule)},
   {path:'authentication', component:AuthComponent},
   {path:'' ,redirectTo:'/authentication', pathMatch:'full'},
   {path:'**', component:PageNotFoundComponent}
