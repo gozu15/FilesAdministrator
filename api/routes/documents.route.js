@@ -8,7 +8,11 @@ module.exports = (app, multi,rutaProtegida) => {
 
     router.get('/',controllerDocument.GetDocument);
     router.post('/upload', multi, controllerDocument.RequestDocument)
+    //RUTA DE USO DE MODULO MAMMOTH
     router.get('/check',controllerDocument.ReadDocument);
+    //RUTA DE USO DE MODULO TEXTTRACT
+    router.get('/check-prod',controllerDocument.TexttractModuleRead);
+    //RUTA DE USO DE MODULO PDF-PARSE
     router.get('/pdfcheck',controllerDocument.ReadPdfDocument);
 
     //HELLO WORLD EXAMPLE

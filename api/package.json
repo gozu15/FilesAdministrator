@@ -16,6 +16,7 @@
     "jsonwebtoken": "^8.5.1",
     "mammoth": "^1.4.13",
     "mongoose": "^5.10.11",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "textract": "^2.5.0"
   }
 }

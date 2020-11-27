@@ -1,6 +1,7 @@
 "use strict";
 const { response } = require('express');
 const mammoth = require('mammoth');
+const textract = require('textract')
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
 let textMarkDown ="";
@@ -108,10 +109,19 @@ async function RequestDocument(req, res) {
     }
 
 }
+//FUNCION DE PRUEBA CON MODULO Textract PARA OBTENER TEXTO DE ARCHIVOS DOC, DOCX, PDF
+async function TexttractModuleRead(req,res){
+    textract.fromFileWithPath(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`,(error,text) =>{
+        if(error) console.log(error)
+        console.log({message:text});
+        res.status(200).send({message:text});
+    })
+}
 
+//FUNCION DE PRUEBA CON MODULO MAMMOTH PARA OBTENER TEXTO DE ARCHIVOS .DOCX
 async function ReadDocument(req,res){
    //await ConvertDocumentToHtml();
-   mammoth.convertToMarkdown({path: `${url}NqFd_G4cnQjg6XxJCdtcO9xc.docx`} )
+   mammoth.convertToMarkdown({path: `${url}wer465we4r564wer.docx`} )
     .then((result) => {        
         
         console.log({message:result.messages, html: result.value});
@@ -123,6 +133,7 @@ async function ReadDocument(req,res){
    
 }
 
+//FUNCION PARA OBTENER TEXTO DE ARCHIVOS PDF MODULO PDF-PARSE
 async function ReadPdfDocument(req,res){    
    const pdfFile= fs.readFileSync(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`);
   pdfParse(pdfFile).then((response)=>{
@@ -134,16 +145,16 @@ async function ReadPdfDocument(req,res){
   })
 }
 
-async function ConvertDocumentToHtml(){
-    mammoth.convertToMarkdown({path: `${url}wer465we4r564wer.docx`} )
-    .then((result) => {        
-        textMarkDown = result.value;
-        console.log({message:result.messages, html: result.value});
+// async function ConvertDocumentToHtml(){
+//     mammoth.convertToMarkdown({path: `${url}wer465we4r564wer.docx`} )
+//     .then((result) => {        
+//         textMarkDown = result.value;
+//         console.log({message:result.messages, html: result.value});
         
-    }).catch((err) => {
-        console.log("ocurrio un error",err);        
-    });
-}
+//     }).catch((err) => {
+//         console.log("ocurrio un error",err);        
+//     });
+// }
 //DOCUMENT FILE END
 module.exports = {
     GetDocument,
@@ -155,5 +166,6 @@ module.exports = {
     Read,
     Update,
     Delete,
-    ReadbyID
+    ReadbyID,
+    TexttractModuleRead
 }
