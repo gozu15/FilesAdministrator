@@ -1,22 +1,14 @@
 "use strict";
-const { response } = require('express');
+//import {Powerpoint, Word} from 'pdf-officegen'
+const googlevision= require('@google-cloud/vision');
 const mammoth = require('mammoth');
-const textract = require('textract')
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
-let textMarkDown ="";
-const modelDocument = require('../Models/document.model');
-const { model } = require('../Models/holamundo.model');
-//hello wordl example
-const modelHello = require('../Models/holamundo.model');
+const TurnDown= require('turndown')
+let turndownservice = new TurnDown();
+const modelDocument = require('../Models/image_object.model');
 const url= './uploads/'
-async function GetDocument(req, res) {
-    //TODO Obtener documento y guardarlo en una carpeta
-    res.status(200).send({
-        hola: "HOLA MUNDO"
-    });
-    console.log("ENTRAN GET DOCUMENTS");
-}
+
 
 async function CreateDataDocument(req,res){
     let data = req.body;
@@ -28,104 +20,85 @@ async function CreateDataDocument(req,res){
         })
     }
 }
-//EXAMPLE HELLO WORDL FUNCTIONS
-async function Create(req,res){
-    let data = req.body;
-    modelHello.create(data
-        // ,(response)=>{
-        // console.log(response);      
-    //}
-    ).then(response =>{
-        console.log("this is response",response);
-        res.status(200).send({message:response})
-    })
-    .catch(err =>{
-        console.log("error filter",err);
-        res.status(400).send({error:err});
-    })
-}
-async function Read(req,res){   
-    modelHello.find()
-    .then(response =>{        
-        console.log(response);
-        res.status(200).send({message:response});
-
-    }).catch(err =>{
-        console.log(err);
-        res.status(200).send({error:err});
-    })
-}
-
-async function ReadbyID(req,res){
-    let id= req.params.id
-    modelHello.find({_id:id})
-    .then(response =>{        
-        console.log(response);
-        res.status(200).send({message:response});
-
-    }).catch(err =>{
-        console.log(err);
-        res.status(200).send({error:err});
-    })
-}
-
-async function Update(req,res){
-    let data = req.body;
+async function updateDataDocument(req,res){
     let id = req.params.id
-    modelHello.update({_id:id},data)
+    let data = req.body;
+    modelDocument.update({_id:id},data)
     .then(response =>{
         console.log(response);
-        res.status(200).send({message:response});
-    }).catch(err =>{
+        res.status(200).send(response);
+    })
+    .catch(err =>{
         console.log(err);
-        res.status(400).send({message:err});
+        res.status(500).send(err);
     })
 }
 
-async function Delete(req,res){
-    let id = req.params.id;
-    modelHello.deleteOne({_id:id})
-    .then(response =>{
-        console.log(response);
-        res.status(200).send({message:response});
-    })
-    .catch(err =>{
-        res.status(400).send({error:err});
-    })
-}
-//END EXAMPLE HELLOWORLD
 
 //UPDATE DOCUMENT FILE INIT
 async function RequestDocument(req, res) {
-    console.log("BODY REQUEST", req);
-    if (req.body != undefined && req.body != null) {
-        res.status(200).send({
-            message: "Archivo subido correctamente"
+    
+    let file = req.files.file;
+    console.log(file);
+    if (file != undefined && file != null) {
+        let checkpath = file.path.split('\\')
+        let getextension = file.type
+        modelDocument.create({
+            url_uploaded:checkpath[1],
+            type_image: getextension           
+        }).then(response =>{
+           fs.readFile(url+response.url_uploaded,(err, data) =>{
+                var contentType = 'image/png';
+                var base64 = Buffer.from(data).toString('base64');
+                base64='data:image/png;base64,'+base64;    
+                console.log(response)
+                    res.status(200).send({
+                    message: "Archivo subido correctamente",
+                    data:response,
+                    image:base64
+                    })    
+            })
+            
         })
+        .catch(err =>{
+            res.status(500).send("ocurrio un error")
+            console.log(err);
+        })
+        
+        
     } else {
-        res.status(404).send({
+        res.status(500).send({
             message: "Hubo un problema al subir el archivo..."
         })
     }
 
 }
-//FUNCION DE PRUEBA CON MODULO Textract PARA OBTENER TEXTO DE ARCHIVOS DOC, DOCX, PDF
-async function TexttractModuleRead(req,res){
-    textract.fromFileWithPath(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`,(error,text) =>{
-        if(error) console.log(error)
-        console.log({message:text});
-        res.status(200).send({message:text});
+
+async function ReadDocumentToRelationship(req,res){
+    modelDocument.find()
+    .then(response =>{
+        console.log(response)
+        res.status(200).send(response);
+    })
+    .catch(err =>{
+        res.status(500).send(err);
     })
 }
 
 //FUNCION DE PRUEBA CON MODULO MAMMOTH PARA OBTENER TEXTO DE ARCHIVOS .DOCX
 async function ReadDocument(req,res){
    //await ConvertDocumentToHtml();
-   mammoth.convertToMarkdown({path: `${url}wer465we4r564wer.docx`} )
+   
+   mammoth.convertToHtml({path: `${url}wer465we4r564wer.docx`} )
     .then((result) => {        
-        
-        console.log({message:result.messages, html: result.value});
-        res.status(200).send({message:"Documento convertido",text:result.value});
+        //convierte datos html a markdown
+        let markdown = turndownservice.turndown(result.value)
+        let newtext= CountDATA(turndownservice.turndown(result.value));        
+        //crea un archivo extension .md y guarda el texto markdown
+        fs.writeFileSync(`${url}/exampleMarkdown.md`,markdown);        
+        console.log({message:result.messages, html: result.value, markdown:markdown});
+        console.log("textoNuevo",newtext);
+        res.status(200).send({message:"Documento convertido",text:markdown});
         
     }).catch((err) => {
         console.log("ocurrio un error",err);        
@@ -133,39 +106,191 @@ async function ReadDocument(req,res){
    
 }
 
-//FUNCION PARA OBTENER TEXTO DE ARCHIVOS PDF MODULO PDF-PARSE
-async function ReadPdfDocument(req,res){    
-   const pdfFile= fs.readFileSync(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`);
-  pdfParse(pdfFile).then((response)=>{
-    console.log(response.info);
-    res.status(200).send({message_info:response.info, message_text:response.text})
-  })
-  .catch(err =>{
-      console.log({message:err});
-  })
+async function ReadMarkdownFile(req,res){
+    let posicion= searchAText("Tutor:",`${url}exampleMarkdown.md`)
+    res.status(200).send({message:posicion});
 }
 
-// async function ConvertDocumentToHtml(){
-//     mammoth.convertToMarkdown({path: `${url}wer465we4r564wer.docx`} )
-//     .then((result) => {        
-//         textMarkDown = result.value;
-//         console.log({message:result.messages, html: result.value});
+async function searchAText(texto,archivo){
+    let checkFile= fs.readFileSync(archivo)
+   
+    let auxLector = ""+checkFile.split(" ");
+   
+    let cont=-1;
+    let position=0;
+    
+    auxLector.forEach(element => {
+        cont++;
+        if(element == texto){
+            console.log("EURECA");
+            position= cont;            
+        }
+    });
+    return position;
+}
+
+function CountDATA (str) {
+    let findit= true
+        let count = 0;
+        let auxtext= ""
+	//4488 caracteres tiene una pagina word completamente lleno
+        while(findit && count <=50)
+        {
+            auxtext += str[count];
+            count++; 
+        }
+    
+	return auxtext;
+};
+//FUNCION PARA OBTENER TEXTO DE ARCHIVOS PDF MODULO PDF-PARSE
+async function ReadPdfDocument(req,res){   
+  let dataBuffer = fs.readFileSync(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`);
+  pdfParse(dataBuffer).then((data)=>{
+   
+    console.log(data.text);
+    res.status(200).send({message:data.text});
+    
+    //algoritmo de busqueda. 
+      
+  })
+  .catch(err =>{
+     res.status(500).send({message:err});
+  })  
+}
+
+async function OCRGoogleAPI(req,res){
+    let nameimage=req.params.name
+    console.log("nameimg",nameimage)
+    const ocr = new googlevision.ImageAnnotatorClient();
+    ocr.textDetection(`${url}${nameimage}`)
+    .then(response =>{
+        //response[0].fullTextAnnotation.text
+        let obj = []
+        let textfull=response[0].fullTextAnnotation.text
+        let text =""
+        let newparagarph ={}
+        let newobject_TXT={}
+        let contparagraph=0
+        let pages= response[0].fullTextAnnotation.pages        
         
-//     }).catch((err) => {
-//         console.log("ocurrio un error",err);        
-//     });
-// }
+        
+        pages.forEach(element => {
+            element.blocks.forEach(blocks =>{
+                blocks.paragraphs.forEach(paragraphs =>{
+                    contparagraph++;
+                    paragraphs.words.forEach(words =>{
+                        words.symbols.forEach(symbol =>{
+                            text += symbol.text
+                        })
+                        text +=" "
+                    })
+                    newparagarph={
+                        num:contparagraph,                        
+                        paragraphtext:text
+                    }
+                    obj.push(newparagarph);
+                    text=""
+                })
+            })
+
+        });
+        let querellantes = false
+        let imputados = false
+        let victimas = false
+        let auxcontquere = null
+        let auxcontimput = null
+        let auxcontvict = null
+        let contaux=0
+       
+        obj.forEach(element => {
+            
+            contaux++;
+            //OBTENEMOS CODIGO DE DOCUMENTO
+            if(element.num == 4 ){
+                
+                let splitresponse = element.paragraphtext.split(':')
+                newobject_TXT.code_document= splitresponse[1]
+            }
+            if(element.num == 6){
+                let splitresponse = element.paragraphtext.split(':')
+                let hours =""+splitresponse[2]+":"+splitresponse[3]
+                newobject_TXT.date_admission = splitresponse[1]
+                newobject_TXT.hours_admission = hours
+                newobject_TXT.relevant_court =splitresponse[5]
+                newobject_TXT.crime = splitresponse[6]                
+                newobject_TXT.process_type = splitresponse[7]
+            }
+            if(element.paragraphtext == 'QUERELLANTES ' ){
+                newobject_TXT.querellantes=[]
+                auxcontquere = element.num
+                querellantes = true
+                imputados = false
+                victimas = false
+            }
+           
+            if(element.paragraphtext == 'IMPUTADOS '){
+                newobject_TXT.imputados=[]
+                auxcontimput = element.num
+                imputados = true
+                querellantes = false
+                victimas= false
+            }
+             if(element.paragraphtext == 'VICTIMAS '){
+                newobject_TXT.victimas=[]
+                auxcontvict = element.num
+                imputados = false
+                querellantes = false
+                victimas = true
+            }
+             if(auxcontquere != null && contaux > auxcontquere && querellantes){
+                 let bool = element.paragraphtext.search(':') 
+                
+                 if(bool != -1){
+                     let splitresponse = element.paragraphtext.split(':')
+                newobject_TXT.querellantes.push(splitresponse[1])
+                 }
+                 else{
+                     newobject_TXT.querellantes.push(element.paragraphtext)
+                 }               
+                
+            }
+              if(auxcontimput != null && contaux > auxcontimput && imputados){
+                newobject_TXT.imputados.push(element.paragraphtext)
+            }            
+              if(auxcontvict != null && contaux > auxcontvict && victimas){
+                  let bool = element.paragraphtext.search('ble de impr') 
+                  if(bool == -1){
+                    newobject_TXT.victimas.push(element.paragraphtext)
+                  }
+                  else{
+                      victimas=false
+                  }
+                
+
+            }
+        });        
+    
+        //modelDocument.create()        
+    
+        //TODO GUARDAR EN BASE DE DATOS EL OBJETO, CREAR EL ARCHIVO .MD, 
+        res.status(200).send({object:newobject_TXT});          
+    })
+    .catch(error =>{
+        res.status(500).send({error:error});
+        console.log("ocurrio un error",error)
+    })
+}
+
+
+
 //DOCUMENT FILE END
-module.exports = {
-    GetDocument,
+module.exports = {    
     RequestDocument,
     ReadDocument,
     CreateDataDocument,
-    ReadPdfDocument,
-    Create,
-    Read,
-    Update,
-    Delete,
-    ReadbyID,
-    TexttractModuleRead
+    ReadPdfDocument,    
+    ReadMarkdownFile,
+    OCRGoogleAPI,
+    ReadDocumentToRelationship,
+    updateDataDocument
 }

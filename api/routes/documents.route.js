@@ -5,23 +5,21 @@ module.exports = (app, multi,rutaProtegida) => {
     const controllerDocument = require('../Controllers/getDocument');
 
     router.post('/create',controllerDocument.CreateDataDocument)
-
-    router.get('/',controllerDocument.GetDocument);
+    
+    router.put('/update/:id',controllerDocument.updateDataDocument);
     router.post('/upload', multi, controllerDocument.RequestDocument)
+    router.get('/read',controllerDocument.ReadDocumentToRelationship)
     //RUTA DE USO DE MODULO MAMMOTH
     router.get('/check',controllerDocument.ReadDocument);
     //RUTA DE USO DE MODULO TEXTTRACT
-    router.get('/check-prod',controllerDocument.TexttractModuleRead);
+    //router.get('/check-prod',controllerDocument.TexttractModuleRead);
     //RUTA DE USO DE MODULO PDF-PARSE
     router.get('/pdfcheck',controllerDocument.ReadPdfDocument);
 
-    //HELLO WORLD EXAMPLE
-    router.post('/hello-create',controllerDocument.Create);
-    router.get('/hello-get',controllerDocument.Read);
-    router.get('/hello-get/:id',controllerDocument.ReadbyID);
-    router.put('/hello-update/:id',controllerDocument.Update);
-    router.delete('/hello-delete/:id',controllerDocument.Delete);
+    router.get('/mdcheck',controllerDocument.ReadMarkdownFile);
 
+        
+    router.post('/takeImage/:name',controllerDocument.OCRGoogleAPI);
     app.use('/api/documents', router);
 
 }

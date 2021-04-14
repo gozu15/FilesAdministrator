@@ -9,6 +9,7 @@
   "author": "Angel (Hope-.-)",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/vision": "^2.1.2",
     "body-parser": "^1.19.0",
     "connect-multiparty": "^2.2.0",
     "cors": "^2.8.5",
@@ -16,7 +17,11 @@
     "jsonwebtoken": "^8.5.1",
     "mammoth": "^1.4.13",
     "mongoose": "^5.10.11",
+    "nodemon": "^2.0.7",
+    "pdf-officegen": "^2.0.4",
     "pdf-parse": "^1.1.1",
-    "textract": "^2.5.0"
+    "pdftohtmljs": "^0.6.0",
+    "textract": "^2.5.0",
+    "turndown": "^7.0.0"
   }
 }
