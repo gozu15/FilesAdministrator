@@ -1,130 +1,182 @@
 <template>
   <div class="col">
+
+
     <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
       <div class="q-pa-sm">
-        <div class="row q-pa-sm">
-          <div class="col-6">Codigo nurek:{{ code_document }}</div>
+        <div class="row">
+          <!-- FIN PRIMERA ENTRADA -->
           <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
+            <section>
+              <h3>Crimen</h3>
+              <p>{{ crime }}</p>
+            </section>
           </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Crimen:{{ crime }}</div>
           <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
+            <div class="input-box">
+              <q-input
+                outlined
+                :disable="disable"
+                v-model="data.crime"
+                label="Ingrese crimen"
+                @keydown.enter.prevent="submitArrays()"
+              />
+            </div>
           </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Fecha de ingreso:{{ date_admission }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
-          </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Hora de ingreso:{{ hours_admission }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
-          </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Tipo de proceso:{{ process_type }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
-          </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Juzgado a cargo:{{ relevant_court }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
-          </div>
-        </div>
-        <div class="row q-pa-sm">
-          <div class="col-6">Imputados:{{ code_document }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
-          </div>
-        </div>
+          <!-- FIN SEGUNDA ENTRADA -->
 
-        <div class="row q-pa-sm">
-          <div class="col-6">Querellantes:{{ code_document }}</div>
           <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
+            <section>
+              <h3>Tipo de proceso</h3>
+              <p>{{ process_type }}</p>
+            </section>
           </div>
-        </div>
+          <div class="col-6">
+            <div class="input-box">
+              <q-input
+                outlined
+                :disable="disable"
+                v-model="data.process_type"
+                label="Ingrese tipo de proceso"
+                @keydown.enter.prevent="submitArrays()"
+              />
+            </div>
+          </div>
+          <!-- FIN QUINTA ENTRADA -->
+          <div class="col-6">
+            <section>
+              <h3>Juzgado a cargo</h3>
+              <p>{{ relevant_court }}</p>
+            </section>
+          </div>
+          <div class="col-6">
+            <div class="input-box">
+              <q-input
+                outlined
+                :disable="disable"
+                v-model="data.relevant_court"
+                label="Ingrese el juzgado a cargo"
+                @keydown.enter.prevent="submitArrays()"
+              />
+            </div>
+          </div>
+          <!-- FIN SEXTA ENTRADA -->
+          <div class="col-6">
+            <section>
+              <h3>Imputados</h3>
+              <p>
+                <ul>
+                  <li v-for="(imputado,index)  in imputados" :key="index">
+                    {{imputado}}
+                  </li>
+                </ul>
+                <!-- {{ code_document }} -->
+                </p>
+            </section>
+          </div>
+          <div class="col-6">
+            <div class="input-box">
+              <q-input
+                outlined
+                :disable="disable"
+                type="textarea"
+                v-model="imputadosaux"
+                hint="Utilice la coma ',' para separar las personas en este apartado"
+                label="Ingrese el o los imputado(s)"
+                @keydown.enter.prevent="submitArrays()"
+              />
+            </div>
+          </div>
+          <!-- FIN SEPTIMA ENTRADA -->
+          <div class="col-6">
+            <section>
+              <h3>Querellantes</h3>
+              <p><ul>
+                  <li v-for="(querellante,index)  in querellantes" :key="index">
+                    {{querellante}}
+                  </li>
+                </ul></p>
+            </section>
+          </div>
+          <div class="col-6">
+            <div class="input-box">
+              <q-input
+                outlined
+                hint="Utilice la coma ',' para separar las personas en este apartado"
+                :disable="disable"
+                type="textarea"
+                v-model="querellantesaux"
+                label="Ingrese el o los querellante(s)"
+                @keydown.enter.prevent="submitArrays()"
+              />
+            </div>
+          </div>
+          <!-- FIN OCTAVA ENTRADA -->
+          <div class="col-6">
+            <section>
+              <h3>Victimas</h3>
+              <p>
+                <ul>
+                  <li v-for="(victima,index)  in victimas" :key="index">
+                    {{victima}}
+                  </li>
+                </ul>
+                </p>
+            </section>
+          </div>
+          <div class="col-6">
+            <div class="input-box">
+                <q-input
+                outlined
+                type="textarea"
+                hint="Utilice la coma ',' para separar las personas en este apartado"
+                :disable="disable"
+                v-model="victimasaux"
+                label="Ingrese la(s) victima(s)"
+                @keydown.enter.prevent="submitArrays()"
+              />
 
-        <div class="row q-pa-sm">
-          <div class="col-6">Victimas:{{ code_document }}</div>
-          <div class="col-6">
-            <q-input
-              filled
-              v-model="dataaux.code_document"
-              label="Codigo Nurek"
-              @keydown.enter.prevent="submitArrays()"
-            />
+
+            </div>
           </div>
+          <!-- FIN NOVENA ENTRADA -->
         </div>
       </div>
-      <div>
-        <q-btn label="Submit" type="submit" color="primary" />
-        <q-btn
-          label="Reset"
-          type="reset"
-          color="primary"
-          flat
-          class="q-ml-sm"
-        />
-      </div>
-    </q-form>
+
+        <div class="q-pt-md">
+      <q-btn
+        @click="enableInputs()"
+        color="negative"
+        class="full-width"
+        label="Modificar campos"
+      />
+    </div>
+    <div class="q-pt-md">
+      <q-btn
+        @click="enableInputs()"
+        color="positive"
+        type="reset"
+        class="full-width"
+        label="Cancelar"
+      />
+    </div>
 
     <div class="row">
       <q-btn
         color="primary"
-        @click="alert = true"
+
         label="Verificar y guardar"
+        type="submit"
         style="height: 56px"
         class="full-width"
       />
+      <!-- @click="alert = true" -->
     </div>
+
+    </q-form>
+
+
+
     <!-- DIALOG -->
 
     <q-dialog v-model="alert">
@@ -226,35 +278,35 @@ export default {
   name: "DataimageContent",
   props: {
     id: {
-      type: String,
+      type: String
     },
     code_document: {
-      type: String,
+      type: String
     },
     crime: {
-      type: String,
+      type: String
     },
     date_admission: {
-      type: String,
+      type: String
     },
     hours_admission: {
-      type: String,
+      type: String
     },
     imputados: {
-      type: Array,
+      type: Array
     },
     process_type: {
-      type: String,
+      type: String
     },
     querellantes: {
-      type: Array,
+      type: Array
     },
     relevant_court: {
-      type: String,
+      type: String
     },
     victimas: {
-      type: Array,
-    },
+      type: Array
+    }
   },
   data() {
     return {
@@ -262,10 +314,25 @@ export default {
       selected: "Crimen",
       confirm: false,
       loading6: false,
+      disable: true,
+      imputadosaux:"",
+      querellantesaux:"",
+      victimasaux:"",
       name: null,
       accept: null,
       age: null,
       alert: false,
+      data: {
+        code_document: null,
+        crime: null,
+        date_admission: null,
+        hours_admission: null,
+        imputados: [],
+        process_type: null,
+        querellantes: [],
+        relevant_court: null,
+        victimas: []
+      },
       dataaux: {
         code_document: null,
         crime: null,
@@ -275,20 +342,20 @@ export default {
         process_type: null,
         querellantes: [],
         relevant_court: null,
-        victimas: [],
+        victimas: []
       },
 
       victim: {
         index: null,
-        text: null,
+        text: null
       },
       quere: {
         index: null,
-        text: null,
+        text: null
       },
       imput: {
         index: null,
-        text: null,
+        text: null
       },
       disabledIO: true,
       dense: false,
@@ -299,55 +366,99 @@ export default {
           children: [
             {
               label: "Crimen",
-              icon: "room_service",
+              icon: "room_service"
             },
             {
               label: "Tipo de proceso",
-              icon: "photo",
+              icon: "photo"
             },
             {
               label: "Juzgado a cargo",
-              icon: "photo",
+              icon: "photo"
             },
             {
               label: "Victimas",
-              icon: "photo",
+              icon: "photo"
             },
             {
               label: "Querellantes",
-              icon: "photo",
+              icon: "photo"
             },
             {
               label: "Imputados",
-              icon: "photo",
-            },
-          ],
-        },
-      ],
+              icon: "photo"
+            }
+          ]
+        }
+      ]
     };
   },
   methods: {
     onSubmit() {
-      for (let iterator in this.dataaux) {
-        if (this.dataaux[iterator] != null) {
-          //TODO CAMBIAR ALGORITMO PARA CAMBIO DE DATOS
+      let sw = 0;
+      for (let element in this.data)
+      {
+        console.log(this.data[element])
+        if(this.data[element] == null || this.data[element].length ==0)
+        {
+          console.log("ENTRO IF")
+          sw = 1;
+          break;
         }
-        console.log(this.dataaux[iterator]);
+        console.log(element);
       }
+      if(sw == 1){
+        console.log("IF")
+        this.buildObject();
+      }
+      else{
+        //let quere = this.querellantesaux.split(",");
+        //this.data.querellantes = quere;
+        //let other = this.querellantesaux.split(",");
+        console.log("THIS IS ELSE ",this.data.querellantes)
+      }
+
+
+      //if()
+      //this.buildObject()
+
+    },
+     onReset() {
+      this.name = null;
+      this.age = null;
+      this.accept = false;
+    },
+    enableInputs() {
+         this.disable = false;
+         this.buildObject();
+    },
+    buildObject(){
+
+      this.imputadosaux=this.imputados;
+        this.querellantesaux=this.querellantes;
+        this.victimasaux=this.victimas;
+      this.data = {
+        code_document: this.code_document,
+        crime: this.crime,
+        date_admission: this.date_admission,
+        hours_admission: this.hours_admission,
+        imputados: this.imputadosaux,
+        process_type: this.process_type,
+        querellantes: this.querellantesaux,
+        relevant_court: this.relevant_court,
+        victimas: this.victimasaux
+      };
     },
     enabledBtns() {
       this.disabledIO = false;
     },
     submit() {
       //Setting the variable only when submitted
-      this.disabledIO = true;
+
+      //this.disabledIO = true;
       console.log();
     },
-    onReset() {
-      this.name = null;
-      this.age = null;
-      this.accept = false;
-    },
+
     submitArrays() {
       //Setting the variable only when submitted
       console.log("presionaste enter");
@@ -407,19 +518,19 @@ export default {
       if (criterio == "victimas") {
         this.victim = {
           index: index,
-          text: texto,
+          text: texto
         };
       }
       if (criterio == "querellantes") {
         this.quere = {
           index: index,
-          text: texto,
+          text: texto
         };
       }
       if (criterio == "imputados") {
         this.imput = {
           index: index,
-          text: texto,
+          text: texto
         };
       }
       console.log(index, texto);
@@ -427,10 +538,10 @@ export default {
     updateImageMap() {
       this.$axios
         .put(`documents/update/${this.id}`, this.dataaux)
-        .then((result) => {
+        .then(result => {
           console.log("Respuesta actualizar", this.result);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err);
         });
     },
@@ -446,7 +557,7 @@ export default {
         process_type: this.process_type,
         querellantes: this.deleteSlotbyIndexinArray(this.querellantes),
         relevant_court: this.relevant_court,
-        victimas: this.deleteSlotbyIndexinArray(this.victimas),
+        victimas: this.deleteSlotbyIndexinArray(this.victimas)
       };
     },
 
@@ -457,7 +568,25 @@ export default {
         }
       }
       return array;
-    },
-  },
+    }
+  }
 };
 </script>
+<style scoped>
+h3 {
+  font-size: 15px;
+  font-family: sans-serif;
+  font-weight: bold;
+}
+section {
+  font-family: sans-serif;
+}
+.input-box {
+  height: 100%;
+  display: flex;
+  width: 100%;
+}
+.input-box .q-field {
+  width: 100% !important;
+}
+</style>
