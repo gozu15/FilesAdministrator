@@ -283,10 +283,19 @@ async function OCRGoogleAPI(req,res){
                 
             }
               if(auxcontimput != null && contaux > auxcontimput && accused){
-                newobject_TXT.accused.push(element.paragraphtext)
+                let bool = element.paragraphtext.search('sable de') 
+                console.log("accused",element.paragraphtext);
+                if(bool == -1){
+                    newobject_TXT.accused.push(element.paragraphtext)
+                }
+                else{
+                    accused = false
+                }         
+                
             }            
               if(auxcontvict != null && contaux > auxcontvict && victim){
-                  let bool = element.paragraphtext.search('ble de impr') 
+                  let bool = element.paragraphtext.search('ble de') 
+                  console.log("check victim",bool);
                   if(bool == -1){
                     newobject_TXT.victim.push(element.paragraphtext)
                   }
