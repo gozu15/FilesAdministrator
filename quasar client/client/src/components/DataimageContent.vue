@@ -1,18 +1,16 @@
 <template>
   <div class="col">
-
-
     <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
       <div class="q-pa-sm">
         <div class="row">
           <!-- FIN PRIMERA ENTRADA -->
-          <div class="col-6">
+          <div class="col-4">
             <section>
               <h3>Crimen</h3>
-              <p>{{ crime }}</p>
+              <p>{{ cover_image_information.crime }}</p>
             </section>
           </div>
-          <div class="col-6">
+          <div class="col-8">
             <div class="input-box">
               <q-input
                 outlined
@@ -25,13 +23,13 @@
           </div>
           <!-- FIN SEGUNDA ENTRADA -->
 
-          <div class="col-6">
+          <div class="col-4">
             <section>
               <h3>Tipo de proceso</h3>
-              <p>{{ process_type }}</p>
+              <p>{{ cover_image_information.process_type }}</p>
             </section>
           </div>
-          <div class="col-6">
+          <div class="col-8">
             <div class="input-box">
               <q-input
                 outlined
@@ -41,32 +39,13 @@
                 @keydown.enter.prevent="submitArrays()"
               />
             </div>
-          </div>
-          <!-- FIN QUINTA ENTRADA -->
-          <div class="col-6">
-            <section>
-              <h3>Juzgado a cargo</h3>
-              <p>{{ relevant_court }}</p>
-            </section>
-          </div>
-          <div class="col-6">
-            <div class="input-box">
-              <q-input
-                outlined
-                :disable="disable"
-                v-model="data.relevant_court"
-                label="Ingrese el juzgado a cargo"
-                @keydown.enter.prevent="submitArrays()"
-              />
-            </div>
-          </div>
-          <!-- FIN SEXTA ENTRADA -->
-          <div class="col-6">
+          </div>          
+          <div class="col-4">
             <section>
               <h3>Imputados</h3>
               <p>
                 <ul>
-                  <li v-for="(imputado,index)  in imputados" :key="index">
+                  <li v-for="(imputado,index)  in cover_image_information.accused" :key="index">
                     {{imputado}}
                   </li>
                 </ul>
@@ -74,13 +53,13 @@
                 </p>
             </section>
           </div>
-          <div class="col-6">
+          <div class="col-8">
             <div class="input-box">
               <q-input
                 outlined
                 :disable="disable"
                 type="textarea"
-                v-model="imputadosaux"
+                v-model="data.accused"
                 hint="Utilice la coma ',' para separar las personas en este apartado"
                 label="Ingrese el o los imputado(s)"
                 @keydown.enter.prevent="submitArrays()"
@@ -88,50 +67,50 @@
             </div>
           </div>
           <!-- FIN SEPTIMA ENTRADA -->
-          <div class="col-6">
+          <div class="col-4">
             <section>
               <h3>Querellantes</h3>
               <p><ul>
-                  <li v-for="(querellante,index)  in querellantes" :key="index">
+                  <li v-for="(querellante,index)  in cover_image_information.appellant" :key="index">
                     {{querellante}}
                   </li>
                 </ul></p>
             </section>
           </div>
-          <div class="col-6">
+          <div class="col-8">
             <div class="input-box">
               <q-input
                 outlined
                 hint="Utilice la coma ',' para separar las personas en este apartado"
                 :disable="disable"
                 type="textarea"
-                v-model="querellantesaux"
+                v-model="data.appellant"
                 label="Ingrese el o los querellante(s)"
                 @keydown.enter.prevent="submitArrays()"
               />
             </div>
           </div>
           <!-- FIN OCTAVA ENTRADA -->
-          <div class="col-6">
+          <div class="col-4">
             <section>
               <h3>Victimas</h3>
               <p>
                 <ul>
-                  <li v-for="(victima,index)  in victimas" :key="index">
+                  <li v-for="(victima,index)  in cover_image_information.victim" :key="index">
                     {{victima}}
                   </li>
                 </ul>
                 </p>
             </section>
           </div>
-          <div class="col-6">
+          <div class="col-8">
             <div class="input-box">
                 <q-input
                 outlined
                 type="textarea"
                 hint="Utilice la coma ',' para separar las personas en este apartado"
                 :disable="disable"
-                v-model="victimasaux"
+                v-model="data.victim"
                 label="Ingrese la(s) victima(s)"
                 @keydown.enter.prevent="submitArrays()"
               />
@@ -192,28 +171,28 @@
                 <div class="col-12">
                   <div class="row justify-between" style="text-align: left">
                     <div>Codigo Nurek:</div>
-                    <div>{{ dataaux.code_document }}</div>
+                    <div>{{ data.code_document }}</div>
                   </div>
                   <div class="row justify-between" style="text-align: left">
                     <div>Crimen:</div>
-                    <div>{{ dataaux.crime }}</div>
+                    <div>{{ data.crime }}</div>
                   </div>
                   <div class="row justify-between" style="text-align: left">
                     <div>Fecha de ingreso:</div>
-                    <div>{{ dataaux.date_admission }}</div>
+                    <div>{{ data.date_admission }}</div>
                   </div>
                   <div class="row justify-between" style="text-align: left">
                     <div>Hora de ingreso</div>
-                    <div>{{ dataaux.hours_admission }}</div>
+                    <div>{{ data.hours_admission }}</div>
                   </div>
                   <div class="row justify-between" style="text-align: left">
                     <div>Tipo de proceso</div>
-                    <div>{{ dataaux.process_type }}</div>
+                    <div>{{ data.process_type }}</div>
                   </div>
                   <div class="row justify-between" style="text-align: left">
                     <div>Juzgado de turno:</div>
                     <div>
-                      {{ dataaux.relevant_court }}
+                      {{ data.relevant_court }}
                     </div>
                   </div>
                 </div>
@@ -222,7 +201,7 @@
                   Imputados
                   <div>
                     <ul>
-                      <li v-for="(element, index) in imputados" :key="index">
+                      <li v-for="(element, index) in data.accused" :key="index">
                         {{ element }}
                       </li>
                     </ul>
@@ -232,7 +211,7 @@
                   Querellantes
                   <div>
                     <ul>
-                      <li v-for="(element, index) in querellantes" :key="index">
+                      <li v-for="(element, index) in data.appellant" :key="index">
                         {{ element }}
                       </li>
                     </ul>
@@ -242,7 +221,7 @@
                   Victimas
                   <div>
                     <ul>
-                      <li v-for="(element, index) in victimas" :key="index">
+                      <li v-for="(element, index) in data.victim" :key="index">
                         {{ element }}
                       </li>
                     </ul>
@@ -274,40 +253,9 @@
   </div>
 </template>
 <script>
+import {mapState,mapMutations,mapActions} from 'vuex'
 export default {
-  name: "DataimageContent",
-  props: {
-    id: {
-      type: String
-    },
-    code_document: {
-      type: String
-    },
-    crime: {
-      type: String
-    },
-    date_admission: {
-      type: String
-    },
-    hours_admission: {
-      type: String
-    },
-    imputados: {
-      type: Array
-    },
-    process_type: {
-      type: String
-    },
-    querellantes: {
-      type: Array
-    },
-    relevant_court: {
-      type: String
-    },
-    victimas: {
-      type: Array
-    }
-  },
+  name: "DataimageContent", 
   data() {
     return {
       splitterModel: 50,
@@ -327,11 +275,11 @@ export default {
         crime: null,
         date_admission: null,
         hours_admission: null,
-        imputados: [],
+        appellant: [],
         process_type: null,
-        querellantes: [],
+        accused: [],
         relevant_court: null,
-        victimas: []
+        victim: []
       },
       dataaux: {
         code_document: null,
@@ -395,19 +343,19 @@ export default {
   },
   methods: {
     onSubmit() {
-      let sw = 0;
+      let isUpdatable = false;
       for (let element in this.data)
       {
         console.log(this.data[element])
         if(this.data[element] == null || this.data[element].length ==0)
         {
           console.log("ENTRO IF")
-          sw = 1;
+          isUpdatable = 1;
           break;
         }
         console.log(element);
       }
-      if(sw == 1){
+      if(isUpdatable == 1){
         console.log("IF")
         this.buildObject();
       }
@@ -568,8 +516,14 @@ export default {
         }
       }
       return array;
-    }
-  }
+    },
+    ...mapMutations('upload_image',['getDataCoverImage',
+'changeStepOne',
+'changeStepTwo',])
+  },
+  computed:{
+    ...mapState('upload_image',['cover_image_information'])
+  },
 };
 </script>
 <style scoped>

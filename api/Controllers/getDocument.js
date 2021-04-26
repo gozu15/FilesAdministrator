@@ -34,6 +34,33 @@ async function updateDataDocument(req,res){
     })
 }
 
+async function deleteDataDocument(req,res){
+    let id = req.params.id    
+    modelDocument.deleteOne({_id:id},data)
+    .then(response =>{
+        console.log(response);
+        res.status(200).send({message:response});
+    })
+    .catch(err =>{
+        console.log(err);
+        res.status(500).send({message:'Error to delete', error:err });
+    })
+}
+
+async function getImageByName(req,res){
+    let name = req.params.name
+    fs.readFile(url+name,(err, data) =>{
+        var contentType = 'image/png';
+        var base64 = Buffer.from(data).toString('base64');
+        base64='data:image/png;base64,'+base64;
+            res.status(200).send({
+            message: "Archivo obtenido correctamente",           
+            image:base64
+            })    
+    })
+
+}
+
 
 //UPDATE DOCUMENT FILE INIT
 async function RequestDocument(req, res) {
@@ -194,14 +221,15 @@ async function OCRGoogleAPI(req,res){
             })
 
         });
-        let querellantes = false
-        let imputados = false
-        let victimas = false
+        let appellant = false
+        let accused = false
+        let victim = false
         let auxcontquere = null
         let auxcontimput = null
         let auxcontvict = null
         let contaux=0
        
+        console.log(obj);
         obj.forEach(element => {
             
             contaux++;
@@ -221,54 +249,56 @@ async function OCRGoogleAPI(req,res){
                 newobject_TXT.process_type = splitresponse[7]
             }
             if(element.paragraphtext == 'QUERELLANTES ' ){
-                newobject_TXT.querellantes=[]
+                newobject_TXT.appellant=[]
                 auxcontquere = element.num
-                querellantes = true
-                imputados = false
-                victimas = false
+                appellant = true
+                accused = false
+                victim = false
             }
            
             if(element.paragraphtext == 'IMPUTADOS '){
-                newobject_TXT.imputados=[]
+                newobject_TXT.accused=[]
                 auxcontimput = element.num
-                imputados = true
-                querellantes = false
-                victimas= false
+                accused = true
+                appellant = false
+                victim= false
             }
              if(element.paragraphtext == 'VICTIMAS '){
-                newobject_TXT.victimas=[]
+                newobject_TXT.victim=[]
                 auxcontvict = element.num
-                imputados = false
-                querellantes = false
-                victimas = true
+                accused = false
+                appellant = false
+                victim = true
             }
-             if(auxcontquere != null && contaux > auxcontquere && querellantes){
+             if(auxcontquere != null && contaux > auxcontquere && appellant){
                  let bool = element.paragraphtext.search(':') 
                 
                  if(bool != -1){
                      let splitresponse = element.paragraphtext.split(':')
-                newobject_TXT.querellantes.push(splitresponse[1])
+                newobject_TXT.appellant.push(splitresponse[1])
                  }
                  else{
-                     newobject_TXT.querellantes.push(element.paragraphtext)
+                     newobject_TXT.appellant.push(element.paragraphtext)
                  }               
                 
             }
-              if(auxcontimput != null && contaux > auxcontimput && imputados){
-                newobject_TXT.imputados.push(element.paragraphtext)
+              if(auxcontimput != null && contaux > auxcontimput && accused){
+                newobject_TXT.accused.push(element.paragraphtext)
             }            
-              if(auxcontvict != null && contaux > auxcontvict && victimas){
+              if(auxcontvict != null && contaux > auxcontvict && victim){
                   let bool = element.paragraphtext.search('ble de impr') 
                   if(bool == -1){
-                    newobject_TXT.victimas.push(element.paragraphtext)
+                    newobject_TXT.victim.push(element.paragraphtext)
                   }
                   else{
-                      victimas=false
+                      victim=false
                   }
                 
 
             }
         });        
+
+        console.log(newobject_TXT)
     
         //modelDocument.create()        
     
@@ -292,5 +322,7 @@ module.exports = {
     ReadMarkdownFile,
     OCRGoogleAPI,
     ReadDocumentToRelationship,
-    updateDataDocument
+    updateDataDocument,
+    deleteDataDocument,
+    getImageByName,
 }

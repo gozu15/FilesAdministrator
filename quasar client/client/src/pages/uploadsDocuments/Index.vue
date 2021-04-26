@@ -1,29 +1,10 @@
 <template>
   <div class="q-pa-md">
     <div class="content">
-      <div class="row justify-center">
-        <div class="tittle">
-          <h2>MAPEO DE IMAGENES</h2>
-        </div>
-      </div>
-
       <div class="tableaux">
-        <div class="row justify-end">
-          <div style="margin: 10px">
-            <q-btn
-              round
-              dense
-              color="primary"
-              size="20px"
-              icon="add"
-              @click="persistent = !persistent"
-            />
-          </div>
-        </div>
-        <!-- TABLE INIT -->
         <q-table
           :grid="$q.screen.xs"
-          title="Registro de imagenes subidas al servidor"
+          title="Lista de Caratulas"
           :data="data"
           :columns="columns"
           row-key="name"
@@ -31,7 +12,23 @@
           table-header-class="bg-primary text-white"
         >
           <template v-slot:top-right>
-            <q-input
+            <div class="row">
+              <div class="col-12" style="margin: 10px,">
+                <div class="row justify-end">
+                   <q-btn
+                  round
+                  dense
+                  color="primary"
+                  size="20px"
+                  icon="add"
+                  @click="persistent = !persistent"
+                />
+                </div>
+               
+              </div>
+              <div class="col-12">
+                <div class="row justify-end">
+                  <q-input
               borderless
               dense
               debounce="300"
@@ -43,7 +40,12 @@
                 <q-icon name="search" />
               </template>
             </q-input>
-          </template>
+                </div>
+                 
+              </div>
+            </div>
+            <!-- TABLE INIT -->
+          </template>       
 
           <template v-slot:body-cell-options="props">
             <q-td :props="props">
@@ -93,57 +95,57 @@ export default {
           required: true,
           label: "Codigo NUREK",
           align: "left",
-          field: (row) => row.code_document,
-          format: (val) => `${val}`,
-          sortable: true,
+          field: row => row.code_document,
+          format: val => `${val}`,
+          sortable: true
         },
         {
           name: "process_type",
           align: "center",
           label: "Tipo de proceso",
           field: "process_type",
-          sortable: true,
+          sortable: true
         },
         {
           name: "crime",
           label: "Crimen",
           field: "crime",
           align: "center",
-          sortable: true,
+          sortable: true
         },
         {
           name: "date_init",
           label: "Fecha / Hra de ingreso",
           field: "date_init",
-          align: "center",
+          align: "center"
         },
         {
           name: "imputado",
           label: "Imputados",
           field: "imputados",
-          align: "center",
+          align: "center"
         },
 
         {
           name: "querellante",
           label: "Querellantes",
           field: "querellantes",
-          align: "center",
+          align: "center"
         },
         {
           name: "victima",
           label: "Victimas",
           field: "victimas",
-          align: "center",
+          align: "center"
         },
 
         {
           name: "options",
           label: "Opciones",
-          field: "options",
-        },
+          field: "options"
+        }
       ],
-      data: [],
+      data: []
     };
   },
   computed: {
@@ -153,15 +155,15 @@ export default {
 
     dataImageComputed() {
       return this.dtlink;
-    },
+    }
   },
   methods: {
     getImageUploaded() {
       this.$axios
         .get("documents/read")
-        .then((response) => {
+        .then(response => {
           response.data.date_init = null;
-          response.data.forEach((element) => {
+          response.data.forEach(element => {
             let dateHrs =
               "" + element.date_admission + " " + element.hours_admission;
             element.date_init = dateHrs;
@@ -170,7 +172,7 @@ export default {
 
           console.log("Resposne", response);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error("Error ocurrido", err);
         });
     },
@@ -181,12 +183,12 @@ export default {
     },
     deleteRow(props) {
       console.log(props);
-    },
+    }
   },
   created() {
     this.getImageUploaded();
   },
-  mounted() {},
+  mounted() {}
 };
 </script>
 <style scoped>

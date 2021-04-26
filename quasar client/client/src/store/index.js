@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import {CoverProperties} from './upload_cover_image'
 // import example from './module-example'
 
 Vue.use(Vuex)
@@ -17,7 +17,7 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      // example
+      upload_image:CoverProperties
     },
 
     // enable strict mode (adds overhead!)

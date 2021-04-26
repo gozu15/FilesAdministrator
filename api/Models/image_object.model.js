@@ -9,9 +9,9 @@ let ImageObjectModel =  new schema({
     relevant_court:{type:String, required:true, default:"En espera"},  //JUZGADO ASIGNADO
     crime:{type:String, required:true, default:"En espera"},           //CRIMEN
     process_type:{type:String, required:true, default:"En espera"},    //TIPO DE PROCESO
-    querellantes:[],    //QUERELLANTES
-    imputados:[],       //IMPUTADOS
-    victimas:[],        //VICTIMAS
+    appellant:[],    //QUERELLANTES
+    accused:[],       //IMPUTADOS
+    victim:[],        //VICTIMAS
     court_code:{type:String,required:false, default:"En espera"},      //CODIGO DE JUZGADO ASIGNADO
     created_at    : { type: Date },
     updated_at    : { type: Date }
