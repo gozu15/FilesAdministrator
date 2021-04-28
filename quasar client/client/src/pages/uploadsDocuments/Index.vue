@@ -15,37 +15,66 @@
             <div class="row">
               <div class="col-12" style="margin: 10px,">
                 <div class="row justify-end">
-                   <q-btn
-                  round
-                  dense
-                  color="primary"
-                  size="20px"
-                  icon="add"
-                  @click="GoToRegisterAnImage()"
-                />
+                  <q-btn
+                    round
+                    dense
+                    color="primary"
+                    size="20px"
+                    icon="add"
+                    @click="GoToRegisterAnImage()"
+                  />
                 </div>
-               
               </div>
               <div class="col-12">
                 <div class="row justify-end">
                   <q-input
-              borderless
-              dense
-              debounce="300"
-              v-model="filter"
-              placeholder="Click aqui para buscar"
-              style="width: 300px"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
+                    borderless
+                    dense
+                    debounce="300"
+                    v-model="filter"
+                    placeholder="Click aqui para buscar"
+                    style="width: 300px"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="search" />
+                    </template>
+                  </q-input>
                 </div>
-                 
               </div>
             </div>
             <!-- TABLE INIT -->
-          </template>       
+          </template>
+
+          <template v-slot:body-cell-acussed="props">
+            <q-td :props="props">
+              <ul>
+                <li v-for="(acusado, index) in props.row.accused" :key="index">
+                  {{ acusado }}
+                </li>
+              </ul>
+            </q-td>
+          </template>
+          <template v-slot:body-cell-appellant="props">
+            <q-td :props="props">
+              <ul>
+                <li
+                  v-for="(querellante, index) in props.row.appellant"
+                  :key="index"
+                >
+                  {{ querellante }}
+                </li>
+              </ul>
+            </q-td>
+          </template>
+          <template v-slot:body-cell-victim="props">
+            <q-td :props="props">
+              <ul>
+                <li v-for="(victima, index) in props.row.victim" :key="index">
+                  {{ victima }}
+                </li>
+              </ul>
+            </q-td>
+          </template>
 
           <template v-slot:body-cell-options="props">
             <q-td :props="props">
@@ -62,7 +91,7 @@
                 round
                 flat
                 color="grey"
-                @click="deleteRow(props)"
+                @click="GetRowToDelete(props)"
                 icon="delete"
               ></q-btn>
             </q-td>
@@ -72,12 +101,17 @@
     </div>
 
     <!-- DIALOG INIT -->
+      <q-dialog v-model="dialog_delete">
+        <DialogDelete/>
+      </q-dialog>
   </div>
 </template>
 <script>
+import {mapState,mapMutations,mapActions} from 'vuex'
 import DataimageContent from "../../components/DataimageContent";
+import DialogDelete from '../../components/DialogDeleteTableOption'
 export default {
-  components: { DataimageContent },
+  components: { DataimageContent,DialogDelete },
   data() {
     return {
       persistent: false,
@@ -87,6 +121,7 @@ export default {
       selected: [],
       pagination: {},
       urlImage: null,
+      dialog_delete:false,
       id: null,
 
       columns: [
@@ -98,32 +133,50 @@ export default {
           field: row => row.code_document,
           format: val => `${val}`,
           sortable: true
-        },       
+        },
         {
           name: "crime",
           label: "Crimen",
           field: "crime",
           align: "center",
+          style: `font-size: 0.85em;
+  font-style: italic;
+  max-width: 200px;
+  white-space: normal;
+  color: #555;
+  margin-top: 4px;`,
           sortable: true
-        },       
+        },
         {
-          name: "imputado",
+          name: "acussed",
           label: "Imputados",
           field: "imputados",
-          align: "center"
-        },
+          align: "left",
+          style: `font-size: 0.85em;
+          font-style: italic;  
+          color: #555;
+          margin-top: 4px;`
+          },
 
         {
-          name: "querellante",
+          name: "appellant",
           label: "Querellantes",
           field: "querellantes",
-          align: "center"
+          align: "left",
+          style: `font-size: 0.95em;
+          font-style: italic; 
+          color: #555;
+          margin-top: 4px;`
         },
         {
-          name: "victima",
+          name: "victim",
           label: "Victimas",
           field: "victimas",
-          align: "center"
+          align: "left",
+          style: `font-size: 0.95em;
+                  font-style: italic;                 
+                  color: #555;
+                  margin-top: 4px;`
         },
 
         {
@@ -133,9 +186,11 @@ export default {
         }
       ],
       data: []
-    };
+    }
+    
   },
   computed: {
+    ...mapState('upload_image',['id_cover']),
     tableClass() {
       return this.navigationActive === true ? "shadow-8 no-outline" : void 0;
     },
@@ -145,6 +200,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations('upload_image',['GetId']),
     getImageUploaded() {
       this.$axios
         .get("documents/read")
@@ -163,19 +219,20 @@ export default {
           console.error("Error ocurrido", err);
         });
     },
-    GoToRegisterAnImage(){
+    GoToRegisterAnImage() {
       this.$router.push({
-        name:'AddImage'
-      })
-    },
+        name: "AddImage"
+      });
+    },    
 
     //METHODS TABLE BUTTONS
-    editRow(props) {
+    EditRow(props) {
       console.log(props);
     },
-    deleteRow(props) {
-      console.log(props);
-    }
+    GetRowToDelete(props) {       
+      this.GetId({id:props.row._id})
+      this.dialog_delete= true;
+    }   
   },
   created() {
     this.getImageUploaded();

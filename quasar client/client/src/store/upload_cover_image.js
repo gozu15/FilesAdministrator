@@ -1,6 +1,7 @@
 export const CoverProperties = {
     namespaced: true,
     state: {
+        id_cover:null,
         step_one: true,
         step_two: false,
         cover_image_information: {
@@ -18,6 +19,9 @@ export const CoverProperties = {
         }
     },
     mutations: {
+        GetId(state,payload){
+            state.id_cover = payload.id;
+        },
         getDataCoverImage(state, payload) {
             state.cover_image_information = {
                 id:payload.id,
