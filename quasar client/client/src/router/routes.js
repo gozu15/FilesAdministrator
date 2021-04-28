@@ -4,11 +4,11 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'inicio', component: () => import('pages/Index.vue') },
+      { path: 'inicio', component: () => import('pages/Index.vue'), name:"Home"},
       { path: 'caratulas', component: () => import('pages/caratulas/Index.vue') },
       { path: 'docmodelo', component: () => import('pages/relationshippCovertDoc/Index.vue') },
-      { path: 'upload-image', component: () => import('pages/uploadsDocuments/Index.vue') },
-      { path: 'add-image', component: () => import('pages/uploadsDocuments/Addnewdocument.vue') },
+      { path: 'upload-image', component: () => import('pages/uploadsDocuments/Index.vue'),name:'UploadImage' },
+      { path: 'add-image', component: () => import('pages/uploadsDocuments/Addnewdocument.vue'), name:'AddImage' },
       { path: 'libros_diarios', component: () => import('pages/libros_diarios/Index.vue') },
       { path: 'memoriales_decretos', component: () => import('pages/memoriales&decretos/Index.vue') }
     ],

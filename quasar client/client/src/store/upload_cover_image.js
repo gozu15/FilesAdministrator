@@ -32,6 +32,22 @@ export const CoverProperties = {
                 relevant_court:payload.relevant_court,
                 victim:payload.victim,
             }
+           
+        },
+        clearCoverInformation(state){
+            state.cover_image_information={
+                id: null,
+                url_uploaded: null,
+                code_document: null,
+                crime: null,
+                date_admission: null,
+                hours_admission: null,
+                appellant: null, //QUERELLANTES
+                process_type: null,
+                accused: null, //IMPUTADO
+                relevant_court: null,
+                victim: null, //VICTIMAS
+            }
         },
         changeStepOne(state){
             state.step_one = true;

@@ -36,7 +36,7 @@ async function updateDataDocument(req,res){
 
 async function deleteDataDocument(req,res){
     let id = req.params.id    
-    modelDocument.deleteOne({_id:id},data)
+    modelDocument.deleteOne({_id:id})
     .then(response =>{
         console.log(response);
         res.status(200).send({message:response});

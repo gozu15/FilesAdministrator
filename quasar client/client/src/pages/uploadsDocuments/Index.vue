@@ -21,7 +21,7 @@
                   color="primary"
                   size="20px"
                   icon="add"
-                  @click="persistent = !persistent"
+                  @click="GoToRegisterAnImage()"
                 />
                 </div>
                
@@ -98,27 +98,14 @@ export default {
           field: row => row.code_document,
           format: val => `${val}`,
           sortable: true
-        },
-        {
-          name: "process_type",
-          align: "center",
-          label: "Tipo de proceso",
-          field: "process_type",
-          sortable: true
-        },
+        },       
         {
           name: "crime",
           label: "Crimen",
           field: "crime",
           align: "center",
           sortable: true
-        },
-        {
-          name: "date_init",
-          label: "Fecha / Hra de ingreso",
-          field: "date_init",
-          align: "center"
-        },
+        },       
         {
           name: "imputado",
           label: "Imputados",
@@ -175,6 +162,11 @@ export default {
         .catch(err => {
           console.error("Error ocurrido", err);
         });
+    },
+    GoToRegisterAnImage(){
+      this.$router.push({
+        name:'AddImage'
+      })
     },
 
     //METHODS TABLE BUTTONS

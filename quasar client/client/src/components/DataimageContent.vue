@@ -138,8 +138,12 @@
             <q-btn  @click="enableInputs()" fab icon="fas fa-edit" color="green" padding="10px" />
           </q-page-sticky>
           <q-page-sticky position="bottom-right" :offset="[18, 18]">
-            <q-btn type="reset" fab icon="fas fa-times" color="red" padding="10px" />
+            <q-btn @click="DeleteImageMap()" fab icon="fas fa-times" color="red" padding="10px" />
           </q-page-sticky>
+
+          <!-- <q-btn color="primary" @click="deleteSlotbyIndexinArray()">
+            clickme
+          </q-btn> -->
     </q-form>
      
 
@@ -223,7 +227,7 @@
               <q-btn
                 flat
                 label="Aceptar y Actualizar"
-                @click="updateImageMap()"
+                @click="UpdateImageMap()"
                 color="primary"
                 v-close-popup
               />
@@ -346,10 +350,12 @@ export default {
       }
       if(isUpdatable == true){
         this.BuildObjectToUpdateCover();
+        this.UpdateImageMap()
         console.log(this.cover_image_information);
       }
       else{
-        this.BuildObjectToUpdateCoverInitial();        
+        this.BuildObjectToUpdateCoverInitial();       
+        this.UpdateImageMap() 
       }
     },
      onReset() {
@@ -374,27 +380,27 @@ export default {
     },
     GetInformationToEdit(){
       this.data = {
-            id: this.cover_image_information.id,
-            url_uploaded: this.cover_image_information.url_uploaded,
-            code_document: this.cover_image_information.code_document,
-            crime: this.cover_image_information.crime,
-            date_admission: this.cover_image_information.date_admission,
-            hours_admission: this.cover_image_information.hours_admission,
-            appellant: this.cover_image_information.appellant, //QUERELLANTES
-            process_type: this.cover_image_information.process_type,
-            accused: this.cover_image_information.accused, //IMPUTADO
-            relevant_court: this.cover_image_information.relevant_court,
-            victim: this.cover_image_information.victim, //VICTIMAS
+            id: this.DeleteEmptyChar(this.cover_image_information.id),
+            url_uploaded: this.DeleteEmptyChar(this.cover_image_information.url_uploaded),
+            code_document: this.DeleteEmptyChar(this.cover_image_information.code_document),
+            crime: this.DeleteEmptyChar(this.cover_image_information.crime),
+            date_admission: this.DeleteEmptyChar(this.cover_image_information.date_admission),
+            hours_admission: this.DeleteEmptyChar(this.cover_image_information.hours_admission),
+            appellant: this.DeleteEmptyChar(this.cover_image_information.appellant), //QUERELLANTES
+            process_type: this.DeleteEmptyChar(this.cover_image_information.process_type),
+            accused: this.DeleteEmptyChar(this.cover_image_information.accused), //IMPUTADO
+            relevant_court: this.DeleteEmptyChar(this.cover_image_information.relevant_court),
+            victim: this.DeleteEmptyChar(this.cover_image_information.victim), //VICTIMAS
       };      
     },
-    BuildObjectToUpdateCover(){ 
+
+    async BuildObjectToUpdateCover(){ 
       let appellant = this.BreakAndBuildToSaveInArray(this.data.appellant,',');
       let accused = this.BreakAndBuildToSaveInArray(this.data.accused,',');
       let victim = this.BreakAndBuildToSaveInArray(this.data.victim,',');     
       this.data.appellant = appellant;
       this.data.accused =accused;
-      this.data.victim =victim;
-      
+      this.data.victim =victim;      
       this.getDataCoverImage(this.data);
       this.onReset();
     },
@@ -411,14 +417,10 @@ export default {
     },
     submit() {
       //Setting the variable only when submitted
-
+        //TODO press with enter function
       //this.disabledIO = true;
       console.log();
-    },
-
-    submitArrays() {
-      //TODO press with enter function
-    },
+    },   
     getVictim(index, criterio, texto) {
       this.disabledIO = false;
       if (criterio == "victimas") {
@@ -441,32 +443,72 @@ export default {
       }
       console.log(index, texto);
     },
-    updateImageMap() {
+    UpdateImageMap() {
       this.$axios
-        .put(`documents/update/${this.id}`, this.dataaux)
+        .put(`documents/update/${this.cover_image_information.id}`, this.cover_image_information)
         .then(result => {
-          console.log("Respuesta actualizar", this.result);
+          console.log("Respuesta actualizar", result);
+          this.onReset();
+          this.changeStepOne();
+          this.clearCoverInformation();
+           this.$router.replace({
+            name:'UploadImage'
+          })
         })
         .catch(err => {
           console.error(err);
         });
     },
 
-    deleteSlotbyIndexinArray(array) {
-      for (let i = 0; i < array.length; i++) {
-        if (array[i] == " ") {
-          array.splice(i, 1);
-        }
+    DeleteImageMap(){
+      console.log("entro delete")
+        this.$axios.delete(`documents/delete/${this.cover_image_information.id}`)
+        .then(result => {
+          console.log("Respuesta actualizar", result);
+          this.onReset();
+          this.changeStepOne();
+          this.clearCoverInformation();
+          this.$router.replace({
+            name:'UploadImage'
+          })
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    },
+
+
+    DeleteEmptyChar(text) {      
+      if(typeof text == 'object'){        
+         for (let i = 0; i < text.length; i++) {
+            let check_text = text[i];          
+          if (text[i] == " ") {
+            text.splice(i, 1);
+          } 
+          text[i] = check_text.trim();
+          return text;          
       }
-      return array;
+      }
+      if(typeof text == 'string'){
+         text = "" + text;
+         let newtext = text.trim();
+          console.log(newtext)
+          return newtext;
+      }
     },
     ...mapMutations('upload_image',['getDataCoverImage',
 'changeStepOne',
-'changeStepTwo',])
+'changeStepTwo',
+'clearCoverInformation'])
   },
   computed:{
     ...mapState('upload_image',['cover_image_information'])
   },
+  destroyed(){
+    this.onReset();
+    this.changeStepOne();
+    this.clearCoverInformation();
+  }
 };
 </script>
 <style scoped>
