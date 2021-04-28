@@ -185,6 +185,24 @@ async function ReadPdfDocument(req,res){
   })  
 }
 
+    function checkStringIfIsValidToBuildDate(text=""){
+        let new_date= null;  
+        let length = text.length
+        if(length ==10 || length == 8){            
+            for (let index = 0; index < length; index++) {
+                console.log("StringIsValid",text[index]);                
+                if(text[index] == '/')
+                {
+                    
+                }
+                new_date.push(text[index]);             
+            }
+            return new_date;
+        }
+        
+        
+    }
+
 async function OCRGoogleAPI(req,res){
     let nameimage=req.params.name
     console.log("nameimg",nameimage)
@@ -228,12 +246,14 @@ async function OCRGoogleAPI(req,res){
         let auxcontimput = null
         let auxcontvict = null
         let contaux=0
-       
+        let opqwe = checkStringIfIsValidToBuildDate(obj[2].paragraphtext);
+        console.log("t",opqwe);
         console.log(obj);
         obj.forEach(element => {
             
             contaux++;
             //OBTENEMOS CODIGO DE DOCUMENTO
+           
             if(element.num == 4 ){
                 
                 let splitresponse = element.paragraphtext.split(':')

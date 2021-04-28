@@ -1,13 +1,15 @@
 <template>
   <div class="col">
-    <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+    
+  
+       <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
       <div class="q-pa-sm">
         <div class="row">
           <!-- FIN PRIMERA ENTRADA -->
           <div class="col-4">
             <section>
               <h3>Crimen</h3>
-              <p>{{ cover_image_information.crime }}</p>
+              <p>{{ cover_image_information.crime || 'No se pudo obtener el dato correctamente'}}</p>
             </section>
           </div>
           <div class="col-8">
@@ -26,7 +28,7 @@
           <div class="col-4">
             <section>
               <h3>Tipo de proceso</h3>
-              <p>{{ cover_image_information.process_type }}</p>
+              <p>{{ cover_image_information.process_type || 'No se pudo obtener el dato correctamente'}}</p>
             </section>
           </div>
           <div class="col-8">
@@ -46,7 +48,7 @@
               <p>
                 <ul>
                   <li v-for="(imputado,index)  in cover_image_information.accused" :key="index">
-                    {{imputado}}
+                    {{imputado || 'No se pudo obtener el dato correctamente'}}
                   </li>
                 </ul>
                 <!-- {{ code_document }} -->
@@ -72,7 +74,7 @@
               <h3>Querellantes</h3>
               <p><ul>
                   <li v-for="(querellante,index)  in cover_image_information.appellant" :key="index">
-                    {{querellante}}
+                    {{querellante || 'No se pudo obtener el dato correctamente'}}
                   </li>
                 </ul></p>
             </section>
@@ -95,11 +97,15 @@
             <section>
               <h3>Victimas</h3>
               <p>
-                <ul>
+                <ul v-if="cover_image_information.victim != null">
                   <li v-for="(victima,index)  in cover_image_information.victim" :key="index">
                     {{victima}}
                   </li>
                 </ul>
+                <ul v-if="cover_image_information.victim == null">
+                  <li>No se pudo obtener los datos correctamente</li>
+                </ul>
+                
                 </p>
             </section>
           </div>
@@ -122,37 +128,20 @@
         </div>
       </div>
 
-        <div class="q-pt-md">
-      <q-btn
-        @click="enableInputs()"
-        color="negative"
-        class="full-width"
-        label="Modificar campos"
-      />
-    </div>
-    <div class="q-pt-md">
-      <q-btn
-        @click="enableInputs()"
-        color="positive"
-        type="reset"
-        class="full-width"
-        label="Cancelar"
-      />
-    </div>
-
-    <div class="row">
-      <q-btn
-        color="primary"
-
-        label="Verificar y guardar"
-        type="submit"
-        style="height: 56px"
-        class="full-width"
-      />
-      <!-- @click="alert = true" -->
-    </div>
-
+      <q-page-sticky  position="bottom-right" :offset="[18, 173]">
+            <q-btn fab icon="fas fa-eye" color="dark" padding="10px" />
+          </q-page-sticky>
+          <q-page-sticky position="bottom-right" :offset="[18, 122]">
+            <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
+          </q-page-sticky>
+          <q-page-sticky position="bottom-right" :offset="[18, 70]">
+            <q-btn  @click="enableInputs()" fab icon="fas fa-edit" color="green" padding="10px" />
+          </q-page-sticky>
+          <q-page-sticky position="bottom-right" :offset="[18, 18]">
+            <q-btn type="reset" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
     </q-form>
+     
 
 
 
@@ -271,15 +260,17 @@ export default {
       age: null,
       alert: false,
       data: {
-        code_document: null,
-        crime: null,
-        date_admission: null,
-        hours_admission: null,
-        appellant: [],
-        process_type: null,
-        accused: [],
-        relevant_court: null,
-        victim: []
+            id: null,
+            url_uploaded: null,
+            code_document: null,
+            crime: null,
+            date_admission: null,
+            hours_admission: null,
+            appellant: null, //QUERELLANTES
+            process_type: null,
+            accused: null, //IMPUTADO
+            relevant_court: null,
+            victim: null, //VICTIMAS
       },
       dataaux: {
         code_document: null,
@@ -347,55 +338,73 @@ export default {
       for (let element in this.data)
       {
         console.log(this.data[element])
-        if(this.data[element] == null || this.data[element].length ==0)
-        {
-          console.log("ENTRO IF")
-          isUpdatable = 1;
-          break;
-        }
-        console.log(element);
+        let check_data = this.data[element] != null ? true : false
+        if(check_data)
+        {                    
+          isUpdatable = true;  
+        }  
       }
-      if(isUpdatable == 1){
-        console.log("IF")
-        this.buildObject();
+      if(isUpdatable == true){
+        this.BuildObjectToUpdateCover();
+        console.log(this.cover_image_information);
       }
       else{
-        //let quere = this.querellantesaux.split(",");
-        //this.data.querellantes = quere;
-        //let other = this.querellantesaux.split(",");
-        console.log("THIS IS ELSE ",this.data.querellantes)
+        this.BuildObjectToUpdateCoverInitial();        
       }
-
-
-      //if()
-      //this.buildObject()
-
     },
      onReset() {
-      this.name = null;
-      this.age = null;
-      this.accept = false;
+      this.data = {
+            id:null,
+            url_uploaded:null,
+            code_document:null,
+            crime:null,
+            date_admission:null,
+            hours_admission:null,
+            appellant:null,
+            process_type:null,
+            accused:null,
+            relevant_court:null,
+            victim:null,
+      };
+      this.disable = true;
     },
     enableInputs() {
          this.disable = false;
-         this.buildObject();
+         this.GetInformationToEdit();
     },
-    buildObject(){
-
-      this.imputadosaux=this.imputados;
-        this.querellantesaux=this.querellantes;
-        this.victimasaux=this.victimas;
+    GetInformationToEdit(){
       this.data = {
-        code_document: this.code_document,
-        crime: this.crime,
-        date_admission: this.date_admission,
-        hours_admission: this.hours_admission,
-        imputados: this.imputadosaux,
-        process_type: this.process_type,
-        querellantes: this.querellantesaux,
-        relevant_court: this.relevant_court,
-        victimas: this.victimasaux
-      };
+            id: this.cover_image_information.id,
+            url_uploaded: this.cover_image_information.url_uploaded,
+            code_document: this.cover_image_information.code_document,
+            crime: this.cover_image_information.crime,
+            date_admission: this.cover_image_information.date_admission,
+            hours_admission: this.cover_image_information.hours_admission,
+            appellant: this.cover_image_information.appellant, //QUERELLANTES
+            process_type: this.cover_image_information.process_type,
+            accused: this.cover_image_information.accused, //IMPUTADO
+            relevant_court: this.cover_image_information.relevant_court,
+            victim: this.cover_image_information.victim, //VICTIMAS
+      };      
+    },
+    BuildObjectToUpdateCover(){ 
+      let appellant = this.BreakAndBuildToSaveInArray(this.data.appellant,',');
+      let accused = this.BreakAndBuildToSaveInArray(this.data.accused,',');
+      let victim = this.BreakAndBuildToSaveInArray(this.data.victim,',');     
+      this.data.appellant = appellant;
+      this.data.accused =accused;
+      this.data.victim =victim;
+      
+      this.getDataCoverImage(this.data);
+      this.onReset();
+    },
+    BuildObjectToUpdateCoverInitial(){
+      this.getDataCoverImage(this.cover_image_information);
+    },
+    BreakAndBuildToSaveInArray(string,criteryToBreak){
+      string = ""+string;
+      let newstring = string.split(criteryToBreak);      
+      return newstring;
     },
     enabledBtns() {
       this.disabledIO = false;
@@ -408,58 +417,7 @@ export default {
     },
 
     submitArrays() {
-      //Setting the variable only when submitted
-      console.log("presionaste enter");
-      // if (this.victim.text != null) {
-      //   this.victimas[this.victim.index] = this.victim.text;
-      //   this.disabledIO = true;
-      //   this.victim = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.quere = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.imput = {
-      //     index: null,
-      //     text: null,
-      //   };
-      // }
-      // if (this.quere.text != null) {
-      //   this.querellantes[this.quere.index] = this.quere.text;
-      //   this.disabledIO = true;
-      //   this.victim = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.quere = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.imput = {
-      //     index: null,
-      //     text: null,
-      //   };
-      // }
-      // if (this.imput.text != null) {
-      //   this.imputados[this.imput.index] = this.imput.text;
-      //   this.disabledIO = true;
-      //   this.victim = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.quere = {
-      //     index: null,
-      //     text: null,
-      //   };
-      //   this.imput = {
-      //     index: null,
-      //     text: null,
-      //   };
-      // }
-
-      // console.log();
+      //TODO press with enter function
     },
     getVictim(index, criterio, texto) {
       this.disabledIO = false;
@@ -494,24 +452,9 @@ export default {
         });
     },
 
-    verifyDataImage() {
-      this.confirm = true;
-      this.dataaux = {
-        code_document: this.code_document,
-        crime: this.crime,
-        date_admission: this.date_admission,
-        hours_admission: this.hours_admission,
-        imputados: this.deleteSlotbyIndexinArray(this.imputados),
-        process_type: this.process_type,
-        querellantes: this.deleteSlotbyIndexinArray(this.querellantes),
-        relevant_court: this.relevant_court,
-        victimas: this.deleteSlotbyIndexinArray(this.victimas)
-      };
-    },
-
     deleteSlotbyIndexinArray(array) {
       for (let i = 0; i < array.length; i++) {
-        if (array[i] == "") {
+        if (array[i] == " ") {
           array.splice(i, 1);
         }
       }
@@ -533,7 +476,12 @@ h3 {
   font-weight: bold;
 }
 section {
-  font-family: sans-serif;
+   font-size: 0.85em;  
+  max-width: 200px;
+  white-space: normal;
+  color: #555;
+  margin-top: 4px;
+
 }
 .input-box {
   height: 100%;

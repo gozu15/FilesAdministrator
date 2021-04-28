@@ -62,7 +62,7 @@ export default {
         process_type: null,
         appellant: null,
         relevant_court: null,
-        victims: null
+        victim: null
       }
     };
   },
@@ -102,7 +102,7 @@ export default {
               process_type: response.data.object.process_type,
               appellant: response.data.object.appellant,
               relevant_court: response.data.object.relevant_court,
-              victims: response.data.object.victims
+              victim: response.data.object.victim
             };
             this.getDataCoverImage(this.dataImage);
             this.changeStepTwo();
