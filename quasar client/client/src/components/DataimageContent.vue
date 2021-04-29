@@ -355,7 +355,7 @@ export default {
       }
       else{
         this.BuildObjectToUpdateCoverInitial();       
-        this.UpdateImageMap() 
+        this.UpdateImageMap();
       }
     },
      onReset() {

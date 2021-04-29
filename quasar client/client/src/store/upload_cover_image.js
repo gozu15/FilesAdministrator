@@ -1,3 +1,4 @@
+import Vue from 'vue'
 export const CoverProperties = {
     namespaced: true,
     state: {
@@ -16,9 +17,13 @@ export const CoverProperties = {
             accused: null, //IMPUTADO
             relevant_court: null,
             victim: null, //VICTIMAS
-        }
+        },
+        cover_list:[],
     },
     mutations: {
+        GetdataToCoverModule(state,payload){
+            state.cover_list= payload;
+        },
         GetId(state,payload){
             state.id_cover = payload.id;
         },
@@ -63,6 +68,16 @@ export const CoverProperties = {
         }
     },
     actions: {
-
+        GetDataFromApi({commit}){
+            Vue.prototype.$axios.get('documents/read')
+            .then(response =>{
+                console.log(response)
+                commit('GetdataToCoverModule',response.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        }
     }
 }

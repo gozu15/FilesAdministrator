@@ -15,7 +15,7 @@
 </template>
 <script>
 import {mapMutations,
-mapState} from 'vuex'
+mapState,mapActions} from 'vuex'
 export default {
     name:"DialogDelete",   
     data(){
@@ -25,10 +25,12 @@ export default {
     },
     methods:{
         ...mapMutations('upload_image',['getId']),
+        ...mapActions('upload_image',['GetDataFromApi']),
         DeleteCoverImageSelected(){            
             this.$axios.delete(`documents/delete/${this.id_cover}`)
             .then(response =>{
                 console.log(response);
+                this.GetDataFromApi();
             })
             .catch(err =>{
                 console.error(err);
@@ -36,7 +38,7 @@ export default {
     }
         },
     computed:{
-        ...mapState('upload_image',['id_cover']),
+        ...mapState('upload_image',['id_cover','cover_list']),
         },
     created(){
 

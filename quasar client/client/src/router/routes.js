@@ -8,6 +8,7 @@ const routes = [
       { path: 'caratulas', component: () => import('pages/caratulas/Index.vue') },
       { path: 'docmodelo', component: () => import('pages/relationshippCovertDoc/Index.vue') },
       { path: 'upload-image', component: () => import('pages/uploadsDocuments/Index.vue'),name:'UploadImage' },
+      { path: 'update-image', component: () => import('pages/uploadsDocuments/UpdateCover.vue'),name:'UpdateCoverImage' },
       { path: 'add-image', component: () => import('pages/uploadsDocuments/Addnewdocument.vue'), name:'AddImage' },
       { path: 'libros_diarios', component: () => import('pages/libros_diarios/Index.vue') },
       { path: 'memoriales_decretos', component: () => import('pages/memoriales&decretos/Index.vue') }

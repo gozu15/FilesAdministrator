@@ -5,7 +5,7 @@
         <q-table
           :grid="$q.screen.xs"
           title="Lista de Caratulas"
-          :data="data"
+          :data="cover_list"
           :columns="columns"
           row-key="name"
           :filter="filter"
@@ -91,9 +91,9 @@
                 round
                 flat
                 color="grey"
-                @click="GetRowToDelete(props)"
+                @click="GetRowToDelete(props)"GetDataFromApi
                 icon="delete"
-              ></q-btn>
+              ></q-btn>            
             </q-td>
           </template>
         </q-table>
@@ -190,7 +190,7 @@ export default {
     
   },
   computed: {
-    ...mapState('upload_image',['id_cover']),
+    ...mapState('upload_image',['id_cover','cover_list']),
     tableClass() {
       return this.navigationActive === true ? "shadow-8 no-outline" : void 0;
     },
@@ -201,29 +201,15 @@ export default {
   },
   methods: {
     ...mapMutations('upload_image',['GetId']),
+    ...mapActions('upload_image',['GetDataFromApi']),
     getImageUploaded() {
-      this.$axios
-        .get("documents/read")
-        .then(response => {
-          response.data.date_init = null;
-          response.data.forEach(element => {
-            let dateHrs =
-              "" + element.date_admission + " " + element.hours_admission;
-            element.date_init = dateHrs;
-          });
-          this.data = response.data;
-
-          console.log("Resposne", response);
-        })
-        .catch(err => {
-          console.error("Error ocurrido", err);
-        });
+      this.GetDataFromApi();
     },
     GoToRegisterAnImage() {
       this.$router.push({
         name: "AddImage"
       });
-    },    
+    },
 
     //METHODS TABLE BUTTONS
     EditRow(props) {
