@@ -129,7 +129,7 @@
       </div>
 
       <q-page-sticky  position="bottom-right" :offset="[18, 173]">
-            <q-btn fab icon="fas fa-eye" color="dark" padding="10px" />
+            <q-btn @click="PreviewImage()" fab icon="fas fa-eye" color="dark" padding="10px" />
           </q-page-sticky>
           <q-page-sticky position="bottom-right" :offset="[18, 122]">
             <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
@@ -242,6 +242,13 @@
       </q-card>
     </q-dialog>
 
+    <!-- DIALOG TO PREVIEW IMAGE COVER -->
+    <q-dialog v-model="onImage">
+      <div class="q-pa-md image-cover-background" >
+        <img :src="image_cover" alt="Imagen del documento">
+      </div>
+    </q-dialog>
+
     <div></div>
   </div>
 </template>
@@ -256,10 +263,12 @@ export default {
       confirm: false,
       loading6: false,
       disable: true,
+      onImage:false,
       imputadosaux:"",
       querellantesaux:"",
       victimasaux:"",
       name: null,
+      image_cover:null,
       accept: null,
       age: null,
       alert: false,
@@ -443,6 +452,19 @@ export default {
       }
       console.log(index, texto);
     },
+    PreviewImage(){
+      console.log()
+      let image_name= this.cover_image_information.url_uploaded;
+       this.$axios.get(`documents/image/${image_name}`)
+       .then(response =>{         
+         console.log(response)
+         this.onImage = true;
+          this.image_cover = response.data.image;
+       })
+       .catch(error =>{
+         console.log(error);
+       })
+    },
     UpdateImageMap() {
       this.$axios
         .put(`documents/update/${this.cover_image_information.id}`, this.cover_image_information)
@@ -532,5 +554,11 @@ section {
 }
 .input-box .q-field {
   width: 100% !important;
+}
+.image-cover-background img{
+  width: 90%;
+    background-size: 100% 100%;
+  display: block;
+  margin: auto;
 }
 </style>

@@ -128,7 +128,7 @@
       </div>
 
       <q-page-sticky  position="bottom-right" :offset="[18, 173]">
-            <q-btn fab icon="fas fa-eye" color="dark" padding="10px" />
+            <q-btn @click="PreviewImage()" fab icon="fas fa-eye" color="dark" padding="10px" />
           </q-page-sticky>
           <q-page-sticky position="bottom-right" :offset="[18, 122]">
             <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
@@ -137,13 +137,20 @@
             <q-btn  @click="enableInputs()" fab icon="fas fa-edit" color="green" padding="10px" />
           </q-page-sticky>
           <q-page-sticky position="bottom-right" :offset="[18, 18]">
-            <q-btn @click="DeleteImageMap()" fab icon="fas fa-times" color="red" padding="10px" />
+            <q-btn @click="CancelUpdate()" fab icon="fas fa-times" color="red" padding="10px" />
           </q-page-sticky>
 
           <!-- <q-btn color="primary" @click="deleteSlotbyIndexinArray()">
             clickme
           </q-btn> -->
     </q-form>
+
+    <!-- DIALOG TO PREVIEW IMAGE COVER -->
+    <q-dialog v-model="onImage">
+      <div class="q-pa-md image-cover-background" >
+        <img :src="image_cover" alt="Imagen del documento">
+      </div>
+    </q-dialog>
     </div>
 </template>
 <script>
@@ -152,6 +159,8 @@ export default {
     name:"UpdateCoverInformation",
     data(){
         return{
+          onImage:false,
+          image_cover:null,
             disable:true,
              data: {
             id: null,
@@ -169,7 +178,8 @@ export default {
         }
     },
     methods:{
-        ...mapMutations('upload_image',['getDataCoverImage','clearCoverInformation']),
+        ...mapMutations('upload_image',['getDataCoverImage','clearCoverInformation','changeStepOne',
+'changeStepTwo']),
         ...mapActions('upload_image',[]),
         onSubmit() {
       let isUpdatable = false;
@@ -183,16 +193,19 @@ export default {
         }  
       }
       if(isUpdatable == true){
+        console.log("if",this.cover_image_information);
         this.BuildObjectToUpdateCover();
         this.UpdateImageMap()
-        console.log(this.cover_image_information);
+        
       }
       else{
+        console.log("else",this.cover_image_information);
         this.BuildObjectToUpdateCoverInitial();       
         this.UpdateImageMap() 
+        
       }
     },
-     async BuildObjectToUpdateCover(){ 
+     async BuildObjectToUpdateCover(){
       let appellant = this.BreakAndBuildToSaveInArray(this.data.appellant,',');
       let accused = this.BreakAndBuildToSaveInArray(this.data.accused,',');
       let victim = this.BreakAndBuildToSaveInArray(this.data.victim,',');     
@@ -202,10 +215,39 @@ export default {
       this.getDataCoverImage(this.data);
       this.onReset();
     },
-     BreakAndBuildToSaveInArray(string,criteryToBreak){
+     BuildObjectToUpdateCoverInitial(){
+      this.getDataCoverImage(this.cover_image_information);
+    },
+     BreakAndBuildToSaveInArray(string,criteryToBreak){      
       string = ""+string;
-      let newstring = string.split(criteryToBreak);      
+      let newstring
+      if(string != null && criteryToBreak != null){
+        newstring = string.split(criteryToBreak);
+      }
+      else{
+        newstring = [];
+      }
+            
       return newstring;
+    },
+    enableInputs(){
+      this.GetInformationToEdit();
+      this.disable = false;
+    },
+    GetInformationToEdit(){
+      this.data = {
+            id: this.DeleteEmptyChar(this.cover_image_information.id),
+            url_uploaded: this.DeleteEmptyChar(this.cover_image_information.url_uploaded),
+            code_document: this.DeleteEmptyChar(this.cover_image_information.code_document),
+            crime: this.DeleteEmptyChar(this.cover_image_information.crime),
+            date_admission: this.DeleteEmptyChar(this.cover_image_information.date_admission),
+            hours_admission: this.DeleteEmptyChar(this.cover_image_information.hours_admission),
+            appellant: this.DeleteEmptyChar(this.cover_image_information.appellant), //QUERELLANTES
+            process_type: this.DeleteEmptyChar(this.cover_image_information.process_type),
+            accused: this.DeleteEmptyChar(this.cover_image_information.accused), //IMPUTADO
+            relevant_court: this.DeleteEmptyChar(this.cover_image_information.relevant_court),
+            victim: this.DeleteEmptyChar(this.cover_image_information.victim), //VICTIMAS
+      };      
     },
     onReset() {
       this.data = {
@@ -220,8 +262,65 @@ export default {
             accused:null,
             relevant_court:null,
             victim:null,
-      };
+      };      
       this.disable = true;
+    },
+    UpdateImageMap() {
+      console.log(this.cover_image_information)
+      this.$axios
+        .put(`documents/update/${this.cover_image_information.id}`, this.cover_image_information)
+        .then(result => {
+          console.log("Respuesta actualizar", result);
+          this.onReset();
+          this.changeStepOne();
+          this.clearCoverInformation();
+           this.$router.replace({
+            name:'UploadImage'
+          })
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    },
+      PreviewImage(){
+      console.log()
+      let image_name= this.cover_image_information.url_uploaded;
+       this.$axios.get(`documents/image/${image_name}`)
+       .then(response =>{         
+         console.log(response)
+         this.onImage = true;
+          this.image_cover = response.data.image;
+       })
+       .catch(error =>{
+         console.log(error);
+       })
+    },
+     DeleteEmptyChar(text) {      
+      if(typeof text == 'object'){        
+         for (let i = 0; i < text.length; i++) {
+            let check_text = text[i];          
+          if (text[i] == " ") {
+            text.splice(i, 1);
+          } 
+          text[i] = check_text.trim();
+          return text;          
+      }
+      }
+      else{
+         if(typeof text == 'string'){
+         text = "" + text;
+         let newtext = text.trim();
+          console.log(newtext)
+          return newtext;
+      }
+      else{        
+        return text
+      }
+      }
+     
+    },
+    CancelUpdate(){
+      console.log("COVER",this.cover_image_information);
     },
     },
     computed:{
@@ -251,5 +350,11 @@ section {
 }
 .input-box .q-field {
   width: 100% !important;
+}
+.image-cover-background img{
+  width: 90%;
+    background-size: 100% 100%;
+  display: block;
+  margin: auto;
 }
 </style>

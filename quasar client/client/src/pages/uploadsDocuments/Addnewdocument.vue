@@ -9,6 +9,7 @@
               label="Seleccione un archivo a subir, luego precione el boton ->"
               filled
               counter
+              accept="image/*"
               multiple
               style="max-width: 100%"
             />

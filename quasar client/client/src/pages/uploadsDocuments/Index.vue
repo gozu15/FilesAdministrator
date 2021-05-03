@@ -13,19 +13,7 @@
         >
           <template v-slot:top-right>
             <div class="row">
-              <div class="col-12" style="margin: 10px,">
-                <div class="row justify-end">
-                  <q-btn
-                    round
-                    dense
-                    color="primary"
-                    size="20px"
-                    icon="add"
-                    @click="GoToRegisterAnImage()"
-                  />
-                </div>
-              </div>
-              <div class="col-12">
+               <div class="col-6">
                 <div class="row justify-end">
                   <q-input
                     borderless
@@ -41,38 +29,76 @@
                   </q-input>
                 </div>
               </div>
+              <div class="col-6" style="margin: 10px,">
+                <div class="row justify-end">
+                  <q-btn
+                    round
+                    dense
+                    color="primary"
+                    size="20px"
+                    icon="add"
+                    @click="GoToRegisterAnImage()"
+                  />
+                </div>
+              </div>
+             
             </div>
             <!-- TABLE INIT -->
           </template>
 
           <template v-slot:body-cell-acussed="props">
             <q-td :props="props">
-              <ul>
-                <li v-for="(acusado, index) in props.row.accused" :key="index">
-                  {{ acusado }}
-                </li>
-              </ul>
+              <section>
+                <div v-for="(acusado, index) in props.row.accused" :key="index">
+                  <p style="width: 150px; 
+  padding: 2px 5px;
+
+  /* BOTH of the following are required for text-overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  white-space: initial;">
+                    *{{ acusado }}
+                  </p>
+                </div>
+              </section>             
             </q-td>
           </template>
           <template v-slot:body-cell-appellant="props">
             <q-td :props="props">
-              <ul>
-                <li
-                  v-for="(querellante, index) in props.row.appellant"
-                  :key="index"
-                >
-                  {{ querellante }}
-                </li>
-              </ul>
+              <section>
+                <div  v-for="(querellante, index) in props.row.appellant"
+                  :key="index">
+                  <p style="width: 200px; 
+  padding: 2px 5px;
+
+  /* BOTH of the following are required for text-overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  white-space: initial;">
+                    *{{ querellante }}
+                  </p>
+                </div>
+              </section>             
             </q-td>
           </template>
           <template v-slot:body-cell-victim="props">
             <q-td :props="props">
-              <ul>
+              <section >
+                <div v-for="(victima, index) in props.row.victim" :key="index">
+                  <p style="width: 150px; 
+  padding: 2px 5px;
+
+  /* BOTH of the following are required for text-overflow */
+  white-space: nowrap;
+  overflow: hidden;
+  white-space: initial;">*{{victima}}</p>
+                </div>
+                <!-- <ul>
                 <li v-for="(victima, index) in props.row.victim" :key="index">
                   {{ victima }}
                 </li>
-              </ul>
+              </ul> -->
+              </section>              
             </q-td>
           </template>
 
@@ -83,7 +109,15 @@
                 round
                 flat
                 color="grey"
-                @click="editRow(props)"
+                @click="ViewMore(props)"
+                icon="fas fa-eye"
+                ></q-btn>
+              <q-btn
+                dense
+                round
+                flat
+                color="grey"
+                @click="EditRow(props)"
                 icon="edit"
               ></q-btn>
               <q-btn
@@ -139,7 +173,7 @@ export default {
           label: "Crimen",
           field: "crime",
           align: "center",
-          style: `font-size: 0.85em;
+          style: `font-size: 0.95em;
   font-style: italic;
   max-width: 200px;
   white-space: normal;
@@ -152,8 +186,8 @@ export default {
           label: "Imputados",
           field: "imputados",
           align: "left",
-          style: `font-size: 0.85em;
-          font-style: italic;  
+          style: `font-size: 0.95em;
+          font-style: italic;         
           color: #555;
           margin-top: 4px;`
           },
@@ -165,7 +199,7 @@ export default {
           align: "left",
           style: `font-size: 0.95em;
           font-style: italic; 
-          color: #555;
+          color: #555; 
           margin-top: 4px;`
         },
         {
@@ -190,7 +224,7 @@ export default {
     
   },
   computed: {
-    ...mapState('upload_image',['id_cover','cover_list']),
+    ...mapState('upload_image',['id_cover','cover_list','cover_image_information']),
     tableClass() {
       return this.navigationActive === true ? "shadow-8 no-outline" : void 0;
     },
@@ -200,7 +234,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('upload_image',['GetId']),
+    ...mapMutations('upload_image',['GetId','getDataCoverImage']),
     ...mapActions('upload_image',['GetDataFromApi']),
     getImageUploaded() {
       this.GetDataFromApi();
@@ -210,10 +244,25 @@ export default {
         name: "AddImage"
       });
     },
+    ViewMore(check_row){
+      let row_selected = check_row.row;
+      row_selected.id= row_selected._id
+      this.getDataCoverImage(row_selected);
+      console.log(this.cover_image_information);
+      this.$router.push({
+        name:'ViewMore'
+      })
+    },
 
     //METHODS TABLE BUTTONS
     EditRow(props) {
-      console.log(props);
+      let row_selected = props.row;
+      row_selected.id= row_selected._id
+      this.getDataCoverImage(row_selected);
+      console.log(this.cover_image_information);
+      this.$router.push({
+        name:'UpdateCoverImage'
+      })
     },
     GetRowToDelete(props) {       
       this.GetId({id:props.row._id})
