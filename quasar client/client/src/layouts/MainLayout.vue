@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar style="background-color:green;">
         <q-btn
           flat
           dense
@@ -11,9 +11,7 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title> ASISTENTE DE JUZGADO </q-toolbar-title>        
       </q-toolbar>
     </q-header>
 
@@ -25,7 +23,7 @@
     >
       <q-list>
         <q-item-label header class="text-grey-8">
-          Essential Links
+          Administrador
         </q-item-label>
         <EssentialLink
           v-for="link in essentialLinks"
@@ -59,35 +57,35 @@ const linksData = [
     link: "https://forum.quasar.dev",
     pathLink: "upload-image",
   },
-  {
-    title: "Caratulas",
-    caption: "quasar.dev",
-    icon: "school",
-    link: "https://quasar.dev",
-    pathLink: "caratulas",
-  },
-  {
-    title: "Libros diarios",
-    caption: "github.com/quasarframework",
-    icon: "code",
-    link: "https://github.com/quasarframework",
-    pathLink: "libros_diarios",
-  },
-  {
-    title: "Memoriales & Decretos",
-    caption: "chat.quasar.dev",
-    icon: "chat",
-    link: "https://chat.quasar.dev",
-    pathLink: "memoriales_decretos",
-  },
+  // {
+  //   title: "Caratulas",
+  //   caption: "quasar.dev",
+  //   icon: "school",
+  //   link: "https://quasar.dev",
+  //   pathLink: "caratulas",
+  // },
+  // {
+  //   title: "Libros diarios",
+  //   caption: "github.com/quasarframework",
+  //   icon: "code",
+  //   link: "https://github.com/quasarframework",
+  //   pathLink: "libros_diarios",
+  // },
+  // {
+  //   title: "Memoriales & Decretos",
+  //   caption: "chat.quasar.dev",
+  //   icon: "chat",
+  //   link: "https://chat.quasar.dev",
+  //   pathLink: "memoriales_decretos",
+  // },
 
-  {
-    title: "Logout",
-    caption: "@quasarframework",
-    icon: "rss_feed",
-    link: "https://twitter.quasar.dev",
-    pathLink: "login",
-  },
+  // {
+  //   title: "Logout",
+  //   caption: "@quasarframework",
+  //   icon: "rss_feed",
+  //   link: "https://twitter.quasar.dev",
+  //   pathLink: "login",
+  // },
 ];
 
 export default {
