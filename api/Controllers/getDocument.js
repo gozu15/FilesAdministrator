@@ -7,6 +7,7 @@ const pdfParse = require('pdf-parse');
 const TurnDown= require('turndown')
 let turndownservice = new TurnDown();
 const modelDocument = require('../Models/image_object.model');
+const { exec } = require('child_process');
 const url= './uploads/'
 
 
@@ -102,7 +103,13 @@ async function RequestDocument(req, res) {
 }
 
 async function ReadDocumentToRelationship(req,res){
+    const PAGE_SIZE = 5
+    let page_number = req.query.page;
+    let skip = (page_number - 1) * PAGE_SIZE
+    
     modelDocument.find()
+    .skip(skip)
+    .limit(PAGE_SIZE)
     .then(response =>{
         console.log(response)
         res.status(200).send(response);
@@ -111,6 +118,8 @@ async function ReadDocumentToRelationship(req,res){
         res.status(500).send(err);
     })
 }
+
+
 
 //FUNCION DE PRUEBA CON MODULO MAMMOTH PARA OBTENER TEXTO DE ARCHIVOS .DOCX
 async function ReadDocument(req,res){
@@ -131,6 +140,35 @@ async function ReadDocument(req,res){
         console.log("ocurrio un error",err);        
     });
    
+}
+
+async function FindDataFromCoverInformationImage(req,res){
+    let accused = req.query.accused;
+    let victim = req.query.victim;
+    let appellant = req.query.appellant;
+    let crime = req.query.crime;
+    let page_number = req.query.page;
+    console.log(accused)  
+    const PAGE_SIZE = 5    
+    let skip = (page_number - 1) * PAGE_SIZE
+    
+    modelDocument.find({$or:[
+    {'victim':{ $regex: `${victim}` , $options: 'i' }}, 
+    {'accused':{ $regex: `${accused}` , $options: 'i' }},
+    {'appellant':{ $regex: `${appellant}` , $options: 'i' }},
+    {'crime':{ $regex: `${crime}` , $options: 'i' }}
+    ]},
+     {},
+    // 'appellant':{ $regex: `${accused}` , $options: 'i' },
+    // 'crime':{ $regex: `${accused}` , $options: 'i' }
+ (error,victima) =>{
+        if(error) res.status(500).send({message:error})
+        console.log(victima);
+        res.status(200).send({message:victima});
+    }).skip(skip)
+    .limit(PAGE_SIZE);
+   
+    
 }
 
 async function ReadMarkdownFile(req,res){
@@ -354,4 +392,5 @@ module.exports = {
     updateDataDocument,
     deleteDataDocument,
     getImageByName,
+    FindDataFromCoverInformationImage,
 }
