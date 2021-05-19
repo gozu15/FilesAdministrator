@@ -13,8 +13,8 @@ let ImageObjectModel =  new schema({
     accused:[],       //IMPUTADOS
     victim:[],        //VICTIMAS
     court_code:{type:String,required:false, default:"En espera"},      //CODIGO DE JUZGADO ASIGNADO
-    created_at    : { type: Date },
-    updated_at    : { type: Date }
+    created_at    : { type: Date,default:new Date()  },
+    updated_at    : { type: Date,default:new Date()  }
 })
 ImageObjectModel.pre('create', function(next){
      now = new Date();

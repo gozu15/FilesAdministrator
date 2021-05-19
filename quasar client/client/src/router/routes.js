@@ -11,8 +11,13 @@ const routes = [
       { path: 'update-image', component: () => import('pages/uploadsDocuments/UpdateCover.vue'),name:'UpdateCoverImage' },
       { path: 'view-more', component: () => import('pages/uploadsDocuments/ViewMore.vue'),name:'ViewMore' },
       { path: 'add-image', component: () => import('pages/uploadsDocuments/Addnewdocument.vue'), name:'AddImage' },
-      { path: 'libros_diarios', component: () => import('pages/libros_diarios/Index.vue') },
-      { path: 'memoriales_decretos', component: () => import('pages/memoriales&decretos/Index.vue') }
+      { path: 'books_diary', component: () => import('pages/libros_diarios/Index.vue') },
+      { path: 'memoriales_decretos', component: () => import('src/pages/memoriales&decretos/Index.vue') },
+      { path: 'memorials_documents', component: () => import('src/pages/memoriales&decretos/MemorialsDocuments'), name:'MemorialsDocuments' },
+      { path: 'memorials_documents_create', component: () => import('src/components/MemorialsDecrets/CreateMemorial'), name:'CreateMemorialsDocuments' },
+
+      { path: 'memorials_models', component: () => import('src/pages/memoriales&decretos/MemorialsModels'), name:'MemorialsModels' }
+      
     ],
     redirect: { path: 'inicio' }
   },

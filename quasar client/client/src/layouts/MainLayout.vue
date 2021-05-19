@@ -57,6 +57,13 @@ const linksData = [
     link: "https://forum.quasar.dev",
     pathLink: "upload-image",
   },
+   {
+     title: "Memoriales & Decretos",
+     caption: "chat.quasar.dev",
+     icon: "chat",
+     link: "https://chat.quasar.dev",
+     pathLink: "memoriales_decretos",
+   },
   // {
   //   title: "Caratulas",
   //   caption: "quasar.dev",
@@ -71,13 +78,7 @@ const linksData = [
   //   link: "https://github.com/quasarframework",
   //   pathLink: "libros_diarios",
   // },
-  // {
-  //   title: "Memoriales & Decretos",
-  //   caption: "chat.quasar.dev",
-  //   icon: "chat",
-  //   link: "https://chat.quasar.dev",
-  //   pathLink: "memoriales_decretos",
-  // },
+  
 
   // {
   //   title: "Logout",

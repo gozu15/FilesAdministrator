@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import {CoverProperties} from './upload_cover_image'
+import {MemorialsDecretsStore} from './memorials&decrets'
+import {TagsFromImage} from './tags'
 // import example from './module-example'
 
 Vue.use(Vuex)
@@ -17,7 +19,9 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      upload_image:CoverProperties
+      upload_image:CoverProperties,
+      memorials_decrets:MemorialsDecretsStore,
+      tags_info:TagsFromImage,
     },
 
     // enable strict mode (adds overhead!)
