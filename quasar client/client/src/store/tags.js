@@ -18,7 +18,8 @@ export const TagsFromImage={
             accused:null,
             victim:null,
             court_code:null,
-        }
+        },
+        document_text:null
     },
     mutations:{
         LoadAllTagsToList(state,payload){            

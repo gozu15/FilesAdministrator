@@ -5,7 +5,7 @@
     <div class="row">
       <div class="content-editor" id="content-editor">
         <q-editor
-          v-model="memorial_object.documents_text"
+          v-model="memorial_properties.documents_text"          
           :dense="$q.screen.lt.md"
           :toolbar="[
             ['bold', 'italic', 'strike', 'underline'],
@@ -160,7 +160,8 @@ export default {
       "ReloadListMemorials",
       "ReloadMemorialProperties",
       "ChangeNextPage",
-      "ClearData"
+      "ClearData",
+      "AddTagInToDocumentText"
     ]),
     ...mapActions("memorials_decrets", []),
     Open(){
@@ -189,13 +190,16 @@ export default {
     }
   },
   computed: {
-    ...mapState("memorials_decrets", ["memorials_list"])
+    ...mapState("memorials_decrets", ["memorials_list","memorial_properties"])
   }
 };
 </script>
 <style scoped>
 .q-page-container{
   padding: 0 !important;
+}
+.content-editor{
+  width: 100%;
 }
 .content-tabs{
   display: none;

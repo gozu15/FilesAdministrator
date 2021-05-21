@@ -10,7 +10,7 @@ export const MemorialsDecretsStore ={
             name:null,
             uid_image_object:null,
             description:null,
-            documents_text:null,
+            documents_text:" ",
         },
         page:1
     },
@@ -22,6 +22,10 @@ export const MemorialsDecretsStore ={
                 arrayauxiliar.push(element)
             });
             state.memorials_list = payload//[...new Set(arrayauxiliar)];            
+        },
+        AddTagInToDocumentText(state,payload){
+            console.log("addtag")
+            state.memorial_properties.documents_text += payload;
         },
         ReloadMemorialProperties(state,payload){
             state.memorial_properties={
