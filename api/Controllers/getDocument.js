@@ -37,7 +37,8 @@ async function updateDataDocument(req,res){
 
 async function deleteDataDocument(req,res){
     let id = req.params.id    
-    modelDocument.deleteOne({_id:id})
+    let data= {isdelete: true}
+    modelDocument.update({_id:id},data)
     .then(response =>{
         console.log(response);
         res.status(200).send({message:response});
@@ -107,7 +108,7 @@ async function ReadDocumentToRelationship(req,res){
     let page_number = req.query.page;
     let skip = (page_number - 1) * PAGE_SIZE
     
-    modelDocument.find()
+    modelDocument.find({isdelete:false})
     .skip(skip)
     .limit(PAGE_SIZE)
     .then(response =>{
@@ -153,22 +154,18 @@ async function FindDataFromCoverInformationImage(req,res){
     let skip = (page_number - 1) * PAGE_SIZE
     
     modelDocument.find({$or:[
-    {'victim':{ $regex: `${victim}` , $options: 'i' }}, 
-    {'accused':{ $regex: `${accused}` , $options: 'i' }},
-    {'appellant':{ $regex: `${appellant}` , $options: 'i' }},
-    {'crime':{ $regex: `${crime}` , $options: 'i' }}
+    {'victim':{ $regex: `${victim}` , $options: 'i' },'isdelete':false}, 
+    {'accused':{ $regex: `${accused}` , $options: 'i' },'isdelete':false},
+    {'appellant':{ $regex: `${appellant}` , $options: 'i' },'isdelete':false},
+    {'crime':{ $regex: `${crime}` , $options: 'i' },'isdelete':false}
     ]},
-     {},
-    // 'appellant':{ $regex: `${accused}` , $options: 'i' },
-    // 'crime':{ $regex: `${accused}` , $options: 'i' }
+     {},    
  (error,victima) =>{
         if(error) res.status(500).send({message:error})
         console.log(victima);
         res.status(200).send({message:victima});
     }).skip(skip)
-    .limit(PAGE_SIZE);
-   
-    
+    .limit(PAGE_SIZE);   
 }
 
 async function ReadMarkdownFile(req,res){

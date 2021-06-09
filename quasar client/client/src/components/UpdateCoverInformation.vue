@@ -40,7 +40,50 @@
                 @keydown.enter.prevent="submitArrays()"
               />
             </div>
-          </div>          
+          </div>    
+
+            <!-- FECHA DE INGRESO -->
+           <div class="col-4">
+            <section>
+              <h3>Fecha de ingreso</h3>
+              <p>{{ cover_image_information.process_type || 'No se pudo obtener el dato correctamente'}}</p>
+            </section>
+          </div>
+          <div class="col-8">
+            <div class="input-box">
+              <q-date
+      v-model="date"
+      today-btn
+    />
+            </div>
+          </div>    
+          <!-- FECHA END -->
+
+          <!-- HORA DE INGRESO -->
+           <div class="col-4">
+            <section>
+              <h3>Hora de ingreso</h3>
+              <p>{{ cover_image_information.process_type || 'No se pudo obtener el dato correctamente'}}</p>
+            </section>
+          </div>
+          <div class="col-8">
+            <div class="input-box">
+              <div>
+        <div class="q-pb-sm q-gutter-sm">
+          <q-badge color="teal">
+            Model: {{ model1 }}
+          </q-badge>
+          <q-badge color="purple" text-color="white">
+            Mask: hh:mm A
+          </q-badge>
+        </div>
+
+        <q-time v-model="model1" mask="hh:mm A" />
+      </div>
+            </div>
+          </div>    
+          <!-- HORA DE INGRESO END -->
+
           <div class="col-4">
             <section>
               <h3>Imputados</h3>
@@ -161,6 +204,8 @@ export default {
         return{
           onImage:false,
           image_cover:null,
+          model1:'01:51 PM',
+          date:'2019/02/01',
             disable:true,
              data: {
             id: null,

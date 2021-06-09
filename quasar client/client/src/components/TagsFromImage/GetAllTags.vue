@@ -29,12 +29,56 @@
     </div>
 
     <div v-if="tagIsSelected" class="row justify-center">     
-      <div v-for="(tags,index) in tags_to_use" :key="index" class="content-tags">
-        <q-chip clickable @click="ClickOnTag(tags)" color="teal" icon="far fa-bookmark" text-color="white" :label="tags.title" />           
-      </div>
-
-       <div>
-        <q-btn round color="red" icon="close" size="10px" @click="ClickOnCancel()">
+      
+        <q-list bordered separator>
+      <q-item v-for="(tags,index) in tags_to_use" :key="index" class="content-tags" clickable v-ripple @click="ClickOnTag(tags)">
+        <div class="row" style="width:100%" v-if="tags.title != 'Querellantes' && tags.title != 'Acusados' && tags.title != 'Victimas'">
+          <div class="col-12">
+            <q-item-label overline>{{tags.title}}</q-item-label>
+          </div>
+          <div class="col-12">
+            <q-item-label>{{tags.value}}</q-item-label>    
+          </div>
+        </div>
+          <div v-if="tags.title == 'Querellantes'">
+            <div class="row">
+          <div class="col-12">
+            <q-item-label overline>{{tags.title}}</q-item-label>
+          </div>
+          <div class="col-12">
+            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+          </div>
+        </div>
+          </div>
+          <div v-if="tags.title == 'Acusados'">
+            <div class="row">
+          <div class="col-12">
+            <q-item-label overline>{{tags.title}}</q-item-label>
+          </div>
+          <div class="col-12">
+            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+          </div>
+        </div>
+          </div>
+          <div v-if="tags.title == 'Victimas'">
+            <div class="row">
+          <div class="col-12">
+            <q-item-label overline>{{tags.title}}</q-item-label>
+          </div>
+          <div class="col-12">
+            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+          </div>
+        </div>
+          </div>
+        
+          
+        
+        
+      </q-item>     
+    </q-list>
+        <!-- <q-chip clickable @click="ClickOnTag(tags)" color="teal" icon="far fa-bookmark" text-color="white" :label="tags.title" />            -->
+      <div class="btn-content-cancel">
+        <q-btn class="full-width" color="red" size="10px" label="Volver atras" @click="ClickOnCancel()">
         <q-tooltip>
           Click para ir atras y volver a elegir
         </q-tooltip>
@@ -58,21 +102,32 @@ export default {
     };
   },
   methods: {
-    ...mapMutations("tags_info", []),
+    ...mapMutations("tags_info", ['AddTagInDocumentText','ClearDataTags','LoadTagSelected']),
     ...mapActions("tags_info", ["GetListTagsAndLoad"]),
-    ...mapMutations("memorials_decrets",['AddTagInToDocumentText']),
+    ...mapMutations("memorials_decrets",['AddTagInToDocumentText','AddTagInDocumentText']),
     GetTagsAndLoadInTheList() {
       this.GetListTagsAndLoad();
     },
     getCoverImage(cover_selected){
-     
+      this.tags_to_use = []
+      console.log("soy coveT",cover_selected);     
+      this.LoadTagSelected(cover_selected);
       let newobject = null;
       for (const key in cover_selected) {       
         if(key == 'relevant_court')
         {
           newobject={
             title:'Juzgado a cargo',
-            value:cover_selected[key]
+            value:cover_selected[key]           
+          }
+          this.tags_to_use.push(newobject)
+        }
+
+        if(key == 'code_document')
+        {
+          newobject={
+            title:'Nurej',
+            value:cover_selected[key]           
           }
           this.tags_to_use.push(newobject)
         }
@@ -130,17 +185,27 @@ export default {
     ClickOnTag(tag_selected){
       //TODO funcionalidad para enviar el valor al editor de texto wisiwig
       console.log("Click tag",tag_selected)
-      this.AddTagInToDocumentText(tag_selected.value);
+      this.document_writing = tag_selected.value;  
+      //this.AddTagInToDocumentText(tag_selected.value);
 
     },
     ClickOnCancel(){
       console.log("Click cancel")
       //TODO funcionalidad para cerrar los tags del documento seleccionado
       this.tagIsSelected = false;
+      this.ClearDataTags()
     }
   },
   computed: {
-    ...mapState("tags_info", ["list_tags", "tag_selected",'document_text'],"memorials_decrets",["memorial_properties"])
+    ...mapState("tags_info", ["list_tags", "tag_selected",'document_text']),
+    document_writing: {
+      get: function() {
+        return this.$store.state.memorials_decrets.memorial_text_doc;
+      },
+      set: function(newTitle) {
+        this.$store.commit("memorials_decrets/AddTagInDocumentText", newTitle);
+      }
+    }
   },
   created() {},
   mounted() {
@@ -160,5 +225,8 @@ export default {
 }
 .btn-content .q-btn{
     margin-right: 10px;
+}
+.btn-content-cancel{
+  width: 100%;
 }
 </style>

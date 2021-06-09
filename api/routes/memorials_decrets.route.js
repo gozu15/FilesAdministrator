@@ -10,6 +10,7 @@ module.exports = (app,multi,rutaProtegida) =>{
     router.get('/read/typememorials/from',control_memorials_decrets.GetMemorialsByType);
     router.delete('/delete/:id',control_memorials_decrets.Delete);
     router.put('/update/:id',control_memorials_decrets.Update);
+    router.get('/read/memorials/from/search',control_memorials_decrets.FindDataFromSearchButton);
 
     app.use('/api/memorials_decrets',router);
 } 

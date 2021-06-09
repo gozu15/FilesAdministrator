@@ -13,6 +13,7 @@ let ImageObjectModel =  new schema({
     accused:[],       //IMPUTADOS
     victim:[],        //VICTIMAS
     court_code:{type:String,required:false, default:"En espera"},      //CODIGO DE JUZGADO ASIGNADO
+    isdelete:{type:Boolean,required: true, default:false},
     created_at    : { type: Date,default:new Date()  },
     updated_at    : { type: Date,default:new Date()  }
 })

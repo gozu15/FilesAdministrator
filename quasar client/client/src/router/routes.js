@@ -15,6 +15,7 @@ const routes = [
       { path: 'memoriales_decretos', component: () => import('src/pages/memoriales&decretos/Index.vue') },
       { path: 'memorials_documents', component: () => import('src/pages/memoriales&decretos/MemorialsDocuments'), name:'MemorialsDocuments' },
       { path: 'memorials_documents_create', component: () => import('src/components/MemorialsDecrets/CreateMemorial'), name:'CreateMemorialsDocuments' },
+      { path: 'memorials_documents_update', component: () => import('src/components/MemorialsDecrets/UpdateMemorial'), name:'UpdateMemorialsDocuments' },
 
       { path: 'memorials_models', component: () => import('src/pages/memoriales&decretos/MemorialsModels'), name:'MemorialsModels' }
       
