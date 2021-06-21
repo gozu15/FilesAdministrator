@@ -37,7 +37,7 @@ export default {
     methods:{
         GoToMemorialsModels(){
             this.$router.push({
-                name:'MemorialsModels'
+                name:'MemorialDecretModel'
             })
         },
         GoToGenerateMemorialDocument(){

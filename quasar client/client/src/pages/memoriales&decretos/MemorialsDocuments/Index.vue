@@ -49,7 +49,7 @@
             <q-separator />
             <q-card-section class="flex flex-center">
               <div style="width:100%">
-                TIPO DE DECRETO: {{ props.row.type_document }}
+                TIPO DE DOCUMENTO: {{ props.row.type_document }}
               </div>
             </q-card-section>
             <q-card-section class="text-doc">
@@ -210,19 +210,21 @@ export default {
     nextPage: async function() {
       if(this.isSearching == false){
           let params;
-      if (this.data_per_page >= this.memorials_list.length) {
+      if (this.memorials_list.length  >= this.data_per_page) {
         console.log("ENTRO IF");
         this.ChangeNextPage();
         params = {
           page: this.page,
           rowPerPage: this.data_per_page
         };
+        
         await this.GetMemorialsFromApi(params);   
         setTimeout(()=>{
           this.$refs.TableReference.nextPage();
         },1000)   
         
       } else {
+        console.log("NEXT");
         this.$refs.TableReference.nextPage();
       }
       }
@@ -244,10 +246,7 @@ export default {
         } else {
           this.$refs.TableReference.nextPage();
         }
-      }
-    
-
-      console.log("NEXT");
+      }     
     },
     prevPage() {
       this.$refs.TableReference.prevPage();

@@ -17,10 +17,20 @@ const routes = [
       { path: 'memorials_documents_create', component: () => import('src/components/MemorialsDecrets/CreateMemorial'), name:'CreateMemorialsDocuments' },
       { path: 'memorials_documents_update', component: () => import('src/components/MemorialsDecrets/UpdateMemorial'), name:'UpdateMemorialsDocuments' },
 
-      { path: 'memorials_models', component: () => import('src/pages/memoriales&decretos/MemorialsModels'), name:'MemorialsModels' }
+      { path: 'memorials_models', component: () => import('src/pages/memoriales&decretos/MemorialsModels'), name:'MemorialDecretModel' },
+      { path: 'memorials_models_create', component: () => import('src/components/MemorialsDecretsModels/Create.vue'), name:'MemorialDecretModelCreate' },
+      { path: 'memorials_models_update', component: () => import('src/components/MemorialsDecretsModels/Update.vue'), name:'MemorialDecretModelUpdate' }
       
     ],
     redirect: { path: 'inicio' }
+  },
+  {
+    path: '/tags_and_models',
+    component: () => import('layouts/JoinTagsAndModels.vue'),
+    children: [
+      { path: '', component: () => import('pages/memoriales&decretos/MemorialsModels/TagsandModels.vue') }
+    ],
+    redirect: { path: '' }
   },
    {
     path: '/login',

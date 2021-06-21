@@ -1,38 +1,9 @@
 <template>
-  <div class="q-pa-sm">
-    <div  v-if="!tagIsSelected" class="row justify-center">
-      <div class="content-cards" >
-        <q-card class="my-card" bordered v-for="(images_cover, index) in list_tags" :key="index">
-          <q-card-section>
-            <div class="text-h6">{{ images_cover.code_document }}</div>
-            <div class="text-subtitle2">{{ images_cover.crime }}</div>
-          </q-card-section>
-          <q-card-section class="q-pt-none">
-                Proceso:
-          {{images_cover.process_type}}
-          </q-card-section>
-          <q-card-section>
-            <div class="row justify-end btn-content">
-              <q-btn round color="primary" icon="fas fa-eye" size="10px">
-                <q-tooltip>
-          Click para ver mas datos del documento
-        </q-tooltip>
-        </q-btn>   
-              <q-btn round color="red" icon="fas fa-edit" size="10px" @click="getCoverImage(images_cover)">
-                <q-tooltip>
-                  Click para obtener los datos relevantes del documento
-                </q-tooltip>
-              </q-btn>                
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
-
+  <div class="q-pa-sm">    
     <div v-if="tagIsSelected" class="row justify-center">     
       
         <q-list bordered separator>
-      <q-item v-for="(tags,index) in tags_to_use" :key="index" class="content-tags" clickable v-ripple @click="ClickOnTag(tags)">
+      <q-item v-for="(tags,index) in listCoverProperties" :key="index" class="content-tags" clickable v-ripple @click="ClickOnTag(tags)">
         <div class="row" style="width:100%" v-if="tags.title != 'Querellantes' && tags.title != 'Acusados' && tags.title != 'Victimas'">
           <div class="col-12">
             <q-item-label overline>{{tags.title}}</q-item-label>
@@ -45,9 +16,9 @@
             <div class="row">
           <div class="col-12">
             <q-item-label overline>{{tags.title}}</q-item-label>
-          </div>
+          </div>         
           <div class="col-12">
-            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+            <q-item-label>{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
@@ -55,9 +26,9 @@
             <div class="row">
           <div class="col-12">
             <q-item-label overline>{{tags.title}}</q-item-label>
-          </div>
+          </div>        
           <div class="col-12">
-            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+            <q-item-label>{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
@@ -65,9 +36,9 @@
             <div class="row">
           <div class="col-12">
             <q-item-label overline>{{tags.title}}</q-item-label>
-          </div>
+          </div>          
           <div class="col-12">
-            <q-item-label v-for="(quere, index) in tags.value" :key="index">*{{quere}}</q-item-label>    
+            <q-item-label>{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
@@ -93,13 +64,26 @@
 <script>
 import { mapState, mapMutations, mapActions } from "vuex";
 export default {
-  name: "TagsInformationToModel",
+  name: "TagsInformation",
   data() {
     return {
       lorem:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi accusamus corporis magnam in soluta repudiandae.",
-      tagIsSelected:false,
+      tagIsSelected:true,
       tags_to_use:[],
+      documents_image:{
+           id: null,
+            url_uploaded: null,
+            code_document: null,
+            crime: null,
+            date_admission: null,
+            hours_admission: null,
+            appellant: null, //QUERELLANTES
+            process_type: null,
+            accused: null, //IMPUTADO
+            relevant_court: null,
+            victim: null, //VICTIMAS
+      }
     };
   },
   methods: {
@@ -109,79 +93,61 @@ export default {
     GetTagsAndLoadInTheList() {
       this.GetListTagsAndLoad();
     },
-    getCoverImage(cover_selected){
-      this.tags_to_use = []
-      console.log("soy coveT",cover_selected);     
-      this.LoadTagSelected(cover_selected);
-      let newobject = null;
-      for (const key in cover_selected) {       
-        if(key == 'relevant_court')
-        {
-          newobject={
-            title:'Juzgado a cargo',
-            value:cover_selected[key]           
-          }
-          this.tags_to_use.push(newobject)
+    getCoverImage(){  
+        let info = {title:null,value:null}
+        for (const key in this.documents_image) {
+            if(key == 'code_document'){
+                info ={
+                    title:'Codigo NUREJ',
+                    value:'GET NUREJ'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'crime'){
+                info ={
+                    title:'Delito',
+                    value:'GET CRIME'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'relevant_court'){
+                info ={
+                    title:'Juzgado a Cargo',
+                    value:'GET RELEVANT COURT'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'process_type'){
+                info ={
+                    title:'Tipo de Proceso',
+                    value:'GET PROCESS TYPE'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'accused'){
+                info ={
+                    title:'Acusado',
+                    value:'GET ACCUSED'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'appellant'){
+                info ={
+                    title:'Querellantes',
+                    value:'GET APPELLANT'
+                }
+                this.tags_to_use.push(info)
+            }
+            if(key == 'victim'){
+                info ={
+                    title:'Victima',
+                    value:'GET VICTIM'
+                }
+                this.tags_to_use.push(info)
+            }
         }
-
-        if(key == 'code_document')
-        {
-          newobject={
-            title:'Nurej',
-            value:cover_selected[key]           
-          }
-          this.tags_to_use.push(newobject)
-        }
-
-        if(key == 'crime')
-        {
-          newobject={
-            title:'Delito',
-            value:cover_selected[key]
-          }
-          this.tags_to_use.push(newobject)
-        }
-
-        if(key == 'process_type')
-        {
-          newobject={
-            title:'Tipo de proceso',
-            value:cover_selected[key]
-          }
-          this.tags_to_use.push(newobject)
-        }
-        
-        if(key == 'appellant')
-        {
-          newobject={
-            title:'Querellantes',
-            value:cover_selected[key]
-          }
-          this.tags_to_use.push(newobject)
-        }
-
-        if(key == 'accused')
-        {
-          newobject={
-            title:'Acusados',
-            value:cover_selected[key]
-          }
-          this.tags_to_use.push(newobject)
-        }
-        
-        if(key == 'victim')
-        {
-          newobject={
-            title:'Victimas',
-            value:cover_selected[key]
-          }
-          this.tags_to_use.push(newobject)
-        }
-       
-      }
-       this.tagIsSelected = true;
-      
-      
+        console.log("ARRAY",this.tags_to_use);
+         
     },
     ClickOnTag(tag_selected){
       //TODO funcionalidad para enviar el valor al editor de texto wisiwig
@@ -199,6 +165,9 @@ export default {
   },
   computed: {
     ...mapState("tags_info", ["list_tags", "tag_selected",'document_text']),
+    listCoverProperties(){
+        return this.tags_to_use;
+    },
     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
@@ -210,7 +179,7 @@ export default {
   },
   created() {},
   mounted() {
-    this.GetListTagsAndLoad();
+    this.getCoverImage();
   }
 };
 </script>

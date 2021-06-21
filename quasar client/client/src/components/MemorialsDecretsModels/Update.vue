@@ -2,7 +2,7 @@
   <div class="q-pa-md">
     <q-page-container>
       <q-page>
-        <div class="row">
+        <div class="row">          
           <div class="content-tabs" id="content-tabs">
             <div>
               <q-tabs
@@ -11,8 +11,7 @@
                 narrow-indicator
                 class="q-mb-sm"
               >
-                <q-tab class="text-purple" name="causas" label="Causas" />
-                <q-tab class="text-orange" name="models" label="Modelos" />
+                <q-tab class="text-purple" name="causas" label="Causas" />                
               </q-tabs>
               <div class="q-gutter-y-sm">
                 <q-tab-panels
@@ -24,25 +23,17 @@
                 >
                   <q-tab-panel name="causas">
                     <div class="text-h6">Causas</div>
-                    <TagsInformation />
-                  </q-tab-panel>
-
-                  <q-tab-panel name="models">
-                    <div class="text-h6">
-                      Modelos de Decretos y Memoriales
-                    </div>
-                    <MemorialModelList />
-                  </q-tab-panel>
+                    <TagsInformationToModel />
+                  </q-tab-panel>                 
                 </q-tab-panels>
               </div>
             </div>
-          </div> 
+          </div>
           <div class="content-editor" id="content-editor">
             <q-editor
               ref="editor_ref"
               v-model="document_writing"
               :dense="$q.screen.lt.md"
-              @keypress ="InputText($event)"
               :toolbar="[
                 ['bold', 'italic', 'strike', 'underline'],
                 ['print', 'fullscreen'],
@@ -109,9 +100,13 @@
                 verdana: 'Verdana',
                 
               }"
-            >         
+            >          
             </q-editor>
-          </div>                   
+          </div>
+          <div class="content-btn">
+            <!-- <q-btn class="" color="primary" @click="VerifyDocument()" label="Clickme">
+            </q-btn> -->
+          </div>
         </div>
 
         <q-page-sticky position="bottom-right" :offset="[18, 130]">
@@ -170,7 +165,7 @@
         :rules="[ val => val && val.length > 0 || 'Please type something']"
       />
 
-       <q-select outlined v-model="memorial_object.type_document" :options="options" label="Selecciona tipo de documento"
+       <q-select ref="SelectInput" outlined v-model="memorial_object.type_document" :options="options" label="Selecciona tipo de documento"
        />      
       <q-input
         filled        
@@ -201,31 +196,30 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-
-
   </div>
 </template>
 <script>
 import TagsInformation from "../../components/TagsFromImage/GetAllTags";
 import MemorialModelList from "../../components/MemorialsDecretsModels/ListToUse";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
+import TagsInformationToModel from "../../components/TagsFromImage/GetAllTagsToModel";
 export default {
-  components: { TagsInformation, MemorialModelList },
+  components: { TagsInformation, MemorialModelList,TagsInformationToModel },
   data() {
     return {
       memorial_object: {
-        name: null,
-        uid_image_object: null,
+        id:null,
+        name: null,       
         type_document: null,
         description: null,
         documents_text: " "
       },
       confirm:false,
-      options:['Decreto',
-'Memorial',
-'Acusaciones',
-'Autos de inicio',        
+      options:[
+       {label:'Decreto', value:'DecretosModel'}, 
+       {label:'Memorial', value:'MemorialesModel'},
+       {label:'Acusaciones', value:'AcusacionesModel'},
+       {label:'Autos de inicio', value:'AutosModel'}   
       ],
       save_change:false,
       file: null,
@@ -238,14 +232,9 @@ export default {
       "ReloadMemorialProperties",
       "ChangeNextPage",
       "ClearData",
-      "AddTagInToDocumentText"
+      "AddTagInToDocumentText",      
     ]),
-    ...mapActions("memorials_decrets", ['CreateMemorialNewDocument']),
-    InputText(e){      
-      if(e.key === 9 || e.key === 11){
-        console.log('TAB')
-      }
-    },
+    ...mapActions("memorials_decrets", ['CreateMemorialNewDocument',"UpdateModelMemorial"]),
     Open() {
       document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-tabs").style.display = "block";
@@ -257,27 +246,40 @@ export default {
       document.getElementById("content-editor").style.width = "100%";
       console.log("close");
     },
-    getMemorialList() {},
-    VerifyDocument() {      
-      //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")
+    getMemorialList(){
+
+    },
+    VerifyDocument(){  
       console.log(this.memorial_text_doc);
       console.log("TAG SELECTED",this.tag_selected);
-      this.save_change = true;
-      //this.pasteCapture();
+      this.save_change = true;  
     },    
     onSubmit(){
-      let typevalue= this.memorial_object.type_document;      
+      let isUpdatable = false;
+      let typevalue= this.memorial_object.type_document.value;
       this.memorial_object.documents_text=this.memorial_text_doc
       this.memorial_object.type_document = typevalue;
-      this.CreateMemorialNewDocument(this.memorial_object);   
-      this.GoToMemorialsTable();
-    }, 
+      for (const key in this.memorial_properties){
+          if(this.memorial_properties[key] != this.memorial_object[key]){
+            isUpdatable = true;
+          }
+      }
+      if(isUpdatable){
+        this.UpdateModelMemorial(this.memorial_object);
+        this.GoToMemorialsTable();
+      }
+      else{
+        this.GoToMemorialsTable();
+      }    
+      console.log("MEMORIAL",this.memorial_object);
+      
+    },
     GobackInit(){
         this.GoToMemorialsTable()
     },
     GoToMemorialsTable(){
       this.$router.replace({
-        name:'MemorialsDocuments'
+        name:'MemorialDecretModel'
       })
     },
     onReset() {},
@@ -307,15 +309,18 @@ export default {
       }
     }
   },
-  mounted() {
-    this.ClearData();
-    console.log(this.$store);
-  },
-  created(){
-    this.ClearData();
+  mounted() {    
+    this.document_writing = this.memorial_properties.documents_text    
+    this.memorial_object = {
+      id: this.memorial_properties.id,
+      name :this.memorial_properties.name,
+      type_document:this.memorial_properties.type_document,
+      description:this.memorial_properties.description
+    }
+    console.log("update",this.memorial_object);
   },
   beforeDestroy(){
-    
+    this.ClearData();
     console.log("Destroyed");
   }
   

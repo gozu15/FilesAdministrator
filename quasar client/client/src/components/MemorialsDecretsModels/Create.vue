@@ -11,8 +11,7 @@
                 narrow-indicator
                 class="q-mb-sm"
               >
-                <q-tab class="text-purple" name="causas" label="Causas" />
-                <q-tab class="text-orange" name="models" label="Modelos" />
+                <q-tab class="text-purple" name="causas" label="Causas" />                
               </q-tabs>
               <div class="q-gutter-y-sm">
                 <q-tab-panels
@@ -24,15 +23,8 @@
                 >
                   <q-tab-panel name="causas">
                     <div class="text-h6">Causas</div>
-                    <TagsInformation />
-                  </q-tab-panel>
-
-                  <q-tab-panel name="models">
-                    <div class="text-h6">
-                      Modelos de Decretos y Memoriales
-                    </div>
-                    <MemorialModelList />
-                  </q-tab-panel>
+                    <TagsInformationToModel />
+                  </q-tab-panel>                  
                 </q-tab-panels>
               </div>
             </div>
@@ -109,7 +101,20 @@
                 verdana: 'Verdana',
                 
               }"
-            >         
+            >
+              <!-- <template v-slot:image>
+            <q-file
+              v-model="file"
+              ref="token"
+              unelevated
+              color="white"
+              text-color="primary"
+              label="Token"
+              size="sm"
+              style="width:100px"
+              @input="CheckFile()"
+            />
+          </template> TODO Obtener imagen y subirlo a editor-->
             </q-editor>
           </div>                   
         </div>
@@ -207,25 +212,24 @@
   </div>
 </template>
 <script>
-import TagsInformation from "../../components/TagsFromImage/GetAllTags";
-import MemorialModelList from "../../components/MemorialsDecretsModels/ListToUse";
+import TagsInformationToModel from "../../components/TagsFromImage/GetAllTagsToModel";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 export default {
-  components: { TagsInformation, MemorialModelList },
+  components: { TagsInformationToModel },
   data() {
     return {
       memorial_object: {
-        name: null,
-        uid_image_object: null,
+        name: null,        
         type_document: null,
         description: null,
         documents_text: " "
       },
       confirm:false,
-      options:['Decreto',
-'Memorial',
-'Acusaciones',
-'Autos de inicio',        
+      options:[
+       {label:'Decreto', value:'DecretosModel'}, 
+       {label:'Memorial', value:'MemorialesModel'},
+       {label:'Acusaciones', value:'AcusacionesModel'},
+       {label:'Autos de inicio', value:'AutosModel'}   
       ],
       save_change:false,
       file: null,
@@ -266,9 +270,10 @@ export default {
       //this.pasteCapture();
     },    
     onSubmit(){
-      let typevalue= this.memorial_object.type_document;      
+      let typevalue= this.memorial_object.type_document.value;      
       this.memorial_object.documents_text=this.memorial_text_doc
       this.memorial_object.type_document = typevalue;
+      console.log("MEMORIALS OBKJECT",this.memorial_object);
       this.CreateMemorialNewDocument(this.memorial_object);   
       this.GoToMemorialsTable();
     }, 
@@ -277,7 +282,7 @@ export default {
     },
     GoToMemorialsTable(){
       this.$router.replace({
-        name:'MemorialsDocuments'
+        name:'MemorialDecretModel'
       })
     },
     onReset() {},
@@ -308,14 +313,11 @@ export default {
     }
   },
   mounted() {
-    this.ClearData();
+     this.ClearData();
     console.log(this.$store);
   },
-  created(){
-    this.ClearData();
-  },
   beforeDestroy(){
-    
+    //this.ClearData();
     console.log("Destroyed");
   }
   
