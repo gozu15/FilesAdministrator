@@ -3,7 +3,7 @@
     <q-page-container>
       <q-page>
         <div class="row">
-          <div class="content-tabs" id="content-tabs">
+          <div v-if="!openPDFfromeditor" class="content-tabs" id="content-tabs">
             <div>
               <q-tabs
                 v-model="tab"
@@ -13,6 +13,7 @@
               >
                 <q-tab class="text-purple" name="causas" label="Causas" />
                 <q-tab class="text-orange" name="models" label="Modelos" />
+                <q-tab class="text-red" name="library" label="Libreria de leyes" />
               </q-tabs>
               <div class="q-gutter-y-sm">
                 <q-tab-panels
@@ -33,10 +34,28 @@
                     </div>
                     <MemorialModelList />
                   </q-tab-panel>
+                  <q-tab-panel name="library">
+                    <div class="text-h6">
+                      Libreria de Leyes
+                    </div>
+                    <ListBooksFromLibrary />
+                  </q-tab-panel>
                 </q-tab-panels>
               </div>
             </div>
           </div> 
+
+          <!-- check PDF into editor -->
+          <div  v-if="openPDFfromeditor" id="content-pdfviewer" class="content-pdfviewer">
+            <div>
+              <button @click="CloseEditorFromPDF">"4-"</button>  
+              <button @click="OpenEditorFromPDF">">"</button>               
+              <button @click="ClosePdfEditorPreview">"X"</button>
+            </div>
+            <GetPDFinEditor/>
+
+          </div>
+
           <div class="content-editor" id="content-editor">
             <q-editor
               ref="editor_ref"
@@ -145,6 +164,7 @@
             direction="left"
             @show="Open()"
             @hide="Close()"
+            :disable="openPDFfromeditor"
           >
           </q-fab>
         </q-page-sticky>
@@ -207,11 +227,13 @@
   </div>
 </template>
 <script>
+import GetPDFinEditor from '../LibraryLawsAndRegulations/GetPdfInEditor.vue'
+import ListBooksFromLibrary from "../LibraryLawsAndRegulations/GetListFromLibrary.vue";
 import TagsInformation from "../../components/TagsFromImage/GetAllTags";
 import MemorialModelList from "../../components/MemorialsDecretsModels/ListToUse";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
 export default {
-  components: { TagsInformation, MemorialModelList },
+  components: { TagsInformation, MemorialModelList,ListBooksFromLibrary,GetPDFinEditor },
   data() {
     return {
       memorial_object: {
@@ -222,10 +244,13 @@ export default {
         documents_text: " "
       },
       confirm:false,
-      options:['Decreto',
-'Memorial',
-'Acusaciones',
-'Autos de inicio',        
+      options:[
+        {label:'Decreto',value:'Decreto'},
+        {label:'Memorial',value:'Memorial'},
+        {label:'Acusaciones',value:'Acusations'},
+        {label:'Autos de inicio',value:'Autos'},
+        {label:'Resoluciones',value:'Resolutions'},
+        {label:'Sentencias',value:'Sentence'}   
       ],
       save_change:false,
       file: null,
@@ -238,9 +263,30 @@ export default {
       "ReloadMemorialProperties",
       "ChangeNextPage",
       "ClearData",
-      "AddTagInToDocumentText"
+      "AddTagInToDocumentText",
+      "changeViewMorePdfFromEditor",
+      "changeEditorViewer"
     ]),
     ...mapActions("memorials_decrets", ['CreateMemorialNewDocument']),
+    OpenEditorFromPDF(){
+     document.getElementById("content-editor").style.display = "none";
+      document.getElementById("content-pdfviewer").style.width = "100%";
+      
+    },
+    CloseEditorFromPDF(){
+      document.getElementById("content-editor").style.display = "block";
+        document.getElementById("content-editor").style.width = "65%";
+      document.getElementById("content-pdfviewer").style.width = "35%";
+    },
+    ClosePdfEditorPreview(){
+      //document.getElementById("content-pdfviewer").style.width = "35%";   
+      //this.changeEditorViewer(false)     
+      document.getElementById("content-editor").style.display = "block";
+       document.getElementById("content-editor").style.width = "65%";
+      document.getElementById("content-pdfviewer").style.width = "35%";
+      this.changeViewMorePdfFromEditor(false)
+        //this.changeEditorViewer(false);   
+    },
     InputText(e){      
       if(e.key === 9 || e.key === 11){
         console.log('TAB')
@@ -266,7 +312,7 @@ export default {
       //this.pasteCapture();
     },    
     onSubmit(){
-      let typevalue= this.memorial_object.type_document;      
+      let typevalue= this.memorial_object.type_document.value;      
       this.memorial_object.documents_text=this.memorial_text_doc
       this.memorial_object.type_document = typevalue;
       this.CreateMemorialNewDocument(this.memorial_object);   
@@ -276,9 +322,33 @@ export default {
         this.GoToMemorialsTable()
     },
     GoToMemorialsTable(){
+       document.cookie ="text_memorial='ingrese texto'"
       this.$router.replace({
         name:'MemorialsDocuments'
       })
+    },
+    ReadCookie(name){
+      if(document.cookie!= null || document.cookie != undefined){
+          let nameEQ = name + "="; 
+          let ca = document.cookie.split(';');
+
+          for(let i=0;i < ca.length;i++) {
+
+            let c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) {
+              return decodeURIComponent( c.substring(nameEQ.length,c.length) );
+            }
+
+          }
+      }
+      else{
+        document.cookie = "text_memorial=' '";        
+      }
+      return 'texto nuevo';
+     
+
+      
     },
     onReset() {},
     getImage() {},
@@ -295,20 +365,27 @@ export default {
     ...mapState("memorials_decrets", [
       "memorials_list",
       "memorial_properties",
-      "memorial_text_doc"
+      "memorial_text_doc",
+      "openPDFfromeditor",
+      "closeeditor"
     ]),
     ...mapState("tags_info",['tag_selected']),
+
     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
       },
-      set: function(newTitle) {
-        this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);
+      set: function(newTitle) {     
+        console.log("NEW",newTitle)        
+        this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);        
       }
     }
   },
   mounted() {
     this.ClearData();
+    let checkascii = this.ReadCookie("text_memorial");
+    checkascii = checkascii.replace(/ascii59/g,';');
+    this.document_writing = checkascii
     console.log(this.$store);
   },
   created(){

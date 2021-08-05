@@ -83,7 +83,8 @@
 
     async function Delete(req,res){        
         const ID = req.params.id
-        modelMemorialesDecretos.deleteOne({_id:ID})
+        let delete_memorial = {isdelete : true};
+        modelMemorialesDecretos.update({_id:ID},delete_memorial)
         .then(response =>{
             console.log(response);
             res.status(200).send({message:"Done",data:response});

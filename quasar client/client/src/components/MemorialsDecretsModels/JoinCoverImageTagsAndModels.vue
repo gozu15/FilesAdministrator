@@ -33,7 +33,7 @@
             </div>
           </div>
           <!-- EDITOR PREVIEW -->
-           <div class="content-editor" id="content-editor">
+           <!-- <div class="content-editor" id="content-editor">
             <q-editor
               ref="editor_ref"
               v-model="document_writing"
@@ -42,7 +42,7 @@
               :toolbar="[]"
             >
             </q-editor>
-          </div> 
+          </div>  -->
           <!-- EDITOR PREVIEW END -->
         </div>
         <q-page-sticky position="bottom-right" :offset="[18, 130]">
@@ -140,9 +140,9 @@ components:{TagsToJoinModel,EditorModelBuilding},
     ]),
     ...mapActions("memorials_decrets", ["CreateMemorialNewDocument"]),
      Open() {
-      document.getElementById("content-editor").style.width = "50%";
+      //document.getElementById("content-editor").style.width = "50%";
       document.getElementById("content-tabs").style.display = "block";
-      document.getElementById("content-tabs").style.width = "50%";
+      document.getElementById("content-tabs").style.width = "95%";
       // TEXTO DEL EDITOR CAMBIAR A 'algo especifico'
       //CAMBIAR ISRELOADING A FALSE
       //CAMBIAR WIDTH EN ESTA FUNCION

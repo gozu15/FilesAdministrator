@@ -3,7 +3,7 @@
     <q-table
       grid
       ref="TableReference"
-      title="Memoriales y Decretos"
+      title="Memoriales"
       :data="isSearching == false ? memorials_list : memorials_list_searching"
       :columns="columns"
       row-key="name"     
@@ -171,7 +171,7 @@ export default {
       "IsNotSearching",
       "ClearListFromSearch"
     ]),
-    ...mapActions("memorials_decrets", ["GetMemorialsFromApi","FindDataFromMemorialsDocs"]),
+    ...mapActions("memorials_decrets", ["GetMemorialsFromApiMemorials","FindDataFromMemorialsDocs"]),
     GetPressEnter(e){
       //TODO BUSCADOR
        if (e.keyCode === 13) {
@@ -192,7 +192,7 @@ export default {
       if(e == ''){
         console.log("THIS IS EMPTY",e);
          this.ClearListFromSearch()
-        this.GetMemorialsFromApi()
+        this.GetMemorialsFromApiMemorials()
         this.IsNotSearching()
       }
     },
@@ -218,7 +218,7 @@ export default {
           rowPerPage: this.data_per_page
         };
         
-        await this.GetMemorialsFromApi(params);   
+        await this.GetMemorialsFromApiMemorials(params);   
         setTimeout(()=>{
           this.$refs.TableReference.nextPage();
         },1000)   
@@ -266,7 +266,7 @@ export default {
           page: this.page,
           rowPerPage: this.data_per_page
         };
-        this.GetMemorialsFromApi(params);
+        this.GetMemorialsFromApiMemorials(params);
         this.data = this.memorials_list;
         this.$refs.TableReference.setPagination(pagination);
       } else {
@@ -301,7 +301,7 @@ export default {
     },
 
     GetMemorials() {
-      this.GetMemorialsFromApi();
+      this.GetMemorialsFromApiMemorials();
      
     },
     GoToRegisterAnImageTag() {

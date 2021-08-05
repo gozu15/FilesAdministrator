@@ -10,11 +10,14 @@ module.exports = (app, multi,rutaProtegida) => {
     router.get('/complete/:id',controllerDiarybook.findDiaryBookbyIdComplete);   
     router.get('/complete/get/full',controllerDiarybook.findDiaryBookComplete);
 
-    router.put('/update',controllerDiarybook.updateDiarybook);
+    router.put('/update/:id',controllerDiarybook.updateDiarybook);
 
     //add description to book
 
     router.post('/description/add/:idbook',controllerDiarybook.addnewDocumentToBook);
+    router.put('/description/update/:id',controllerDiarybook.updateContentDiarySelected)
+    router.delete('/description/delete/:id',controllerDiarybook.deleteContentFromDiaryBook)
+    router.delete('/delete/:id',controllerDiarybook.deleteDiaryBook)
     
     app.use('/api/diary_books',router);
 }

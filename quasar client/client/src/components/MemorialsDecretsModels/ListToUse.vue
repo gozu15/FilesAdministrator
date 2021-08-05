@@ -1,7 +1,8 @@
 <template>
   <div class="q-pa-md">
     <div class="row justify-center">
-      <div class="content-cards" >
+      <q-infinite-scroll class="content-cards" @load="onLoad" :offset="200">
+      <!-- <div class="content-cards" > -->
         <q-card class="my-card" v-for="(images_cover, index) in memorials_list" :key="index">
           <q-card-section>
             <div class="text-h6">{{ images_cover.name }}</div>            
@@ -16,7 +17,13 @@
             </div>
           </q-card-section>
         </q-card>
-      </div>
+      <!-- </div> -->
+      <template v-slot:loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>      
     </div>
   </div>
 </template>
@@ -33,6 +40,14 @@ export default {
   methods: {
     ...mapMutations("memorials_decrets", ['WritingDocumentText','ClearData']),
     ...mapActions("memorials_decrets", ["GetMemorialsFromApi","GetModelsMemorials"]),
+    onLoad(index, done){
+      console.log("soy index",index);
+      setTimeout(()=>{
+        console.log("Entro")
+        done();
+      },2000);
+      //done();
+    },
     UseModel(model){
       this.WritingDocumentText(model.documents_text)
       this.GotoJoinTagAndModel();

@@ -281,9 +281,30 @@ export default {
         this.GoToMemorialsTable()
     },
     GoToMemorialsTable(){
+      document.cookie ="text_memorial_model='ingrese texto'"
       this.$router.replace({
         name:'MemorialDecretModel'
       })
+    },
+    ReadCookie(name){
+      if(document.cookie!= null || document.cookie != undefined){
+          let nameEQ = name + "="; 
+          let ca = document.cookie.split(';');
+
+          for(let i=0;i < ca.length;i++) {
+
+            let c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) {
+              return decodeURIComponent( c.substring(nameEQ.length,c.length) );
+            }
+
+          }
+      }
+      else{
+        document.cookie = "text_memorial_model=' '";        
+      }
+      return 'texto nuevo';      
     },
     onReset() {},
     getImage() {},
@@ -308,12 +329,20 @@ export default {
         return this.$store.state.memorials_decrets.memorial_text_doc;
       },
       set: function(newTitle) {
+        
         this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);
+         let check =  this.memorial_text_doc
+            check = check.replace(/;/g,'ascii59');
+            let textInput = ""+ check
+            document.cookie = "text_memorial_model="+encodeURI(textInput);
       }
     }
   },
   mounted() {
      this.ClearData();
+      let checkascii = this.ReadCookie("text_memorial_model");
+    checkascii = checkascii.replace(/ascii59/g,';');
+    this.document_writing = checkascii
     console.log(this.$store);
   },
   beforeDestroy(){

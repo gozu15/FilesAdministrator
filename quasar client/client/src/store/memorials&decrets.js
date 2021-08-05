@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import state from './module-example/state';
 const vue = Vue.prototype;
 export const MemorialsDecretsStore ={
     namespaced:true,
@@ -8,6 +7,8 @@ export const MemorialsDecretsStore ={
         memorial_model_to_join:"Ingrese un dato",
         isReloadingModelWithTags:false,
         isSearching:false,
+        openPDFfromeditor:false,
+        closeeditor:false,        
         memorials_list:[],
         memorial_properties:{
             id:null,
@@ -24,6 +25,12 @@ export const MemorialsDecretsStore ={
     },
     mutations:
     {   
+        changeEditorViewer(state,payload){
+            state.closeeditor = payload
+        },
+        changeViewMorePdfFromEditor(state,payload){
+            state.openPDFfromeditor = payload
+        },
         ChangeModelWithTag(state,payload){
             state.isReloadingModelWithTags = payload
         },
@@ -48,6 +55,11 @@ export const MemorialsDecretsStore ={
 
         WritingDocumentText(state, payload){
             state.memorial_text_doc = payload
+            let check =  state.memorial_text_doc
+            check = check.replace(/;/g,'ascii59');
+            let textInput = ""+ check
+            document.cookie = "text_memorial="+encodeURI(textInput);
+            console.log("MEMO",document.cookie)
         },
         WritingDocumentTextToJoinModel(state, payload){
             state.memorial_model_to_join = payload
@@ -255,7 +267,7 @@ export const MemorialsDecretsStore ={
                 params:{
                     page:state.page,
                     size:state.rowPerPage,
-                    type:'Decreto/Memorial/Acusaciones'
+                    type:'Decreto/Memorial'
                 }
             })
             .then(async response =>{
@@ -267,6 +279,156 @@ export const MemorialsDecretsStore ={
             })
             
         },
+
+        async GetMemorialsFromApiAutos({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Autos'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },
+
+        async GetMemorialsFromApiMemorials({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Memorial'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },
+
+        async GetMemorialsFromApiDecrets({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Decreto'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },      
+        async GetMemorialsFromApiResolutions({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Resolutions'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },
+
+        async GetMemorialsFromApiSentence({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Sentence'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },
+
+        async GetMemorialsFromApiAcusations({commit,state},payload){
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+                console.log("memopayload",payload);
+            }   
+           
+            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{
+                    page:state.page,
+                    size:state.rowPerPage,
+                    type:'Acusations'
+                }
+            })
+            .then(async response =>{
+                console.log("RESULTADO",response)
+                commit('ReloadListMemorials',await response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+            
+        },
+
         CreateMemorialNewDocument({commit,state},payload){
             
             commit('ReloadMemorialProperties',payload)

@@ -3,6 +3,10 @@ import Vuex from 'vuex'
 import {CoverProperties} from './upload_cover_image'
 import {MemorialsDecretsStore} from './memorials&decrets'
 import {TagsFromImage} from './tags'
+import {LibraryLawsAndRegulations} from './librarylawsandregulations'
+import {NotifyAudience} from './notify_court'
+import {DIARY_BOOK} from './diary_books'
+import {VARIABLES_INIT} from './initvariables'
 // import example from './module-example'
 
 Vue.use(Vuex)
@@ -22,6 +26,10 @@ export default function (/* { ssrContext } */) {
       upload_image:CoverProperties,
       memorials_decrets:MemorialsDecretsStore,
       tags_info:TagsFromImage,
+      library:LibraryLawsAndRegulations,
+      notify:NotifyAudience,
+      diary_books:DIARY_BOOK,
+      init_variables:VARIABLES_INIT
     },
 
     // enable strict mode (adds overhead!)

@@ -99,49 +99,49 @@ export default {
             if(key == 'code_document'){
                 info ={
                     title:'Codigo NUREJ',
-                    value:'GET NUREJ'
+                    value:'REFERENCIA_TAG_NUREJ'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'crime'){
                 info ={
                     title:'Delito',
-                    value:'GET CRIME'
+                    value:'REFERENCIA_TAG_DELITO'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'relevant_court'){
                 info ={
                     title:'Juzgado a Cargo',
-                    value:'GET RELEVANT COURT'
+                    value:'REFERENCIA_TAG_JUZGADO_A_CARGO'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'process_type'){
                 info ={
                     title:'Tipo de Proceso',
-                    value:'GET PROCESS TYPE'
+                    value:'REFERENCIA_TAG_TIPO_DE_PROCESO'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'accused'){
                 info ={
                     title:'Acusado',
-                    value:'GET ACCUSED'
+                    value:'REFERENCIA_TAG_ACUSADO'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'appellant'){
                 info ={
                     title:'Querellantes',
-                    value:'GET APPELLANT'
+                    value:'REFERENCIA_TAG_QUERELLANTE'
                 }
                 this.tags_to_use.push(info)
             }
             if(key == 'victim'){
                 info ={
                     title:'Victima',
-                    value:'GET VICTIM'
+                    value:'REFERENCIA_TAG_VICTIMA'
                 }
                 this.tags_to_use.push(info)
             }

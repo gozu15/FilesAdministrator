@@ -69,13 +69,13 @@ export default {
      
      let text = ""+this.memorial_text_doc;
       console.log("cover",cover_selected)
-       text=text.replace(/GET NUREJ/g,cover_selected.code_document);
-       text=text.replace(/GET CRIME/g,cover_selected.crime);
-        text=text.replace(/GET RELEVANT COURT/g,cover_selected.relevant_court);
-       text=text.replace(/GET PROCESS TYPE/g,cover_selected.process_type);
-        text=text.replace(/GET ACCUSED/g,newacussed);
-       text=text.replace(/GET APPELLANT/g,newapellant);
-       text=text.replace(/GET VICTIM/g,newvictim);
+       text=text.replace(/REFERENCIA_TAG_NUREJ/g,cover_selected.code_document);
+       text=text.replace(/REFERENCIA_TAG_DELITO/g,cover_selected.crime);
+        text=text.replace(/REFERENCIA_TAG_JUZGADO_A_CARGO/g,cover_selected.relevant_court);
+       text=text.replace(/REFERENCIA_TAG_TIPO_DE_PROCESO/g,cover_selected.process_type);
+        text=text.replace(/REFERENCIA_TAG_ACUSADO/g,newacussed);
+       text=text.replace(/REFERENCIA_TAG_QUERELLANTE/g,newapellant);
+       text=text.replace(/REFERENCIA_TAG_VICTIMA/g,newvictim);
        console.log("TEXT",text)
     this.WritingDocumentTextToJoinModel(text)
      this.LoadTagSelected(cover_selected);
