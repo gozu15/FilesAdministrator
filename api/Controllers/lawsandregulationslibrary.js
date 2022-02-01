@@ -90,15 +90,12 @@ function UploadPDFFile(req,res){
          url:url
       }      
       res.status(200).send("Se subio archivo al servidor")
-   }
-
-   
+   }   
 }
 function GetPDFFile(req,res){
-   let namepdf = req.params.name;//'ZzcrLgUAcACNbJ9M1DTA90FF'
+   let namepdf = req.params.name;
    console.log("PDF SERVER",namepdf);
-   fs.readFile(`${url}`+namepdf,(err,data)=>{
-      //let jsfile = new Buffer.from(data).toString('base64');
+   fs.readFile(`${url}`+namepdf,(err,data)=>{      
       res.contentType("application/pdf");
       res.status(200).send(data);
    });

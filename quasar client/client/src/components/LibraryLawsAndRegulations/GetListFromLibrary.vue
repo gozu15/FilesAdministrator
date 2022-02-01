@@ -1,5 +1,6 @@
 <template>
-    <div class="q-pa-md">     
+    <div class="q-pa-md">    
+      <div class="container">
         <div v-for="(pdf,index) in list_books" :key="index" class="q-pa-md col-xs-12">
           <q-card class="my-card">
             <img src="../../../public/image/book.png" alt="">
@@ -23,6 +24,7 @@
             </q-card-section>
           </q-card>
         </div>
+        </div>         
     </div>
 </template>
 <script>
@@ -36,8 +38,7 @@ export default {
         //TODO Enviar todas las listas de los libros y utilizarlo en un editor de texto. AUTOS, RESOLUCIONES SENTENCIAS
         ...mapMutations('memorials_decrets',['changeViewMorePdfFromEditor']),
         ...mapActions('library',['GetAllPDFs','GetPDFSelected']),
-        ViewMore(selected_pdf){
-            console.log(selected_pdf);
+        ViewMore(selected_pdf){           
              this.GetPDFSelected(selected_pdf)
              this.changeViewMorePdfFromEditor(true);
         }
@@ -59,6 +60,9 @@ export default {
 }
 </script>
 <style scoped>
+.container{
+  height: 380px;
+}
 .my-card img{
     background-size: 100% 100%;
     width: 50%;    

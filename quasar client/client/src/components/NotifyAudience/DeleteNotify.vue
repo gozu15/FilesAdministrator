@@ -35,11 +35,9 @@ export default {
         ClosePopup(){
             this.DeleteNotify(false);
         },
-        DeleteNotifyInRow(){
-            console.log(this.notify_selected);
-            this.DeleteNotifySelected(this.notify_selected)
-            .then(response =>{
-                console.log(response);                
+        DeleteNotifyInRow(){           
+            this.DeleteNotifySelected(this.notify_viewmore)
+            .then(response =>{                         
                 this.GetAllNotify();
                 this.ClosePopup();
             })  
@@ -49,7 +47,7 @@ export default {
         }
     },
     computed:{
-        ...mapState('notify',['notify_selected'])
+        ...mapState('notify',['notify_viewmore'])
     },
     mounted(){}
 }

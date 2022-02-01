@@ -1,7 +1,7 @@
 <template>
     <div class="q-pa-md">
-        <q-page-container>
-            <q-page>
+        <div>
+           
         <div class="row">
              <div class="col-3 q-ma-sm">
                 <q-input v-model="diary_content_selected.entry_date" hint="Fecha de ingreso" disable />
@@ -38,9 +38,8 @@
             @click="GoBack"
           >
           </q-btn>
-        </q-page-sticky>
-        </q-page>
-    </q-page-container>
+        </q-page-sticky>        
+    </div>
     </div>
 </template>
 <script>

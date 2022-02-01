@@ -21,7 +21,7 @@ export default {
       this.$axios
         .get("documents/hello-get")
         .then((result) => {
-          console.log(result);
+         
         })
         .catch((err) => {
           console.error(err);

@@ -6,8 +6,7 @@ class DiaryBook{
     async createDiarybook(req,res){
         let data = req.body        
         modelDiarybook.create(data)
-        .then((result) => {
-            console.log(result)
+        .then((result) => {           
             let responce = {message:"Dato registrado", data :result}
             res.status(200).send(responce)
         }).catch((err) => {
@@ -17,15 +16,12 @@ class DiaryBook{
     }
     async addnewDocumentToBook(req,res){
         let idbook = req.params.idbook
-        let data = req.body;
-        console.log("soy idbook",idbook)
-        console.log("soy data",data)
+        let data = req.body;      
         modeldescriptionDiarybook.create(data)
         .then(resultdescription =>{         
             //res.status(200).send(resultdescription);   
             modelDiarybook.update({_id:idbook},{$push:{book_content:resultdescription._id}})
-            .then(result =>{
-                console.log(result);
+            .then(result =>{              
                 res.status(200).send({message:"Datos agregados",data:result})
             })
             .catch(err =>{
@@ -41,8 +37,7 @@ class DiaryBook{
     async findDiaryBookComplete(req,res){   
         
         modelDiarybook.find({isdelete:false}).populate({path:'book_content',match:{isdelete:false},select:{}})
-        .then(result =>{
-            console.log(result);
+        .then(result =>{           
             res.status(200).send({message:"Datos obtenidos",data:result});
         })
         .catch(err =>{
@@ -55,8 +50,7 @@ class DiaryBook{
         let id = req.params.id;
        
         modelDiarybook.findOne({_id:id,isdelete:false}).populate({path:'book_content',match:{isdelete:false},select:{}})
-        .then(result =>{
-            console.log(result);
+        .then(result =>{            
             res.status(200).send({message:"Datos obtenidos",data:result});
         })
         .catch(err =>{
@@ -66,8 +60,7 @@ class DiaryBook{
 
     async findDiarybook(req,res){
         modelDiarybook.find({isdelete:false})
-        .then((result) => {
-            console.log({message:"Datos encontrados", data :result})
+        .then((result) => {           
             res.status(200).send({message:"Datos encontrados", data :result})
         }).catch((err) => {
              console.log({message:"Ocurrio un error al registrar todo", data :err})
@@ -79,7 +72,6 @@ class DiaryBook{
          console.log("this is id",id);
         modelDiarybook.find({_id:id,isdelete:false})
         .then((result) => {
-            console.log({message:"Datos encontrados", data :result})
             res.status(200).send({message:"Datos encontrados", data :result})
         }).catch((err) => {
              console.log({message:"Ocurrio un error al registrar id", data :err})
@@ -92,7 +84,6 @@ class DiaryBook{
          let data = req.body
         modelDiarybook.update({_id:id},data)
         .then((result) => {
-            console.log({message:"Datos encontrados", data :result})
             res.status(200).send({message:"Datos encontrados", data :result})
         }).catch((err) => {
              console.log({message:"Ocurrio un error al registrar", data :err})
@@ -104,8 +95,7 @@ class DiaryBook{
         let idcontent = req.params.id;
         let data = req.body;
         modeldescriptionDiarybook.update({_id:idcontent},data)
-        .then(response =>{
-            console.log(response)
+        .then(response =>{            
             res.status(200).send(response)
         })
         .catch(err =>{
@@ -118,8 +108,7 @@ class DiaryBook{
         let delete_data= {isdelete:true};
         modelDiarybook.update({_id:id},delete_data)
         .then(response =>{
-            res.status(200).send(response);
-            console.log(response)
+            res.status(200).send(response);            
         })
         .catch(err =>{
             res.status(500).send(err);
@@ -132,8 +121,7 @@ class DiaryBook{
         let delete_data= {isdelete:true};
         modeldescriptionDiarybook.update({_id:id},delete_data)
         .then(response =>{            
-            res.status(200).send(response);
-            console.log(response)
+            res.status(200).send(response);            
         })
         .catch(err =>{
             res.status(500).send(err);

@@ -1,9 +1,25 @@
 <template>
   <div class="q-pa-md">
     <div class="row justify-center">
-      <q-infinite-scroll class="content-cards" @load="onLoad" :offset="200">
-      <!-- <div class="content-cards" > -->
-        <q-card class="my-card" v-for="(images_cover, index) in memorials_list" :key="index">
+      <div class="row">
+          <div class="col-12">
+            <q-input
+              borderless
+              dense
+              debounce="300"
+              @input="CheckEmpty($event)"
+              @keypress="GetPressEnter($event)"
+              v-model="filter"
+              placeholder="Search"              
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+      </div>
+       <div v-if="isSearching" class="content-tosearch">
+         <q-card class="my-card" v-for="(images_cover, index) in models_list" :key="index">
           <q-card-section>
             <div class="text-h6">{{ images_cover.name }}</div>            
           </q-card-section>
@@ -11,19 +27,36 @@
            <q-card-section v-html="images_cover.documents_text" />
           </q-card-section>
           <q-card-section>
-            <div class="row justify-end btn-content-docs"> 
-                 <q-btn round color="primary" icon="fas fa-eye" size="10px"/>   
-                 <q-btn round color="red" icon="fas fa-edit" size="10px" @click="UseModel(images_cover)"/>                
+            <div class="row justify-end btn-content-docs">                 
+              <q-btn round color="red" icon="fas fa-edit" size="10px" @click="UseModel(images_cover)"/>                
             </div>
           </q-card-section>
         </q-card>
-      <!-- </div> -->
-      <template v-slot:loading>
-        <div class="row justify-center q-my-md">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-      </template>
-    </q-infinite-scroll>      
+       </div>
+      <div v-if="!isSearching" class="content-cards2">
+        <q-infinite-scroll @load="(index,done) => initDefaultData(index,done)" :offset="60" scroll-target=".content-cards2">        
+        <!-- <div class="content-cards" > -->
+          <q-card class="my-card" v-for="(images_cover, index) in models_list" :key="index">
+            <q-card-section>
+              <div class="text-h6">{{ images_cover.name }}</div>            
+            </q-card-section>
+            <q-card-section class="q-pt-none text-doc">
+            <q-card-section v-html="images_cover.documents_text" />
+            </q-card-section>
+            <q-card-section>
+              <div class="row justify-end btn-content-docs">                 
+                  <q-btn round color="red" icon="fas fa-edit" size="10px" @click="UseModel(images_cover)"/>                
+              </div>
+            </q-card-section>
+          </q-card>
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+              <q-spinner-dots color="primary" size="40px" />
+            </div>
+        </template>
+        <!-- </div> -->   
+      </q-infinite-scroll>   
+    </div> 
     </div>
   </div>
 </template>
@@ -34,41 +67,116 @@ export default {
   data() {
     return {
       lorem:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi accusamus corporis magnam in soluta repudiandae."
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi accusamus corporis magnam in soluta repudiandae.",
+      page:0,
+      size:5,
+      filter:null
     };
   },
   methods: {
-    ...mapMutations("memorials_decrets", ['WritingDocumentText','ClearData']),
-    ...mapActions("memorials_decrets", ["GetMemorialsFromApi","GetModelsMemorials"]),
-    onLoad(index, done){
-      console.log("soy index",index);
-      setTimeout(()=>{
-        console.log("Entro")
-        done();
-      },2000);
-      //done();
+    ...mapMutations("memorials_decrets", ["ReloadModelsInList",'WritingDocumentText','ClearData'," IsNotSearching"]),
+    ...mapMutations("tags_info",["IsSearching"]),    
+    ...mapActions("memorials_decrets", ["GetMemorialsFromApi","GetModelsMemorials","GetMemorialsModelInList","FindDataFromMemorialsModels","GetDataFromMemorialsModelsSearch"]),
+  CheckEmpty(e){   
+      
+      if(e == ''){
+        this.isnotSearching = true
+        
+        this.page= 0; 
+        this.page += 1;
+           let props = {
+             page:this.page,
+             rowPerPage:this.size
+           }
+    this.ClearData();
+    this.GetMemorialsModelInList(props)
+     .then(response =>{
+                
+                this.ReloadModelsInList(response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })   
+   
+        this.IsSearching(false)    
+        
+      }
     },
-    UseModel(model){
-      this.WritingDocumentText(model.documents_text)
+
+    GetPressEnter(e){      
+      //TODO BUSCADOR
+       if (e.keyCode === 13) {
+         this.isnotSearching = false
+         let querys = {                
+                name:this.filter,
+                description:this.filter,
+                documents_text:this.filter,
+         }  
+         this.ClearData();   
+          this.GetDataFromMemorialsModelsSearch(querys)          
+          this.IsSearching(true)  
+      }  
+    },
+
+     initDefaultData(index,done){
+      
+      setTimeout(()=>{
+          
+           this.page += 1;
+           let props = {
+             page:this.page,
+             rowPerPage:this.size
+           }
+           this.GetMemorialsModelInList(props)
+           .then(response =>{
+                
+                this.ReloadModelsInList(response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })       
+          done()
+      },2000)     
+      //done
+      //done()
+      
+    },
+    
+    UseModel(model){    
+      this.IsSearching(false); 
+      this.WritingDocumentText(model.documents_text)      
       this.GotoJoinTagAndModel();
-      console.log('checkmodel',model)
     },
     GotoJoinTagAndModel(){
       this.$router.push({
-        path:'tags_and_models'
+        name:'MemorialModelsLinking'
       })
     }
    
   },
   computed: {
-    ...mapState("memorials_decrets", ["memorials_list", "memorial_properties"])
+    ...mapState("memorials_decrets", ["memorials_list", "memorial_properties","models_list","isSearching"]),
+    ...mapState("tags_info",['isSearching'])
   },
   created() {   
   },
   mounted() {
+     this.page += 1;
+     //this.IsNotSearching();
+           let props = {
+             page:this.page,
+             rowPerPage:this.size
+           }
     this.ClearData();
-    this.GetModelsMemorials();
-  }
+    this.GetMemorialsModelInList(props)
+     .then(response =>{                
+                this.ReloadModelsInList(response.data.data);
+            })
+            .catch(error =>{
+                console.log(error);
+            })       
+  },
+  
 };
 </script>
 <style scoped>
@@ -78,8 +186,9 @@ export default {
   margin-bottom: 15px;  
   overflow: hidden;
 }
-.content-cards{
-    height: 400px;    
+
+.content-cards2{
+    max-height: 300px;    
     overflow: auto;
 }
 .text-doc {
@@ -88,5 +197,9 @@ export default {
 }
 .btn-content-docs .q-btn {
   margin-right: 10px;
+}
+.content-tosearch{
+  max-height: 300px;
+  overflow: auto;
 }
 </style>

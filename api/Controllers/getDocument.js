@@ -1,5 +1,4 @@
 "use strict";
-//import {Powerpoint, Word} from 'pdf-officegen'
 const googlevision= require('@google-cloud/vision');
 const mammoth = require('mammoth');
 const fs = require('fs');
@@ -7,17 +6,18 @@ const pdfParse = require('pdf-parse');
 const TurnDown= require('turndown')
 let turndownservice = new TurnDown();
 const modelDocument = require('../Models/image_object.model');
-const { exec } = require('child_process');
 const url= './uploads/'
 
 
 async function CreateDataDocument(req,res){
-    let data = req.body;
-    console.log("SOIY DATA",data);   
+    let data = req.body;      
     if(data != undefined && data != null){
-        modelDocument.create(data, (response) =>{
-            console.log(response);
+        modelDocument.create(data).then(response =>{           
             res.status(200).send(response);
+        })
+        .catch(err =>{
+            console.log(err)
+            res.status(500).send(err);
         })
     }
 }
@@ -26,8 +26,7 @@ async function updateDataDocument(req,res){
     let data = req.body;
     modelDocument.update({_id:id},data)
     .then(response =>{
-        console.log(response);
-        res.status(200).send(response);
+       res.status(200).send(response);
     })
     .catch(err =>{
         console.log(err);
@@ -40,12 +39,26 @@ async function deleteDataDocument(req,res){
     let data= {isdelete: true}
     modelDocument.update({_id:id},data)
     .then(response =>{
-        console.log(response);
-        res.status(200).send({message:response});
+       res.status(200).send({message:response});
     })
     .catch(err =>{
         console.log(err);
         res.status(500).send({message:'Error to delete', error:err });
+    })
+}
+
+async function ReadDocumentToRelationship(req,res){
+    // const PAGE_SIZE = 5
+    // let page_number = req.query.page;
+    // let skip = (page_number - 1) * PAGE_SIZE    
+    modelDocument.find({isdelete:false})
+    // .skip(skip)
+    // .limit(PAGE_SIZE)
+    .then(response =>{       
+        res.status(200).send(response);
+    })
+    .catch(err =>{
+        res.status(500).send(err);
     })
 }
 
@@ -60,15 +73,10 @@ async function getImageByName(req,res){
             image:base64
             })    
     })
-
 }
 
-
-//UPDATE DOCUMENT FILE INIT
-async function RequestDocument(req, res) {
-    
-    let file = req.files.file;
-    console.log(file);
+async function RequestDocument(req, res) {    
+    let file = req.files.file;    
     if (file != undefined && file != null) {
         let checkpath = file.path.split('\\')
         let getextension = file.type
@@ -76,11 +84,9 @@ async function RequestDocument(req, res) {
             url_uploaded:checkpath[1],
             type_image: getextension           
         }).then(response =>{
-           fs.readFile(url+response.url_uploaded,(err, data) =>{
-                var contentType = 'image/png';
-                var base64 = Buffer.from(data).toString('base64');
-                base64='data:image/png;base64,'+base64;    
-                console.log(response)
+           fs.readFile(url+response.url_uploaded,(err, data) =>{                
+                let base64 = Buffer.from(data).toString('base64');
+                base64='data:image/png;base64,'+base64;                   
                     res.status(200).send({
                     message: "Archivo subido correctamente",
                     data:response,
@@ -92,55 +98,12 @@ async function RequestDocument(req, res) {
         .catch(err =>{
             res.status(500).send("ocurrio un error")
             console.log(err);
-        })
-        
-        
+        })       
     } else {
         res.status(500).send({
             message: "Hubo un problema al subir el archivo..."
         })
     }
-
-}
-
-async function ReadDocumentToRelationship(req,res){
-    const PAGE_SIZE = 5
-    let page_number = req.query.page;
-    let skip = (page_number - 1) * PAGE_SIZE
-    
-    modelDocument.find({isdelete:false})
-    .skip(skip)
-    .limit(PAGE_SIZE)
-    .then(response =>{
-        console.log(response)
-        res.status(200).send(response);
-    })
-    .catch(err =>{
-        res.status(500).send(err);
-    })
-}
-
-
-
-//FUNCION DE PRUEBA CON MODULO MAMMOTH PARA OBTENER TEXTO DE ARCHIVOS .DOCX
-async function ReadDocument(req,res){
-   //await ConvertDocumentToHtml();
-   
-   mammoth.convertToHtml({path: `${url}wer465we4r564wer.docx`} )
-    .then((result) => {        
-        //convierte datos html a markdown
-        let markdown = turndownservice.turndown(result.value)
-        let newtext= CountDATA(turndownservice.turndown(result.value));        
-        //crea un archivo extension .md y guarda el texto markdown
-        fs.writeFileSync(`${url}/exampleMarkdown.md`,markdown);        
-        console.log({message:result.messages, html: result.value, markdown:markdown});
-        console.log("textoNuevo",newtext);
-        res.status(200).send({message:"Documento convertido",text:markdown});
-        
-    }).catch((err) => {
-        console.log("ocurrio un error",err);        
-    });
-   
 }
 
 async function FindDataFromCoverInformationImage(req,res){
@@ -149,7 +112,7 @@ async function FindDataFromCoverInformationImage(req,res){
     let appellant = req.query.appellant;
     let crime = req.query.crime;
     let page_number = req.query.page;
-    console.log(accused)  
+    let code_document = req.query.code_document;    
     const PAGE_SIZE = 5    
     let skip = (page_number - 1) * PAGE_SIZE
     
@@ -157,12 +120,12 @@ async function FindDataFromCoverInformationImage(req,res){
     {'victim':{ $regex: `${victim}` , $options: 'i' },'isdelete':false}, 
     {'accused':{ $regex: `${accused}` , $options: 'i' },'isdelete':false},
     {'appellant':{ $regex: `${appellant}` , $options: 'i' },'isdelete':false},
-    {'crime':{ $regex: `${crime}` , $options: 'i' },'isdelete':false}
+    {'crime':{ $regex: `${crime}` , $options: 'i' },'isdelete':false},
+    {'code_document':{ $regex: `${code_document}` , $options: 'i' },'isdelete':false},
     ]},
      {},    
  (error,victima) =>{
-        if(error) res.status(500).send({message:error})
-        console.log(victima);
+        if(error) res.status(500).send({message:error})       
         res.status(200).send({message:victima});
     }).skip(skip)
     .limit(PAGE_SIZE);   
@@ -174,13 +137,10 @@ async function ReadMarkdownFile(req,res){
 }
 
 async function searchAText(texto,archivo){
-    let checkFile= fs.readFileSync(archivo)
-   
-    let auxLector = ""+checkFile.split(" ");
-   
+    let checkFile= fs.readFileSync(archivo)   
+    let auxLector = ""+checkFile.split(" ");   
     let cont=-1;
-    let position=0;
-    
+    let position=0;    
     auxLector.forEach(element => {
         cont++;
         if(element == texto){
@@ -191,56 +151,36 @@ async function searchAText(texto,archivo){
     return position;
 }
 
-function CountDATA (str) {
-    let findit= true
-        let count = 0;
-        let auxtext= ""
-	//4488 caracteres tiene una pagina word completamente lleno
-        while(findit && count <=50)
-        {
-            auxtext += str[count];
-            count++; 
-        }
-    
-	return auxtext;
-};
 //FUNCION PARA OBTENER TEXTO DE ARCHIVOS PDF MODULO PDF-PARSE
 async function ReadPdfDocument(req,res){   
   let dataBuffer = fs.readFileSync(`${url}ZzcrLgUAcACNbJ9M1DTA90FF.pdf`);
-  pdfParse(dataBuffer).then((data)=>{
-   
+  pdfParse(dataBuffer).then((data)=>{   
     console.log(data.text);
-    res.status(200).send({message:data.text});
-    
-    //algoritmo de busqueda. 
-      
+    res.status(200).send({message:data.text});    
   })
   .catch(err =>{
      res.status(500).send({message:err});
   })  
 }
 
-    function checkStringIfIsValidToBuildDate(text=""){
+function checkStringIfIsValidToBuildDate(text=""){
         let new_date= null;  
         let length = text.length
         if(length ==10 || length == 8){            
             for (let index = 0; index < length; index++) {
                 console.log("StringIsValid",text[index]);                
                 if(text[index] == '/')
-                {
-                    
-                }
-                new_date.push(text[index]);             
+                {   
+                    new_date.push(text[index]);
+                }                             
             }
             return new_date;
-        }
-        
+        }       
         
     }
 
 async function OCRGoogleAPI(req,res){
-    let nameimage=req.params.name
-    console.log("nameimg",nameimage)
+    let nameimage=req.params.name    
     const ocr = new googlevision.ImageAnnotatorClient();
     ocr.textDetection(`${url}${nameimage}`)
     .then(response =>{
@@ -252,7 +192,6 @@ async function OCRGoogleAPI(req,res){
         let newobject_TXT={}
         let contparagraph=0
         let pages= response[0].fullTextAnnotation.pages        
-        
         
         pages.forEach(element => {
             element.blocks.forEach(blocks =>{
@@ -281,27 +220,23 @@ async function OCRGoogleAPI(req,res){
         let auxcontimput = null
         let auxcontvict = null
         let contaux=0
-        let opqwe = checkStringIfIsValidToBuildDate(obj[2].paragraphtext);
-        console.log("t",opqwe);
-        console.log(obj);
-        obj.forEach(element => {
-            
-            contaux++;
-            //OBTENEMOS CODIGO DE DOCUMENTO
-           
+        let opqwe = checkStringIfIsValidToBuildDate(obj[2].paragraphtext);       
+        obj.forEach(element => {            
+            contaux++;           
             if(element.num == 4 ){
                 
                 let splitresponse = element.paragraphtext.split(':')
-                newobject_TXT.code_document= splitresponse[1]
+                newobject_TXT.code_document= splitresponse[1] !=undefined ? splitresponse[1] : null
             }
             if(element.num == 6){
-                let splitresponse = element.paragraphtext.split(':')
-                let hours =""+splitresponse[2]+":"+splitresponse[3]
-                newobject_TXT.date_admission = splitresponse[1]
-                newobject_TXT.hours_admission = hours
-                newobject_TXT.relevant_court =splitresponse[5]
-                newobject_TXT.crime = splitresponse[6]                
-                newobject_TXT.process_type = splitresponse[7]
+                let splitresponse = element.paragraphtext.split(':')                
+                let hours =""+(splitresponse[2]!= undefined ? splitresponse[2] : "12")+":"+(splitresponse[3]!= undefined ?splitresponse[3] : "00")
+                hours = (hours == "12:00" ? null : hours);
+                newobject_TXT.date_admission = splitresponse[1]  != undefined ?splitresponse[1] : null
+                newobject_TXT.hours_admission = hours != undefined ?hours : null
+                newobject_TXT.relevant_court =splitresponse[5] != undefined ?splitresponse[5] : null
+                newobject_TXT.crime = splitresponse[6]    != undefined ?splitresponse[6] : null             
+                newobject_TXT.process_type = splitresponse[7] != undefined ?splitresponse[7] : null
             }
             if(element.paragraphtext == 'QUERELLANTES ' ){
                 newobject_TXT.appellant=[]
@@ -330,18 +265,17 @@ async function OCRGoogleAPI(req,res){
                 
                  if(bool != -1){
                      let splitresponse = element.paragraphtext.split(':')
-                newobject_TXT.appellant.push(splitresponse[1])
+                    newobject_TXT.appellant.push((splitresponse[1] != undefined ?splitresponse[1] : ""))
                  }
                  else{
-                     newobject_TXT.appellant.push(element.paragraphtext)
+                     newobject_TXT.appellant.push((element.paragraphtext != undefined ? element.paragraphtext :""))
                  }               
                 
             }
               if(auxcontimput != null && contaux > auxcontimput && accused){
-                let bool = element.paragraphtext.search('sable de') 
-                console.log("accused",element.paragraphtext);
+                let bool = element.paragraphtext.search('sable de')                 
                 if(bool == -1){
-                    newobject_TXT.accused.push(element.paragraphtext)
+                    newobject_TXT.accused.push((element.paragraphtext!= undefined ? element.paragraphtext :""))
                 }
                 else{
                     accused = false
@@ -349,10 +283,9 @@ async function OCRGoogleAPI(req,res){
                 
             }            
               if(auxcontvict != null && contaux > auxcontvict && victim){
-                  let bool = element.paragraphtext.search('ble de') 
-                  console.log("check victim",bool);
+                  let bool = element.paragraphtext.search('ble de')                  
                   if(bool == -1){
-                    newobject_TXT.victim.push(element.paragraphtext)
+                    newobject_TXT.victim.push((element.paragraphtext != undefined ? element.paragraphtext : ""))
                   }
                   else{
                       victim=false
@@ -363,9 +296,6 @@ async function OCRGoogleAPI(req,res){
         });        
 
         console.log(newobject_TXT)
-    
-        //modelDocument.create()        
-    
         //TODO GUARDAR EN BASE DE DATOS EL OBJETO, CREAR EL ARCHIVO .MD, 
         res.status(200).send({object:newobject_TXT});          
     })
@@ -379,8 +309,7 @@ async function OCRGoogleAPI(req,res){
 
 //DOCUMENT FILE END
 module.exports = {    
-    RequestDocument,
-    ReadDocument,
+    RequestDocument,   
     CreateDataDocument,
     ReadPdfDocument,    
     ReadMarkdownFile,

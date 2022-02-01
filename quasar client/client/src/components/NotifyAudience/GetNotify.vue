@@ -5,6 +5,7 @@
         :columns="columns"
         :data="list_notify"        
         :filter="filter"      
+         table-header-class="bg-dark text-white"
     >
         <template v-slot:top-right>        
             <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
@@ -13,7 +14,7 @@
             </template>
             </q-input>
             <div class="q-pl-md">
-                <q-btn round color="primary" icon="add" @click="GotoCreate"></q-btn>
+                <q-btn round color="positive" icon="add" @click="GotoCreate"></q-btn>
             </div>        
         </template>        
         <template v-slot:body-cell-status="props">
@@ -103,24 +104,22 @@ export default {
         }
     },
     methods:{
-        ...mapMutations('notify',['RealoadNotifyselected','OpenOrCloseNotify','DeleteNotify','NotifyCommingToEnd']),
-        ...mapActions('notify',['GetAllNotify','TimeOutNotifyDate','UpdateNotify','GetNotifyinQueue','GetAllNotifyInProcessStore','GetAllNotify']),
+        ...mapMutations('notify',['RealoadNotifyselected','OpenOrCloseNotify','DeleteNotify','NotifyCommingToEnd','CloseNotifySelectedOnApi']),
+        ...mapActions('notify',['DeleteNotifySelected','GetAllNotify','TimeOutNotifyDate','UpdateNotify','GetNotifyinQueue','GetAllNotifyInProcessStore','ViewMoreNotifySelected']),
         ViewMore(row_selected){
-            console.log(row_selected);
-            this.RealoadNotifyselected(row_selected);
+            this.ViewMoreNotifySelected(row_selected);
             this.OpenOrCloseNotify(true);
         },
         EditRow(row_selected){
-            console.log(row_selected);
-            this.RealoadNotifyselected(row_selected);
+            this.ViewMoreNotifySelected(row_selected);
             this.$router.push({
                 name:'NotifyUpdate'
             })
         },
         GetRowToDelete(row_selected){
-            console.log(row_selected);
-            this.DeleteNotify(true);
-            this.RealoadNotifyselected(row_selected);
+            console.log("DELETE",row_selected)
+            this.DeleteNotify(true); 
+            this.ViewMoreNotifySelected(row_selected);  
         },
         GotoCreate(){
             this.$router.push({
@@ -129,24 +128,22 @@ export default {
         },       
         CloseNotify(){
             this.TimeOutNotifyDate(data)
-            .then(response =>{
-                        console.log(response);      
-                        //this.$socket.emit('dissconnect')
+            .then(response =>{               
                     })
             .catch(err =>{
                         console.log(err);
                     })
         },
-        CloseNotifyinQueue(notify_selected){
-             console.log(notify_selected);
-       notify_selected.status = "TERMINADO";
-            this.UpdateNotify(notify_selected)
+        CloseNotifyinQueue(notify){  
+            this.CloseNotifySelectedOnApi(notify);                
+            this.UpdateNotify(this.notify_selected)
             .then(response =>{
-                
-                //this.NotifyCommingToEnd(true);
-                this.SendObject();
-                this.GetAllNotify();
-                this.GetAllNotifyInProcessStore();
+                this.GetAllNotify().then((response) =>{
+                     this.SendObject();
+                     this.GetAllNotifyInProcessStore().then((response) =>{
+                         this.$socket.emit('closing_notification');
+                     })
+                })                  
             })
             .catch(err =>{
                 console.log(err);
@@ -154,10 +151,9 @@ export default {
         },
          SendObject(){
        this.GetNotifyinQueue()
-       .then(response =>{
+       .then(response =>{           
           if(response.data == ""){
-              let timeNow = new Date().getTime() - (1000 * 60 * 60 * 4);
-              timeNow += 5000;
+              let timeNow = new Date().getTime() - (1000 * 60 * 60 * 4);             
               this.RealoadNotifyselected({date_end:new Date(timeNow), id: null})
               this.$socket.emit('recieve_date',this.notify_selected)
               this.NotifyCommingToEnd(true)
@@ -167,7 +163,7 @@ export default {
                 this.$socket.emit('recieve_date',this.notify_selected)
                 this.NotifyCommingToEnd(true)
             }
-            console.log("RESPONSE",response)               
+                      
             })
         .catch(err =>{
                 console.log(err);
@@ -175,7 +171,15 @@ export default {
       }
     },
     computed:{
-        ...mapState('notify',['list_notify','notify_preview','notify_delete']),
+        ...mapState('notify',['list_notify','notify_preview','notify_delete','notify_selected']),
+         data_selected:{       
+            get: function() {
+            return this.$store.state.notify.notify_selected;
+            },
+            set: function (newData) {
+                this.$store.commit("notify/RealoadNotifyselected", newData);
+            }
+        },
     },
     mounted(){
         this.GetAllNotify();

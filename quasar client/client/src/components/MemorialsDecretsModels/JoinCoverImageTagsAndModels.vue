@@ -1,10 +1,10 @@
 <template>
   <div class="q-pa-md">
-    <q-page-container>
-      <q-page>
-        <div class="row">
+    <q-page-container>    
+        
           <div class="content-tabs" id="content-tabs">
-            <div v-if="isReloadingModelWithTags == false" >
+            <div class="row">
+              <div class="col-4">
               <q-tabs
                 v-model="tab"
                 align="justify"
@@ -13,7 +13,7 @@
               >
                 <q-tab class="text-purple" name="causas" label="Causas" />                
               </q-tabs>
-              <div class="q-gutter-y-sm">
+              <div class="q-gutter-y-sm box-tag">
                 <q-tab-panels
                   v-model="tab"
                   animated
@@ -28,23 +28,25 @@
                 </q-tab-panels>
               </div>
             </div>
-            <div v-if="isReloadingModelWithTags == true">
-              <EditorModelBuilding/>
+            <div class="col-8">
+               <div v-if="isReloadingModelWithTags == true" >
+                  <EditorModelBuilding/>
+                </div>
+                <div v-if="isReloadingModelWithTags == false" style="height:100%;">
+                  <div class="box-loading">                     
+                       <div>
+                        <p>CARGANDO DATOS...<q-spinner-gears color="cyan" style="font-size: 2em"/></p> 
+                        <p>Escoja el documento que desea utilizar en el modelo.</p> 
+                       </div> 
+                  </div>             
+                  
+                </div>
+            </div>               
             </div>
-          </div>
-          <!-- EDITOR PREVIEW -->
-           <!-- <div class="content-editor" id="content-editor">
-            <q-editor
-              ref="editor_ref"
-              v-model="document_writing"
-              :dense="$q.screen.lt.md"
-              disable             
-              :toolbar="[]"
-            >
-            </q-editor>
-          </div>  -->
-          <!-- EDITOR PREVIEW END -->
-        </div>
+            
+        
+          </div>   
+       
         <q-page-sticky position="bottom-right" :offset="[18, 130]">
           <q-btn
             round
@@ -67,7 +69,7 @@
           >
           </q-btn>
         </q-page-sticky>       
-      </q-page>
+      
     </q-page-container>
       <q-dialog v-model="save_change">
       <q-card class="my-card">
@@ -121,16 +123,20 @@ components:{TagsToJoinModel,EditorModelBuilding},
         description: null,
         documents_text: " "
       },
-      options:['Decreto',
-'Memorial',
-'Acusaciones',
-'Autos de inicio',        
+      options:[  
+        {label:'Decreto',value:'Decreto'},
+        {label:'Memorial',value:'Memorial'},
+        {label:'Acusaciones',value:'Acusations'},
+        {label:'Autos de inicio',value:'Autos'},
+        {label:'Resoluciones',value:'Resolutions'},
+        {label:'Sentencias',value:'Sentence'}        
       ],
       tab: "causas",
       save_change:false
     };
   },
   methods: {
+    ...mapMutations("tags_info",["IsSearching","ClearDataTags"]),
     ...mapMutations("memorials_decrets", [
       "ReloadListMemorials",
       "ReloadMemorialProperties",
@@ -139,38 +145,33 @@ components:{TagsToJoinModel,EditorModelBuilding},
       "AddTagInToDocumentText"
     ]),
     ...mapActions("memorials_decrets", ["CreateMemorialNewDocument"]),
-     Open() {
-      //document.getElementById("content-editor").style.width = "50%";
-      document.getElementById("content-tabs").style.display = "block";
-      document.getElementById("content-tabs").style.width = "95%";
-      // TEXTO DEL EDITOR CAMBIAR A 'algo especifico'
-      //CAMBIAR ISRELOADING A FALSE
-      //CAMBIAR WIDTH EN ESTA FUNCION
-      console.log("Opem");
-    },
-    Close() {
-      document.getElementById("content-tabs").style.display = "none";
-      document.getElementById("content-editor").style.width = "100%";
-      console.log("close");
-    },
-      VerifyDocument() {      
-      //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")
-      console.log(this.memorial_text_doc);
-      console.log("TAG SELECTED",this.tag_selected);
+    
+    
+      VerifyDocument() {            
       this.save_change=true;
-      //this.pasteCapture();
     },    
     onSubmit(){
-      let typevalue= this.memorial_object.type_document;      
+      let typevalue= this.memorial_object.type_document.value;      
       this.memorial_object.documents_text=this.memorial_model_to_join
       this.memorial_object.type_document = typevalue;
-      console.log("MEMORIALS OBKJECT",this.memorial_object);
-      this.CreateMemorialNewDocument(this.memorial_object);   
-      this.GoToMemorialsTable();
+      
+      this.CreateMemorialNewDocument(this.memorial_object)
+      .then(response =>{
+          this.onReset()
+      })
+      .catch(err =>{
+        console.error(err)
+      })
+        
+     
     }, 
-    onReset() {},
-     GobackInit(){
-        this.GoToMemorialsTable()
+    onReset() {
+      this.GobackInit()
+    },
+     GobackInit(){      
+       this.ClearDataTags();
+       this.ClearData();
+        this.GoToMemorialsTable();
     },
     GoToMemorialsTable(){
       this.$router.replace({
@@ -198,7 +199,7 @@ components:{TagsToJoinModel,EditorModelBuilding},
   },
   created() {},
   mounted() {
-      this.Open();
+      //this.Open();
   }
 };
 </script>
@@ -210,10 +211,22 @@ components:{TagsToJoinModel,EditorModelBuilding},
   width: 100%;
 }
 .content-tabs {
-  display: none;
+  display: block;
 }
 .my-card {
   width: 400px;
   padding: 25px;
+}
+.box-loading{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+.box-tag{
+  height: 400px;
+  overflow: auto;
+
 }
 </style>

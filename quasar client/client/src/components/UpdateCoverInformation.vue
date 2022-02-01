@@ -42,20 +42,18 @@
             </div>
           </div>    
 
-            <!-- FECHA DE INGRESO -->
-           <div class="col-4">
+          <!-- FECHA DE INGRESO -->
+          <div class="col-4">
             <section>
               <h3>Fecha de ingreso</h3>
-              <p>{{ cover_image_information.process_type || 'No se pudo obtener el dato correctamente'}}</p>
+              <p>{{ cover_image_information.date_admission || 'No se pudo obtener el dato correctamente'}}</p>
             </section>
           </div>
-          <div class="col-8">
-            <div class="input-box">
-              <q-date
-      v-model="date"
-      today-btn
-    />
-            </div>
+          <div class="col-8">           
+              <div class="q-gutter-md row items-start">
+                <q-input v-model="data.date_admission" filled type="date" hint="Fecha de ingreso del documento" :disable="disable"/>    
+                <!-- <q-btn flat color="primary" label="clickme" @click="check"></q-btn>          -->
+              </div>
           </div>    
           <!-- FECHA END -->
 
@@ -63,23 +61,12 @@
            <div class="col-4">
             <section>
               <h3>Hora de ingreso</h3>
-              <p>{{ cover_image_information.process_type || 'No se pudo obtener el dato correctamente'}}</p>
+              <p>{{ cover_image_information.hours_admission || 'No se pudo obtener el dato correctamente'}}</p>
             </section>
           </div>
           <div class="col-8">
-            <div class="input-box">
-              <div>
-        <div class="q-pb-sm q-gutter-sm">
-          <q-badge color="teal">
-            Model: {{ model1 }}
-          </q-badge>
-          <q-badge color="purple" text-color="white">
-            Mask: hh:mm A
-          </q-badge>
-        </div>
-
-        <q-time v-model="model1" mask="hh:mm A" />
-      </div>
+            <div class="q-gutter-md row items-start">            
+              <q-input v-model="data.hours_admission" filled type="time" hint="Hora de ingreso" :disable="disable"/>    
             </div>
           </div>    
           <!-- HORA DE INGRESO END -->
@@ -206,8 +193,8 @@ export default {
           image_cover:null,
           model1:'01:51 PM',
           date:'2019/02/01',
-            disable:true,
-             data: {
+          disable:true,
+          data: {
             id: null,
             url_uploaded: null,
             code_document: null,
@@ -219,32 +206,29 @@ export default {
             accused: null, //IMPUTADO
             relevant_court: null,
             victim: null, //VICTIMAS
-      },
+          },
         }
     },
     methods:{
         ...mapMutations('upload_image',['getDataCoverImage','clearCoverInformation','changeStepOne',
-'changeStepTwo']),
+        'changeStepTwo']),
         ...mapActions('upload_image',[]),
-        onSubmit() {
+    onSubmit() {
       let isUpdatable = false;
       for (let element in this.data)
-      {
-        console.log(this.data[element])
+      {       
         let check_data = this.data[element] != null ? true : false
         if(check_data)
         {                    
           isUpdatable = true;  
         }  
       }
-      if(isUpdatable == true){
-        console.log("if",this.cover_image_information);
+      if(isUpdatable == true){       
         this.BuildObjectToUpdateCover();
         this.UpdateImageMap()
         
       }
-      else{
-        console.log("else",this.cover_image_information);
+      else{       
         this.BuildObjectToUpdateCoverInitial();       
         this.UpdateImageMap() 
         
@@ -280,12 +264,22 @@ export default {
       this.disable = false;
     },
     GetInformationToEdit(){
+       let baddate = this.DeleteEmptyChar(this.cover_image_information.date_admission)
+      baddate = baddate.split('/');
+      let rebuilddate= baddate[2]+"-"+baddate[1]+"-"+baddate[0]
+      let aux= new Date(rebuilddate)
+      let year = aux.getFullYear()
+      let month = aux.getMonth() +1
+      month = (month < 10 ? "0"+month : ""+month)
+      let date = aux.getDate() +1
+      date = (date < 10 ? "0"+date : ""+date);
+      let formatdate = year+"-"+month+"-"+date;      
       this.data = {
             id: this.DeleteEmptyChar(this.cover_image_information.id),
             url_uploaded: this.DeleteEmptyChar(this.cover_image_information.url_uploaded),
             code_document: this.DeleteEmptyChar(this.cover_image_information.code_document),
             crime: this.DeleteEmptyChar(this.cover_image_information.crime),
-            date_admission: this.DeleteEmptyChar(this.cover_image_information.date_admission),
+            date_admission: formatdate,
             hours_admission: this.DeleteEmptyChar(this.cover_image_information.hours_admission),
             appellant: this.DeleteEmptyChar(this.cover_image_information.appellant), //QUERELLANTES
             process_type: this.DeleteEmptyChar(this.cover_image_information.process_type),
@@ -311,11 +305,9 @@ export default {
       this.disable = true;
     },
     UpdateImageMap() {
-      console.log(this.cover_image_information)
       this.$axios
         .put(`documents/update/${this.cover_image_information.id}`, this.cover_image_information)
         .then(result => {
-          console.log("Respuesta actualizar", result);
           this.onReset();
           this.changeStepOne();
           this.clearCoverInformation();
@@ -327,12 +319,12 @@ export default {
           console.error(err);
         });
     },
-      PreviewImage(){
-      console.log()
+
+    PreviewImage(){
+     
       let image_name= this.cover_image_information.url_uploaded;
        this.$axios.get(`documents/image/${image_name}`)
-       .then(response =>{         
-         console.log(response)
+       .then(response =>{ 
          this.onImage = true;
           this.image_cover = response.data.image;
        })
@@ -354,8 +346,7 @@ export default {
       else{
          if(typeof text == 'string'){
          text = "" + text;
-         let newtext = text.trim();
-          console.log(newtext)
+         let newtext = text.trim();         
           return newtext;
       }
       else{        
@@ -364,8 +355,10 @@ export default {
       }
      
     },
-    CancelUpdate(){
-      console.log("COVER",this.cover_image_information);
+    CancelUpdate(){     
+      this.$router.replace({
+                name:'UploadImage'
+            })
     },
     },
     computed:{

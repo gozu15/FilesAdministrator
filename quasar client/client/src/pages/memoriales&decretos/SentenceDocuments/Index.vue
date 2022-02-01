@@ -32,7 +32,7 @@
               <q-btn
                 @click="GoToRegisterAnImageTag()"
                 round
-                color="primary"
+                color="positive"
                 icon="add"
               />
             </div>
@@ -46,7 +46,7 @@
             <q-card-section class="text-center">
               <strong>{{ props.row.name }}</strong>
             </q-card-section>
-            <q-separator />
+            <q-separator color="white"/>
             <q-card-section class="flex flex-center">
               <div style="width:100%">
                 TIPO DE DOCUMENTO: {{ props.row.type_document }}
@@ -60,21 +60,35 @@
               <div class="row justify-end btn-content-docs">
                 <q-btn
                   round
-                  color="dark"
+                  flat
+                  size="10px"
+                  color="positive"
                   icon="fas fa-file-download"
                   @click="Download(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="dark"
+                  flat
+                  size="10px"
+                  color="positive"
                   icon="far fa-eye"
                   @click="ViewMore(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="green"
+                  flat
+                  size="10px"
+                  color="positive"
                   icon="far fa-edit"
                   @click="GetDocumentToEdit(props.row)"
+                ></q-btn>
+                 <q-btn
+                  round
+                  flat
+                  size="10px"
+                  color="positive"
+                  icon="fas fa-trash-alt"
+                  @click="Delete(props.row)"
                 ></q-btn>
               </div>
             </q-card-section>
@@ -111,14 +125,18 @@
     <q-dialog v-model="view_more" full-width>
       <ViewMore />
     </q-dialog>
+    <q-dialog v-model="open_dialog">
+      <DeleteMemorial/>
+    </q-dialog>
   </div>
 </template>
 <script>
 import ViewMore from "../../../components/MemorialsDecrets/ViewMore";
+import DeleteMemorial from "../../../components/MemorialsDecrets/Delete.vue"
 import { mapState, mapMutations, mapActions } from "vuex";
 const stringOptions = ["5", "8", "10", "15", "20", "30"];
 export default {
-  components: { ViewMore },
+  components: { ViewMore,DeleteMemorial },
   data() {
     return {
       data_per_page: 5,
@@ -168,10 +186,18 @@ export default {
       "ReloadMemorialProperties",
       "OpenPreviewDocument",
       "IsSearching",
+      "ReloadListMemorials",
       "IsNotSearching",
-      "ClearListFromSearch"
+      "ClearListFromSearch",
+       "IdPropertieMemorial",
+      "NamePropertieMemorial",
+      "TypePropertieMemorial",
+      "DescriptionPropertieMemorial",
+      "DocumentTextPropertieMemorial",
+      "ChangePrevPage",
+      "WritingDocumentText"
     ]),
-    ...mapActions("memorials_decrets", ["GetMemorialsFromApiSentence","FindDataFromMemorialsDocs"]),
+    ...mapActions("memorials_decrets", ["GetMemorialsFromApiSentence","FindDataFromSentencesDocs","OpenDialogDelete"]),
     GetPressEnter(e){
       //TODO BUSCADOR
        if (e.keyCode === 13) {
@@ -182,17 +208,29 @@ export default {
                 description:this.filter,
                 documents_text:this.filter,
          }        
-          this.FindDataFromMemorialsDocs(querys)
-         console.log("SEARCH",this.memorials_list_searching)
+          this.FindDataFromSentencesDocs(querys)
+         
           this.IsSearching()
       }  
     },
+ Delete(props){
+      this.OpenDialogDelete()
+      this.TypePropertieMemorial(props.type_document)
+      this.IdPropertieMemorial(props._id)
+    },
     CheckEmpty(e){   
-      console.log("No empty",e)   
+      
       if(e == ''){
-        console.log("THIS IS EMPTY",e);
+        
          this.ClearListFromSearch()
         this.GetMemorialsFromApiSentence()
+         .then(async response =>{
+                
+               this.ReloadListMemorials(response.data.data);
+            })
+            .catch(error =>{
+                
+            })
         this.IsNotSearching()
       }
     },
@@ -208,30 +246,34 @@ export default {
       this.pagination.descending = descending;
     },
     nextPage: async function() {
+        
       if(this.isSearching == false){
-          let params;
-      if (this.memorials_list.length  >= this.data_per_page) {
-        console.log("ENTRO IF");
-        this.ChangeNextPage();
-        params = {
-          page: this.page,
-          rowPerPage: this.data_per_page
-        };
-        
-        await this.GetMemorialsFromApiSentence(params);   
-        setTimeout(()=>{
-          this.$refs.TableReference.nextPage();
-        },1000)   
-        
-      } else {
-        console.log("NEXT");
-        this.$refs.TableReference.nextPage();
-      }
+        let params;
+           this.ChangeNextPage();        
+          params = {
+            page: this.page,
+            rowPerPage: this.data_per_page
+          };
+          this.GetMemorialsFromApiSentence(params)
+          .then(response =>{
+            
+            if(response.length == 0){
+                 this.ChangePrevPage()
+            }     
+            else{
+              this.$refs.TableReference.nextPage();
+            }
+             
+          })
+          .catch(err =>{
+            console.error(err)
+          })    
+      
       }
       else{
           let params;
         if (this.data_per_page >= this.memorials_list_searching.length) {
-          console.log("ENTRO IF");
+          
           this.ChangeNextPage();
           params = {
             page: this.page,
@@ -240,17 +282,18 @@ export default {
           description:this.filter,
           documents_text:this.filter,
           };
-          this.FindDataFromMemorialsDocs(params);
+          this.FindDataFromDecretsDocs(params);
           this.data= this.memorials_list_searching
           this.$refs.TableReference.nextPage();
         } else {
           this.$refs.TableReference.nextPage();
         }
-      }     
+      }
     },
     prevPage() {
+      this.ChangePrevPage()
       this.$refs.TableReference.prevPage();
-      console.log("PREF");
+      
     },
 
     changeRowsPerPage() {
@@ -260,17 +303,25 @@ export default {
       };
       let params;
       if (this.data_per_page >= this.memorials_list.length) {
-        console.log("ENTRO IF");
+        
         this.ChangeNextPage();
         params = {
           page: this.page,
           rowPerPage: this.data_per_page
         };
-        this.GetMemorialsFromApiSentence(params);
-        this.data = this.memorials_list;
-        this.$refs.TableReference.setPagination(pagination);
+        this.GetMemorialsFromApiSentence(params)
+         .then(async response =>{
+                
+               this.ReloadListMemorials(response.data.data);
+               this.data = this.memorials_list;
+              this.$refs.TableReference.setPagination(pagination);
+            })
+            .catch(error =>{
+                
+            })
+        
       } else {
-        console.log("ENTRO ELSE");
+        
         this.$refs.TableReference.setPagination(pagination);
       }
       }
@@ -280,7 +331,7 @@ export default {
       };
       let params;
       if (this.data_per_page >= this.memorials_list_searching.length) {
-        console.log("ENTRO IF");
+        
         this.ChangeNextPage();
         params = {
           page: this.page,
@@ -289,11 +340,11 @@ export default {
           description:this.filter,
           documents_text:this.filter,
         };
-        this.FindDataFromMemorialsDocs(params);
+        this.FindDataFromSentencesDocs(params);
         this.data = this.memorials_list_searching;
         this.$refs.TableReference.setPagination(pagination);
       } else {
-        console.log("ENTRO ELSE");
+        
         this.$refs.TableReference.setPagination(pagination);
       }
       }
@@ -301,7 +352,14 @@ export default {
     },
 
     GetMemorials() {
-      this.GetMemorialsFromApiSentence();
+      this.GetMemorialsFromApiSentence()
+       .then(async response =>{
+                
+               this.ReloadListMemorials(response.data.data);
+        })
+        .catch(error =>{
+            
+        })
      
     },
     GoToRegisterAnImageTag() {
@@ -310,11 +368,20 @@ export default {
       });
     },
     GetDocumentToEdit(doc_selected) {
-      console.log(doc_selected);
-      this.ReloadMemorialProperties(doc_selected);
-      this.$router.push({
+       this.$router.push({
         name: "UpdateMemorialsDocuments"
-      });
+      })
+       .then(async () =>{
+        await this.WritingDocumentText(doc_selected.documents_text)
+        await this.IdPropertieMemorial(doc_selected._id)
+        await this.NamePropertieMemorial(doc_selected.name)
+        await this.TypePropertieMemorial(doc_selected.type_document)
+        await this.DescriptionPropertieMemorial(doc_selected.description)
+        await this.DocumentTextPropertieMemorial(doc_selected.documents_text) 
+      })
+      .catch((err)=>{
+        console.error(err)
+      })
     },
     ViewMore(doc_selected) {
       this.OpenPreviewDocument(doc_selected);
@@ -369,7 +436,7 @@ export default {
       "view_more",
       "page",
       "memorials_list_searching",
-      "isSearching"
+      "isSearching","open_dialog"
     ]),
     GetListMemorials(){
       return this.data;
@@ -377,30 +444,37 @@ export default {
   },
   created() {
      this.GetMemorials();
-      this.data = this.memorials_list;
+     
+  },
+  destroyed(){
+    
+    this.ClearData();
+
   },
   mounted() {
-   
-
-    console.log("EQWEQEQWE");
+    this.ClearData();
+     this.GetMemorials();
   }
 };
 </script>
-<style scoped>
-.my-card {
-  height: 100%;
-}
-.text-doc {
-  height: 210px;
-  overflow: hidden;
-}
-.btn-content-docs .q-btn {
-  margin-right: 10px;
-}
-.bottom-table{
-  width: 100% !important ;
-}
-.row-btn .q-btn{
-  margin-left: 10px;
-}
+<style lang="sass" scoped>
+@import '../../../css/quasar.variables.scss'
+.my-card 
+  height: 100%
+  background-color:$bluedark !important
+  color: white
+
+.text-doc 
+  height: 210px
+  overflow: hidden
+
+.btn-content-docs .q-btn 
+  margin-right: 10px
+
+.bottom-table
+  width: 100% !important 
+
+.row-btn .q-btn
+  margin-left: 10px
+
 </style>

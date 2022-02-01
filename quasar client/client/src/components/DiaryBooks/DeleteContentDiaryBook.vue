@@ -26,9 +26,7 @@ export default {
     methods:{
         ...mapMutations('diary_books',['OpenCloseDeleteContentBook']),
         ...mapActions('diary_books',['GetDiaryBookById','DeleteContentDiaryBook']),
-        DeleteContent(){
-            console.log('SEC',this.diary_content_selected);
-            console.log('PE',this.diary_selected);
+        DeleteContent(){           
             this.DeleteContentDiaryBook(this.diary_content_selected)
             this.GetDiaryBookById(this.diary_selected)
             this.CerrarDialog()

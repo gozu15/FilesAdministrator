@@ -1,28 +1,37 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh Lpr lff">
     <q-header class="header-main" elevated>
       <!-- <q-toolbar style="background-color:green;"> -->
       <div class="q-pa-sm" style="width:100%;">
-        <div class="row justify-between">
-          <div>
-            <q-btn
+        <div class="row">
+          <div class="col-6">
+            <div class="row">
+              <div class="col-2">
+                  <q-btn
               flat
               dense
               round
               icon="menu"
               size="15px"
               aria-label="Menu"
+              color="positive"
               @click="leftDrawerOpen = !leftDrawerOpen"
             />
-          </div>
-          <div class="">
-            <div class="tittle">
-              <p>SECRETARIO DE JUZGADO</p>
+              </div>
+              <div class="col-10">               
+              <div class="tittle">
+                <p> JUZGADO DE INSTRUCCION PENAL 3RO, QUILLACOLLO </p>
+              </div>           
+              </div>
+
             </div>
+          
+            
           </div>
-          <div>
+          
+          <div class="col-6">
             <div class="row justify-end">
-              <q-btn flat color="white" round icon="notifications" size="12px">
+              <q-btn flat color="positive" round icon="notifications" size="12px">
                 <q-badge floating color="red" rounded :label="list_only_inprocess.length || countaux"/>
                 <q-menu
                   transition-show="flip-right"
@@ -68,28 +77,33 @@
         </div>
       </div>
     </q-header>
-
     <q-drawer
       class="drawer-main" 
       v-model="leftDrawerOpen"      
       show-if-above
       bordered
+      :mini="miniState"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay
              
     >
-    <div class="shadow-menu">
+    <div class="box-drawer" >
       <q-list>
-        <q-item-label header class="text-center tittle-qdrawer">
-          ADMINISTRADOR
-        </q-item-label>
+        <!-- <q-item-label header class="text-center tittle-qdrawer">
+          <p>JUZGADO DE INSTRUCCION PENAL 3ERO, QUILLACOLLO</p> 
+        </q-item-label> -->
         <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
           v-bind="link"
         />
       </q-list>
-    </div>
-      
+    </div>      
+
     </q-drawer>
+    
+    
 
     <q-page-container>
       <router-view />
@@ -128,42 +142,48 @@ const linksData = [
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "memorials_documents"
+        pathLink: "memorials_documents",
+        checkactivemodel:"memorialdoc"
       },
       {
         title: "Decretos",
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "decrets_documents"
+        pathLink: "decrets_documents",
+        checkactivemodel:"decretdoc"
       },
       {
         title: "Acusaciones",
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "acusations_documents"
+        pathLink: "acusations_documents",
+        checkactivemodel:"acusationdoc"
       },
       {
         title: "Autos",
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "autos_documents"
+        pathLink: "autos_documents",
+        checkactivemodel:"autodoc"
       },
       {
         title: "Resoluciones",
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "resolutions_documents"
+        pathLink: "resolutions_documents",
+        checkactivemodel:"resolutiondoc"
       },
       {
         title: "Sentencias",
         caption: "chat.quasar.dev",
         icon: "far fa-file-word",
         link: "https://chat.quasar.dev",
-        pathLink: "sentence_documents"
+        pathLink: "sentence_documents",
+        checkactivemodel:"sentencedoc"
       }
     ],
     title: "Documentos",
@@ -172,6 +192,15 @@ const linksData = [
     link: "https://chat.quasar.dev",
     pathLink: "none",
     checkactive:"documents"
+  },
+  {
+    type: "text",
+    title: "Documentos modelos",
+    caption: "chat.quasar.dev",
+    icon: "far fa-file-alt",
+    link: "https://chat.quasar.dev",
+    pathLink: "memorials_models",
+    checkactive:"models"
   },
 
   {
@@ -218,24 +247,24 @@ export default {
     return {
       leftDrawerOpen: false,
       essentialLinks: linksData,
+      miniState:true,
       countaux:0,
       link:'home'
     };
   },
   methods:{
-    ...mapMutations('notify',['NotifyCommingToEnd','RealoadNotifyselected']),
+    ...mapMutations('notify',['NotifyCommingToEnd','RealoadNotifyselected','CloseNotifySelectedOnApi']),
     ...mapActions('notify',['GetNotifyinQueue','UpdateNotify','GetAllNotifyInProcessStore','GetAllNotify']),
     CloseNotify(props_selected){
-      let notify_selected = props_selected
-      console.log(notify_selected);
-       notify_selected.status = "TERMINADO";
-            this.UpdateNotify(notify_selected)
+      this.CloseNotifySelectedOnApi(props_selected);
+            this.UpdateNotify(this.notify_selected)
             .then(response =>{
                 
                 //this.NotifyCommingToEnd(true);
                 this.SendObject();
                 this.GetAllNotify();
                 this.GetAllNotifyInProcessStore();
+                this.$socket.emit('closing_notification');
             })
             .catch(err =>{
                 console.log(err);
@@ -255,8 +284,7 @@ export default {
                this.RealoadNotifyselected(response.data);
                 this.$socket.emit('recieve_date',this.notify_selected)
                 this.NotifyCommingToEnd(true)
-            }
-            console.log("RESPONSE",response)               
+            }          
             })
         .catch(err =>{
                 console.log(err);
@@ -274,45 +302,41 @@ export default {
   }
 };
 </script>
-<style>
-.notifyinProcess{
-  background-color: rgba(117, 11, 11, 0.555);  
-}
-.q-drawer{
-  /* background-color: rgb(0, 15, 0) !important; */
-  color: rgb(209, 209, 209);
-  background-image: url('../../public/image/poder-Judicial-1.jpg');
-  background-size: cover !important;
-  background-position-x: -200px;
-  
+<style lang="sass">
+@import '../css/quasar.variables.scss'
+.notifyinProcess
+  background-color: rgba(117, 11, 11, 0.555)  
 
-}
-.q-header{
-  background-color: rgb(0, 121, 0) !important;
-  font-family: serif;
-}
-.shadow-menu{
-  background-color: rgba(0, 26, 0, 0.685) !important;  
-  display: flex;
-  height: 140vh;
-  background-size: cover !important;  
-}
-.tittle-qdrawer{
-  font-family: serif;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 23px;
-  margin-bottom: 23px;
-  
-}
-::-webkit-scrollbar{
-  display: none;
-}
-.tittle{
-  font-size: 20px;
-}
-.my-menu-link{
+.q-drawer  
+  color: rgb(209, 209, 209)
+  background-image: url('../../public/image/poder-Judicial-1.jpg')
+  background-size: cover !important
+  background-position-x: -200px    
+  font-family: Source Sans Pro, Avenir, Helvetica, Arial, sans-serif  
 
-}
+.q-header
+  background-color: $dark !important
+  font-family: Source Sans Pro, Avenir, Helvetica, Arial, sans-serif
+
+.box-drawer
+ background-color: rgba($dark, 0.946) !important
+ height: 100% 
+
+.tittle-qdrawer 
+  font-family: Source Sans Pro, Avenir, Helvetica, Arial, sans-serif
+  color: $positive
+  font-size: 15px
+  font-weight: bold 
+  margin-bottom: 23px 
+
+
+.tittle
+  font-family: Source Sans Pro, Avenir, Helvetica, Arial, sans-serif
+  color: $positive
+  font-weight: bold 
+  font-size: 20px
+
+.q-page
+  min-height: auto
+
 </style>

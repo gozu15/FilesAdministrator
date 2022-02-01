@@ -76,8 +76,10 @@ export const DIARY_BOOK ={
     actions:{
         GetListDiaryBooks({commit}){
             vue.$axios.get('diary_books/complete/get/full')
-            .then(response =>{
-                console.log("BOOKS",response);
+            .then(response =>{ 
+                response.data.data.forEach(element =>{
+                    element.departure_date
+                })
                 commit('ReloadListDiaryBooks',response.data.data)
             })
             .catch(err =>{
@@ -88,7 +90,7 @@ export const DIARY_BOOK ={
             let id = payload.id_diary_book || payload.id || payload._id
             vue.$axios.get(`diary_books/complete/${id}`)
             .then(response =>{
-                console.log("BYID",response.data.data)
+            
                 commit('ReloadDiarySelected',response.data.data)
             })
             .catch(err =>{
@@ -99,7 +101,7 @@ export const DIARY_BOOK ={
             let book_to_create = payload
             vue.$axios.post(`diary_books/create`,book_to_create)
             .then(response =>{
-                console.log(response)                
+                
             })
             .catch(err =>{
                 console.log(err)
@@ -121,7 +123,7 @@ export const DIARY_BOOK ={
             }
             vue.$axios.put(`diary_books/update/${id_book}`,data)
             .then(response =>{
-                console.log(response);
+             
             })
             .catch(err =>{
                 console.log(err)
@@ -136,7 +138,7 @@ export const DIARY_BOOK ={
             let id_book = payload.id || payload._id
             vue.$axios.delete(`diary_books/delete/${id_book}`)
             .then(response =>{
-                console.log(response);
+           
             })
             .catch(err =>{
                 console.log(err)
@@ -146,7 +148,7 @@ export const DIARY_BOOK ={
             let id_content = payload.id || payload._id
             vue.$axios.delete(`diary_books/description/delete/${id_content}`)
             .then(response =>{
-                console.log(response);
+              
             })
             .catch(err =>{
                 console.log(err)

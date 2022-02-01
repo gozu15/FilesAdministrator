@@ -5,36 +5,36 @@
                 <q-btn @click="ClosePopup"  round icon="close" color="red"></q-btn>
             </div>
             <q-card-section>
-                <div class="text-h6 text-center" style="text-decoration:underline black">{{notify_selected.name}}</div>
+                <div class="text-h6 text-center" style="text-decoration:underline black">{{notify_viewmore.name}}</div>
             </q-card-section>
             <q-card-section>
                 <div class="q-pa-md row justify-between">
                     <div>Fecha de creacion</div>
-                    <div>{{notify_selected.date_init}}</div>
+                    <div>{{notify_viewmore.date_init}}</div>
                 </div>
                 <div class="q-pa-md row justify-between">
                     <div>Fecha de finalizacion</div>
-                    <div>{{notify_selected.date_end}}</div>
+                    <div>{{notify_viewmore.date_end}}</div>
                 </div>
                 <div class="q-pa-md row justify-between">
                     <div>Descripcion</div>
-                    <div>{{notify_selected.description || 'No existe descripcion'}}</div>
+                    <div>{{notify_viewmore.description || 'No existe descripcion'}}</div>
                 </div>
                 <div class="q-pa-md row justify-between">
                     <div>Estado</div>
                     <div> 
-                        <q-chip v-if="notify_selected.status == 'EN PROCESO'" color="green" text-color="white" icon="far fa-bell">
-                            {{notify_selected.status}}
+                        <q-chip v-if="notify_viewmore.status == 'EN PROCESO'" color="green" text-color="white" icon="far fa-bell">
+                            {{notify_viewmore.status}}
                         </q-chip>
-                        <q-chip v-if="notify_selected.status == 'LLEGANDO A TERMINO'" color="blue" text-color="white" icon="far fa-bell">
-                            {{notify_selected.status}}
+                        <q-chip v-if="notify_viewmore.status == 'LLEGANDO A TERMINO'" color="blue" text-color="white" icon="far fa-bell">
+                            {{notify_viewmore.status}}
                         </q-chip>
-                        <q-chip v-if="notify_selected.status == 'TERMINADO'" color="red" text-color="white" icon="far fa-bell">
-                            {{notify_selected.status}}
+                        <q-chip v-if="notify_viewmore.status == 'TERMINADO'" color="red" text-color="white" icon="far fa-bell">
+                            {{notify_viewmore.status}}
                         </q-chip>
                     </div>
                 </div>               
-                <q-btn @click="CloseAudience" color="black" class="full-width" label="CONCLUIR AUDIENCIA" />
+                <q-btn v-if="notify_viewmore.status != 'TERMINADO'" @click="CloseAudience" color="black" class="full-width" label="CONCLUIR AUDIENCIA" />
             </q-card-section>
         </q-card>
     </div>
@@ -57,10 +57,9 @@ export default {
         },
         CloseAudience(){
             this.getStatus = "TERMINADO";
-            this.UpdateNotify(this.notify_selected)
+            this.UpdateNotify(this.notify_viewmore)
             .then(response =>{
-                
-                //this.NotifyCommingToEnd(true);
+              
                 this.SendObject();
                 this.GetAllNotify();
                 this.GetAllNotifyInProcessStore();
@@ -76,15 +75,15 @@ export default {
               let timeNow = new Date().getTime() - (1000 * 60 * 60 * 4);
               timeNow += 5000;
               this.RealoadNotifyselected({date_end:new Date(timeNow), id: null})
-              this.$socket.emit('recieve_date',this.notify_selected)
+              this.$socket.emit('recieve_date',this.notify_viewmore)
               this.NotifyCommingToEnd(true)
             }
             else{
                this.RealoadNotifyselected(response.data);
-                this.$socket.emit('recieve_date',this.notify_selected)
+                this.$socket.emit('recieve_date',this.notify_viewmore)
                 this.NotifyCommingToEnd(true)
             }
-            console.log("RESPONSE",response)               
+                      
             })
         .catch(err =>{
                 console.log(err);
@@ -93,10 +92,10 @@ export default {
 
     },
     computed:{
-        ...mapState('notify',['notify_selected']),
+        ...mapState('notify',['notify_viewmore']),
         getStatus:{
              get: function() {
-            return this.$store.state.notify.notify_selected.status;
+            return this.$store.state.notify.notify_viewmore.status;
             },
             set: function (newTitle) {
                 this.$store.commit("notify/getStatusNotify", newTitle);

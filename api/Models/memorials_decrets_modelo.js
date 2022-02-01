@@ -13,8 +13,7 @@ const memorialesDecretosModel = new schema({
 })
 memorialesDecretosModel.pre('update', function(next){
      let now = new Date();
-     this.updated_at = now;    
-     console.log("ENTRO PRE");
+     this.updated_at = now;        
      next();
 });
 module.exports = mongoose.model('Memodecre',memorialesDecretosModel);

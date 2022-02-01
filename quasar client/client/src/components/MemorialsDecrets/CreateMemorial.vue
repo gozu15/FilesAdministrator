@@ -47,10 +47,10 @@
 
           <!-- check PDF into editor -->
           <div  v-if="openPDFfromeditor" id="content-pdfviewer" class="content-pdfviewer">
-            <div>
-              <button @click="CloseEditorFromPDF">"4-"</button>  
-              <button @click="OpenEditorFromPDF">">"</button>               
-              <button @click="ClosePdfEditorPreview">"X"</button>
+            <div>             
+              <q-btn v-if="isTiniBookSelected == false" round flat @click="CloseEditorFromPDF" icon="fas fa-undo-alt"></q-btn>  
+              <q-btn v-if="isTiniBookSelected == true" round flat @click="OpenEditorFromPDF" icon="fas fa-external-link-alt"></q-btn>               
+              <q-btn round flat @click="ClosePdfEditorPreview" icon="fas fa-times"></q-btn>
             </div>
             <GetPDFinEditor/>
 
@@ -208,22 +208,6 @@
     </q-dialog>
 
     <!-- DIALOG TO CHECK DOCUMENT BEFORE LEAVE -->
-    <q-dialog v-model="confirm" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="signal_wifi_off" color="red" text-color="white" />
-          <span class="q-ml-sm">¿Esta seguro salir sin guardar?</span>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="red" v-close-popup />
-          <q-btn flat label="Salir" color="primary" v-close-popup @click="GobackInit()"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-
-
   </div>
 </template>
 <script>
@@ -241,8 +225,9 @@ export default {
         uid_image_object: null,
         type_document: null,
         description: null,
-        documents_text: " "
+        documents_text: " ",       
       },
+       isTiniBookSelected:true,
       confirm:false,
       options:[
         {label:'Decreto',value:'Decreto'},
@@ -268,15 +253,18 @@ export default {
       "changeEditorViewer"
     ]),
     ...mapActions("memorials_decrets", ['CreateMemorialNewDocument']),
+    ...mapMutations("tags_info",['IsSearching']),
     OpenEditorFromPDF(){
      document.getElementById("content-editor").style.display = "none";
       document.getElementById("content-pdfviewer").style.width = "100%";
+      this.isTiniBookSelected= false;
       
     },
     CloseEditorFromPDF(){
       document.getElementById("content-editor").style.display = "block";
         document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-pdfviewer").style.width = "35%";
+      this.isTiniBookSelected= true;
     },
     ClosePdfEditorPreview(){
       //document.getElementById("content-pdfviewer").style.width = "35%";   
@@ -289,25 +277,26 @@ export default {
     },
     InputText(e){      
       if(e.key === 9 || e.key === 11){
-        console.log('TAB')
+     
       }
     },
     Open() {
+      this.IsSearching(false)
       document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-tabs").style.display = "block";
       document.getElementById("content-tabs").style.width = "35%";
-      console.log("Opem");
+      
     },
-    Close() {
+    Close() {      
+      this.IsSearching(true)
       document.getElementById("content-tabs").style.display = "none";
       document.getElementById("content-editor").style.width = "100%";
-      console.log("close");
+    
+      
     },
     getMemorialList() {},
     VerifyDocument() {      
-      //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")
-      console.log(this.memorial_text_doc);
-      console.log("TAG SELECTED",this.tag_selected);
+      //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")    
       this.save_change = true;
       //this.pasteCapture();
     },    
@@ -315,42 +304,38 @@ export default {
       let typevalue= this.memorial_object.type_document.value;      
       this.memorial_object.documents_text=this.memorial_text_doc
       this.memorial_object.type_document = typevalue;
-      this.CreateMemorialNewDocument(this.memorial_object);   
-      this.GoToMemorialsTable();
+      this.CreateMemorialNewDocument(this.memorial_object)
+      .then(response =>{
+        this.GoToMemorialsTable();
+        this.IsSearching(true)
+      })
+      .catch(err =>{
+        
+      });
+    
     }, 
     GobackInit(){
         this.GoToMemorialsTable()
+        this.IsSearching(true)
     },
     GoToMemorialsTable(){
-       document.cookie ="text_memorial='ingrese texto'"
+       window.localStorage.clear()
+        document.cookie ="text_memorial_model='ingrese texto'"
       this.$router.replace({
         name:'MemorialsDocuments'
       })
     },
-    ReadCookie(name){
-      if(document.cookie!= null || document.cookie != undefined){
-          let nameEQ = name + "="; 
-          let ca = document.cookie.split(';');
-
-          for(let i=0;i < ca.length;i++) {
-
-            let c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1,c.length);
-            if (c.indexOf(nameEQ) == 0) {
-              return decodeURIComponent( c.substring(nameEQ.length,c.length) );
-            }
-
-          }
-      }
-      else{
-        document.cookie = "text_memorial=' '";        
-      }
-      return 'texto nuevo';
-     
-
-      
+     CheckDataFromStorage(){
+       let existlocalstoragedata = window.localStorage.getItem("text_memorial") != undefined ? true : false;
+       if(existlocalstoragedata){
+         let checkascii = window.localStorage.getItem("text_memorial");
+      checkascii = checkascii.replace(/ascii59/g,';');
+      this.document_writing = checkascii
+       }       
     },
-    onReset() {},
+    onReset() {
+      //this.GoToMemorialsTable();
+    },
     getImage() {},
     CheckFile() {
       this.$q.notify({
@@ -369,33 +354,25 @@ export default {
       "openPDFfromeditor",
       "closeeditor"
     ]),
-    ...mapState("tags_info",['tag_selected']),
+    ...mapState("tags_info",['tag_selected','isSearching']),
 
     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
       },
-      set: function(newTitle) {     
-        console.log("NEW",newTitle)        
+      set: function(newTitle) {   
         this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);        
       }
     }
   },
   mounted() {
     this.ClearData();
-    let checkascii = this.ReadCookie("text_memorial");
-    checkascii = checkascii.replace(/ascii59/g,';');
-    this.document_writing = checkascii
-    console.log(this.$store);
+    this.CheckDataFromStorage()   
   },
   created(){
-    this.ClearData();
+    this.ClearData();     
   },
-  beforeDestroy(){
     
-    console.log("Destroyed");
-  }
-  
 };
 </script>
 <style scoped>

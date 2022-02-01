@@ -5,6 +5,8 @@ export const TagsFromImage={
     state:{
         list_tags:[],
         page:0,
+        isSearching:true,
+        tagsinmodel:false,
         tag_selected:{
             url_uploaded:null,
             type_image:null,
@@ -23,6 +25,12 @@ export const TagsFromImage={
         document_text:null
     },
     mutations:{
+        IstagInModel(state,payload){
+            state.tagsinmodel = payload
+        },
+        IsSearching(state,payload){
+            state.isSearching = payload;
+        },
         LoadTagSelected(state,payload){
             state.tag_selected={
                 url_uploaded:payload.url_uploaded,
@@ -41,14 +49,36 @@ export const TagsFromImage={
             }
         },
         LoadAllTagsToList(state,payload){       
-            state.list_tags = []          
-            payload.forEach(element =>{
-                state.list_tags.push(element);
-            })            
+            //state.list_tags = []          
+            // payload.forEach(element =>{
+            //     state.list_tags.push(element);
+            // })            
+            let check = true;
+            if(state.list_tags.length != 0){
+                for (let index = 0; index < payload.length; index++) {
+                    for (let j = 0; j < state.list_tags.length; j++) {
+                        if(payload[index]._id == state.list_tags[j]._id){
+                            check = false;
+                            break;
+                        }
+                    }
+              }
+              if(check){
+               state.list_tags = [...state.list_tags,...payload]
+              }                                 
+            }
+            else{
+                state.list_tags = payload;
+            }  
+           
+        },
+        PassPage(state,payload){
+            state.page = payload;
         },
         ClearDataTags(state){
-            //state.list_tags=[];
-            state.page=0
+            state.list_tags=[];
+            state.isSearching= false;
+            state.page=0;
             state.tag_selected={
                 url_uploaded:null,
                 type_image:null,
@@ -72,7 +102,7 @@ export const TagsFromImage={
                 query:state.page
             })
             .then(response =>{
-                console.log("TAGS",response)
+              
                 commit('LoadAllTagsToList',response.data)
             })
             .catch(err =>{
@@ -84,10 +114,29 @@ export const TagsFromImage={
             let id = payload.id
             vue.$axios.put(`documents/update/${id}`,payload)
             .then(response =>{
-                console.log(response);
+               
             })
             .catch(err =>{
                 console.log(err);
+            })
+        },
+        SearchDocumentTag({commit},payload){            
+            vue.$axios.get(`documents/search/cover_image`,{               
+                params:
+                {
+                        page:1,
+                        victim:payload.victim,
+                        accused:payload.accused,
+                        appellant:payload.appellant,
+                        crime:payload.crime,
+                        code_document:payload.code_document
+                }
+            })
+            .then(response =>{ 
+                commit('LoadAllTagsToList',response.data.message)
+            })
+            .catch(err =>{
+                console.log("error",err);
             })
         }
     }

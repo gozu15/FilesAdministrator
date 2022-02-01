@@ -9,7 +9,7 @@
           :columns="columns"
           row-key="name"
           :filter="filter"
-          table-header-class="bg-primary text-white"
+          table-header-class="bg-dark text-white"
         >
           <template v-slot:top-right>
             <div class="row">
@@ -34,7 +34,7 @@
                   <q-btn
                     round
                     dense
-                    color="primary"
+                    color="positive"
                     size="20px"
                     icon="add"
                     @click="GoToRegisterAnImage()"
@@ -246,20 +246,18 @@ export default {
     },
     ViewMore(check_row){
       let row_selected = check_row.row;
-      row_selected.id= row_selected._id
+      row_selected.id= row_selected._id      
       this.getDataCoverImage(row_selected);
-      console.log(this.cover_image_information);
+    
       this.$router.push({
         name:'ViewMore'
       })
     },
-
     //METHODS TABLE BUTTONS
     EditRow(props) {
       let row_selected = props.row;
-      row_selected.id= row_selected._id
       this.getDataCoverImage(row_selected);
-      console.log(this.cover_image_information);
+      console.log(props)
       this.$router.push({
         name:'UpdateCoverImage'
       })
@@ -277,11 +275,11 @@ export default {
 </script>
 <style scoped>
 .content {
-  width: 90%;
+  width: 98%;
   margin: auto;
 }
 .card-content {
-  width: 90%;
+  width: 98%;
   margin: auto;
   padding: 10px;
 }

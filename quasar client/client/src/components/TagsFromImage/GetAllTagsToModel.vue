@@ -2,55 +2,54 @@
   <div class="q-pa-sm">    
     <div v-if="tagIsSelected" class="row justify-center">     
       
-        <q-list bordered separator>
+        <q-list  bordered separator>
+          
+
       <q-item v-for="(tags,index) in listCoverProperties" :key="index" class="content-tags" clickable v-ripple @click="ClickOnTag(tags)">
         <div class="row" style="width:100%" v-if="tags.title != 'Querellantes' && tags.title != 'Acusados' && tags.title != 'Victimas'">
           <div class="col-12">
-            <q-item-label overline>{{tags.title}}</q-item-label>
+            <q-item-label class="item-tag" overline>{{tags.title}}</q-item-label>
           </div>
           <div class="col-12">
-            <q-item-label>{{tags.value}}</q-item-label>    
+            <q-item-label class="item-tag">{{tags.value}}</q-item-label>    
           </div>
         </div>
           <div v-if="tags.title == 'Querellantes'">
             <div class="row">
           <div class="col-12">
-            <q-item-label overline>{{tags.title}}</q-item-label>
+            <q-item-label class="item-tag" overline>{{tags.title}}</q-item-label>
           </div>         
           <div class="col-12">
-            <q-item-label>{{tags.value}}</q-item-label>    
+            <q-item-label class="item-tag">{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
           <div v-if="tags.title == 'Acusados'">
             <div class="row">
           <div class="col-12">
-            <q-item-label overline>{{tags.title}}</q-item-label>
+            <q-item-label class="item-tag" overline>{{tags.title}}</q-item-label>
           </div>        
           <div class="col-12">
-            <q-item-label>{{tags.value}}</q-item-label>    
+            <q-item-label class="item-tag">{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
           <div v-if="tags.title == 'Victimas'">
             <div class="row">
           <div class="col-12">
-            <q-item-label overline>{{tags.title}}</q-item-label>
+            <q-item-label class="item-tag" overline>{{tags.title}}</q-item-label>
           </div>          
           <div class="col-12">
-            <q-item-label>{{tags.value}}</q-item-label>    
+            <q-item-label class="item-tag">{{tags.value}}</q-item-label>    
           </div>
         </div>
           </div>
-        
-          
-        
-        
-      </q-item>     
+      </q-item>    
+      
     </q-list>
         <!-- <q-chip clickable @click="ClickOnTag(tags)" color="teal" icon="far fa-bookmark" text-color="white" :label="tags.title" />            -->
       <div class="btn-content-cancel">
-        <q-btn class="full-width" color="red" size="10px" label="Volver atras" @click="ClickOnCancel()">
+        <q-btn v-if="!tagsinmodel" class="full-width" color="red" size="10px" label="Volver atras" @click="ClickOnCancel()">
         <q-tooltip>
           Click para ir atras y volver a elegir
         </q-tooltip>
@@ -83,16 +82,19 @@ export default {
             accused: null, //IMPUTADO
             relevant_court: null,
             victim: null, //VICTIMAS
-      }
+      },
+      
+      
     };
   },
   methods: {
-    ...mapMutations("tags_info", ['AddTagInDocumentText','ClearDataTags','LoadTagSelected']),
+    ...mapMutations("tags_info", ['AddTagInDocumentText','ClearDataTags','LoadTagSelected',"IstagInModel"]),
     ...mapActions("tags_info", ["GetListTagsAndLoad"]),
     ...mapMutations("memorials_decrets",['AddTagInToDocumentText','AddTagInDocumentText']),
     GetTagsAndLoadInTheList() {
       this.GetListTagsAndLoad();
     },
+    
     getCoverImage(){  
         let info = {title:null,value:null}
         for (const key in this.documents_image) {
@@ -146,25 +148,25 @@ export default {
                 this.tags_to_use.push(info)
             }
         }
-        console.log("ARRAY",this.tags_to_use);
+        
          
     },
     ClickOnTag(tag_selected){
       //TODO funcionalidad para enviar el valor al editor de texto wisiwig
-      console.log("Click tag",tag_selected)
+      
       this.document_writing = tag_selected.value;  
       //this.AddTagInToDocumentText(tag_selected.value);
 
     },
     ClickOnCancel(){
-      console.log("Click cancel")
+      
       //TODO funcionalidad para cerrar los tags del documento seleccionado
       this.tagIsSelected = false;
       this.ClearDataTags()
     }
   },
   computed: {
-    ...mapState("tags_info", ["list_tags", "tag_selected",'document_text']),
+    ...mapState("tags_info", ["list_tags", "tag_selected",'document_text',"tagsinmodel"]),
     listCoverProperties(){
         return this.tags_to_use;
     },
@@ -183,14 +185,21 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style>
 .my-card {
   width: 95%;
   /* height: 200px; */
   margin-bottom: 15px;  
 }
-.content-cards{
-    height: 400px;    
+.q_list{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 12px !important;
+}
+
+.item-tag{
+  font-size: 12px !important;
+}
+.content-cards{       
     overflow: auto;
 }
 .btn-content .q-btn{

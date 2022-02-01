@@ -42,7 +42,7 @@ export const LibraryLawsAndRegulations ={
         GetAllPDFs({commit}){
             vue.$axios.get('lawsandregulations/library_get')
             .then(response =>{
-                console.log(response)
+             
                 commit('ReloadBooksList',response.data);
             })
             .catch(err =>{
@@ -57,17 +57,16 @@ export const LibraryLawsAndRegulations ={
             }
             const formData = new FormData();
             formData.append("file", data.pdf_properties);
-            console.log(data.pdf_properties);
+           
             vue.$axios.post('lawsandregulations/uploadpdf',formData,{
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
             })
             .then(response =>{
-                console.log("PDF",response);
+              
                 vue.$axios.post('lawsandregulations/create/library',data)
-                .then(response =>{
-                    console.log("PROPERTIES",response);
+                .then(response =>{                   
                     dispatch('GetAllPDFs')
                 })
                 .catch(err =>{
@@ -80,10 +79,10 @@ export const LibraryLawsAndRegulations ={
         },
         UpdatePDFSelected({commit},payload){
             let pdf_properties = payload;
-            console.log("CheckUPDATE",pdf_properties);
+         
             vue.$axios.put(`lawsandregulations/update/${pdf_properties.id}`,pdf_properties)
             .then(result =>{
-                console.log(result);
+              
             })
             .catch(err =>{
                 console.log(err);
@@ -93,7 +92,7 @@ export const LibraryLawsAndRegulations ={
             let pdf_properties = payload;
             vue.$axios.delete(`lawsandregulations/delete/${pdf_properties.id}`)
             .then(response =>{
-                console.log(response)
+               
             })
             .catch(err =>{
                 console.log(err);
@@ -101,7 +100,7 @@ export const LibraryLawsAndRegulations ={
         },
         GetPDFSelected({commit},payload){
             let name_pdf = payload.pdf_name
-            console.log("´PATH",name_pdf)
+           
             commit('getPdf',`http://localhost:3000/api/lawsandregulations/getpdf/${name_pdf}`)
            
         }

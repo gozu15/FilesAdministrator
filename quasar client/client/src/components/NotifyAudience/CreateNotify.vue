@@ -36,14 +36,44 @@
         ]"
       />      -->
       <div>
-        <q-btn label="Guardar" type="submit" color="primary"/>
-        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" />
+        <!-- <q-btn label="Guardar" type="submit" color="primary"/>
+        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" /> -->
+          <q-page-sticky position="bottom-right" :offset="[18, 130]">
+          <q-btn
+            round
+            size="18px"
+            color="primary"
+            icon="save"
+            direction="left"
+            type="submit"
+          >
+          </q-btn>
+        </q-page-sticky>
+        <q-page-sticky position="bottom-right" :offset="[18, 70]">
+          <q-btn
+            round
+            size="18px"
+            color="red"
+            icon="fas fa-times-circle"
+            direction="left"
+            type="reset"
+          >
+          </q-btn>
+        </q-page-sticky>
       </div>
     </q-form>
     </div>
 </template>
 <script>
 import {mapState,mapActions,mapMutations} from 'vuex'
+let year = new Date().getFullYear()
+let month = new Date().getMonth() +1
+month = (month < 10 ? "0"+month : month)
+let date = new Date().getDate() 
+date = (date < 10 ? "0"+date : date)
+let hours = new Date().toLocaleTimeString()
+let newDate = year + "-" +month+"-"+date+" "+ hours
+console.log("TIME",newDate);
 export default {
     data(){
         return{
@@ -53,7 +83,7 @@ export default {
                 date_end:null,
                 date_init:null,                
             },
-            model: '2021-02-22 21:02'
+            model: newDate
         }
     },
     methods:{
@@ -64,16 +94,14 @@ export default {
             this.notify_properties.date_end = new Date(this.model);
             this.CreateNotify(this.notify_properties)
             .then(response =>{
-                console.log(response)
+            
                  this.SendObject()
                  this.onReset()
+                 this.$socket.emit('created-notify',{message:"Created"})
             })
             .catch(err =>{
-                console.log(err)
-            })
-           
-           
-            console.log(this.notify_properties);
+                console.error(err)
+            })           
         },
         onReset(){
           this.$router.replace({
@@ -95,7 +123,7 @@ export default {
                 this.$socket.emit('recieve_date',this.notify_selected)
                 this.NotifyCommingToEnd(true);
             }
-            console.log("RESPONSE",response)               
+                   
             })
         .catch(err =>{
                 console.log(err);

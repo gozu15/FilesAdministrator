@@ -154,26 +154,23 @@ export default {
       //this.qeditor += `&nbsp;<p>{{${txt}}}</p>`;
       const edit = this.$refs.editor;
       edit.caret.restore();
-      edit.runCmd("insertHTML", `&nbsp;{{${txt}}}`);
-      console.log(this.qeditor);
+      edit.runCmd("insertHTML", `&nbsp;{{${txt}}}`);    
     },
     createModel() {
       let body = {
         nombre: this.name,
         texto: this.qeditor,
-      };
-      console.log(body);
-      this.$axios
+      };          this.$axios
         .post("/models_documents/create", body)
         .then((result) => {
-          console.log(result);
+        
         })
         .catch((err) => {
           console.error(err);
         });
     },
     check() {
-      console.log(this.qeditor);
+     
     },
   },
 };

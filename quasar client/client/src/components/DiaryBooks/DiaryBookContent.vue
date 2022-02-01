@@ -1,6 +1,7 @@
 <template>
     <div class="q-pa-md">
         <div>
+            <div>
              <div class="text-h6 text-center">
                 {{diary_selected.book_name}}
             </div>
@@ -12,11 +13,9 @@
                 Descripcion: 
             </div>
             {{diary_selected.description}}
-            <div class="q-ma-md">
-                <q-btn @click="goBack" flat icon="fas fa-arrow-left" label="Ir atras"></q-btn> 
-            </div>
+           
         </div>
-        <div>
+        <div class="table-box">
              <q-table
         title="Contenido del libro"      
         :columns="columns"
@@ -86,6 +85,21 @@
       </template>
     </q-table>
         </div>
+         <div class="q-ma-md">               
+                 <q-page-sticky position="bottom-right" :offset="[18, 130]">
+          <q-btn
+            round
+            size="18px"
+            color="primary"
+            icon="fas fa-arrow-left"
+            direction="left"
+            @click="goBack"
+          >
+          </q-btn>
+        </q-page-sticky>
+            </div>
+        </div>
+        
         <q-dialog v-model="delete_open_content" persistent>
             <DeleteContentfromDiaryBook/>
         </q-dialog>
@@ -147,29 +161,40 @@ export default {
         },
 
         ViewMore(row_selected){
-            console.log(row_selected);   
+            
             let objectnew = {    
                 id:row_selected._id,            
-                entry_date: row_selected.entry_date,
-                departure_date: row_selected.departure_date,
+                entry_date: this.TransformDateAndHoursToRead(row_selected.entry_date),
+                departure_date: this.TransformDateAndHoursToRead(row_selected.departure_date),
                 accused: row_selected.accused.join(),
                 victim: row_selected.victim.join(),
                 appellant: row_selected.appellant.join(),
                 fojas_number: row_selected.fojas_number,
                 detail_sum: row_selected.detail_sum,
                 nurek_number: row_selected.nurek_number
-            }        
-          console.log("ROW",objectnew)
+            }                 
            this.ReloadDiaryContentSelected(objectnew)
            this.$router.push({
                name:'PreviewContentDiarybook'
            })
         },
-        EditRow(row_selected){
+        TransformDateAndHoursToRead(date_time){
+             let year = new Date(date_time).getUTCFullYear();
+            let month = new Date(date_time).getUTCMonth() + 1;
+            month = month < 10 ? "0" + month : month;
+            let day = new Date(date_time).getUTCDate();
+            let hour = new Date(date_time).getUTCHours() - 4;
+            hour = hour >= 10 ? hour : "0" + hour;
+            let min = new Date(date_time).getUTCMinutes();
+            min = min >= 10 ? min : "0" + min;
+            let newDateFull = year + "-" + month + "-" + day + " " + hour + ":" + min;
+            return newDateFull
+        },
+        EditRow(row_selected){           
            let objectnew = {      
                 id:row_selected._id,   
-                entry_date: row_selected.entry_date,
-                departure_date: row_selected.departure_date,
+                entry_date: this.TransformDateAndHoursToRead(row_selected.entry_date),
+                departure_date: this.TransformDateAndHoursToRead(row_selected.departure_date),
                 accused: row_selected.accused.join(),
                 victim: row_selected.victim.join(),
                 appellant: row_selected.appellant.join(),
@@ -177,7 +202,6 @@ export default {
                 detail_sum: row_selected.detail_sum,
                 nurek_number: row_selected.nurek_number
             }        
-          console.log("ROW",objectnew)
            this.ReloadDiaryContentSelected(objectnew)
            this.$router.push({
                name:'UpdateContentDiarybook'
@@ -195,7 +219,6 @@ export default {
                 detail_sum: row_selected.detail_sum,
                 nurek_number: row_selected.nurek_number
             }        
-          console.log("ROW",objectnew)
            this.ReloadDiaryContentSelected(objectnew)
            this.OpenCloseDeleteContentBook(true);
 
@@ -207,3 +230,7 @@ export default {
 
 }
 </script>
+<style lang="sass" scoped>
+.table-box
+    padding-right:60px
+</style>

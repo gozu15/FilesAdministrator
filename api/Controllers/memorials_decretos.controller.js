@@ -10,59 +10,8 @@
             res.status(500).send({message:"Ocurrio un error",result:err})
         });
     }
-    async function Read(req,res){
-        let page_number = req.query.page;
-        let page_size = req.query.size;
-        console.log("PAGESIZE",page_size)
-        let PAGE_SIZE = 5
-        let skip
-        if(page_size == null || page_size == undefined){ 
-            console.log("ENTRO IF")            
-           skip = (page_number - 1) * PAGE_SIZE
-           modelMemorialesDecretos.find({isdelete:false}).skip(skip).limit(PAGE_SIZE)
-           .then(result =>{
-               console.log(result);
-               res.status(200).send({message:"Se realizo peticion correctamente",data:result})
-           })
-           .catch(err =>{
-               console.log(err);
-               res.status(500).send({message:"Ocurrio un error",result:err})
-           })
-        }           
-        else{
-            console.log("ENTRO ELSE")      
-            PAGE_SIZE = page_size
-            skip = (page_number - 1) * PAGE_SIZE
-            modelMemorialesDecretos.find({isdelete:false}).skip(skip).limit(PAGE_SIZE)
-            .then(result =>{
-                console.log(result);
-                res.status(200).send({message:"Se realizo peticion correctamente",data:result})
-            })
-            .catch(err =>{
-                console.log(err);
-                res.status(500).send({message:"Ocurrio un error",result:err})
-            })
-        }
-        
-       
-    }
-
-    async function ReadbyId(req,res){
-        const ID= req.params.id
-        modelMemorialesDecretos.find({_id:ID,isdelete:false})
-        .then(result =>{
-            console.log(result);
-            res.status(200).send({message:"Se realizo peticion correctamente",data:result})
-        })
-        .catch(err =>{
-            console.log(err);
-            res.status(500).send({message:"Ocurrio un error",result:err})
-        })
-    }
-
     async function Update(req,res){
-        const DATA = req.body;
-        console.log(DATA);
+        const DATA = req.body;        
         const ID = req.params.id
         modelMemorialesDecretos.update({_id:ID},DATA)
         .then(response =>{
@@ -95,6 +44,55 @@
         })
     }
 
+    async function Read(req,res){
+        let page_number = req.query.page;
+        let page_size = req.query.size;
+        console.log("PAGESIZE",page_size)
+        let PAGE_SIZE = 5
+        let skip
+        if(page_size == null || page_size == undefined){ 
+            console.log("ENTRO IF")            
+           skip = (page_number - 1) * PAGE_SIZE
+           modelMemorialesDecretos.find({isdelete:false}).skip(skip).limit(PAGE_SIZE)
+           .then(result =>{
+               console.log(result);
+               res.status(200).send({message:"Se realizo peticion correctamente",data:result})
+           })
+           .catch(err =>{
+               console.log(err);
+               res.status(500).send({message:"Ocurrio un error",result:err})
+           })
+        }           
+        else{
+            console.log("ENTRO ELSE")      
+            PAGE_SIZE = page_size
+            skip = (page_number - 1) * PAGE_SIZE
+            modelMemorialesDecretos.find({isdelete:false}).skip(skip).limit(PAGE_SIZE)
+            .then(result =>{
+                console.log(result);
+                res.status(200).send({message:"Se realizo peticion correctamente",data:result})
+            })
+            .catch(err =>{
+                console.log(err);
+                res.status(500).send({message:"Ocurrio un error",result:err})
+            })
+        }   
+    }
+
+    async function ReadbyId(req,res){
+        const ID= req.params.id
+        modelMemorialesDecretos.find({_id:ID,isdelete:false})
+        .then(result =>{
+            console.log(result);
+            res.status(200).send({message:"Se realizo peticion correctamente",data:result})
+        })
+        .catch(err =>{
+            console.log(err);
+            res.status(500).send({message:"Ocurrio un error",result:err})
+        })
+    }
+
+    
     async function GetMemorialsByType(req,res){
         const param =""+req.query.type;
         let check_critery = param.split('/')

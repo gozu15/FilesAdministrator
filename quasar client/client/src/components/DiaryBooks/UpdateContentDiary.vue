@@ -1,7 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <q-page-container>
-      <q-page>
+    <div>    
           <div class="text-h6 text-center" style="text-decoration: underline black;">
               MODIFICACION DEL CONTENIDO
           </div>
@@ -122,8 +121,8 @@
           </q-btn>
         </q-page-sticky>
         </q-form>
-      </q-page>
-    </q-page-container>
+      
+    </div>
   </div>
 </template>
 <script>
@@ -161,12 +160,10 @@ export default {
       this.getentry_date = dateinit;
       this.getdeparture_date = dateend;
      
-      console.log("diary properties", this.diary_content_selected);
+     
       this.UpdateContentFromDiaryBook(this.diary_content_selected)
         .then(response => {
-          console.log(response);
           this.GetDiaryBookById(this.diary_selected);
-          console.log(this.diary_selected);
           this.OnReset();         
         })
         .catch(err => {
@@ -192,36 +189,20 @@ export default {
     ...mapState("diary_books", ["diary_selected","diary_content_selected"]),
     getentry_date:{
         get:function(){
-            let year = new Date(this.diary_content_selected.entry_date).getUTCFullYear();
-            let month = new Date(this.diary_content_selected.entry_date).getUTCMonth() + 1;
-            month = month < 10 ? "0" + month : month;
-            let day = new Date(this.diary_content_selected.entry_date).getUTCDate();
-            let hour = new Date(this.diary_content_selected.entry_date).getUTCHours() - 4;
-            hour = hour >= 10 ? hour : "0" + hour;
-            let min = new Date(this.diary_content_selected.entry_date).getUTCMinutes();
-            min = min >= 10 ? min : "0" + min;
-            let newDateFull = year + "-" + month + "-" + day + " " + hour + ":" + min;
-            return newDateFull
+            
+            return this.diary_content_selected.entry_date
         },
         set:function (newTitle) {
-                this.$store.commit("diary_books/Getentry_date", new Date(newTitle));
+                this.$store.commit("diary_books/Getentry_date", newTitle);
             }
     },
     getdeparture_date:{
         get:function(){
-            let year = new Date(this.diary_content_selected.departure_date).getUTCFullYear();
-            let month = new Date(this.diary_content_selected.departure_date).getUTCMonth() + 1;
-            month = month < 10 ? "0" + month : month;
-            let day = new Date(this.diary_content_selected.departure_date).getUTCDate();
-            let hour = new Date(this.diary_content_selected.departure_date).getUTCHours() - 4;
-            hour = hour >= 10 ? hour : "0" + hour;
-            let min = new Date(this.diary_content_selected.departure_date).getUTCMinutes();
-            min = min >= 10 ? min : "0" + min;
-            let newDateFull = year + "-" + month + "-" + day + " " + hour + ":" + min;
-            return newDateFull
+          
+            return this.diary_content_selected.departure_date
         },
         set:function (newTitle) {
-                this.$store.commit("diary_books/Getdeparture_date", new Date(newTitle));
+                this.$store.commit("diary_books/Getdeparture_date", newTitle);
             }
     },
         getaccused:{

@@ -20,89 +20,89 @@ export default {
     ...mapActions('notify',['GetNotifyinQueue','TimeOutNotifyDate','UpdateNotify','GetAllNotify','GetAllNotifyInProcessStore']),
      SendObject(){
        this.GetNotifyinQueue()
-       .then(response =>{
-          if(response.data == ""){
+       .then(response =>{        
+          if(response.data == ""){           
               let timeNow = new Date().getTime() - (1000 * 60 * 60 * 4);
               timeNow += 5000;
               this.RealoadNotifyselected({date_end:new Date(timeNow), id: null})
               this.$socket.emit('recieve_date',this.notify_selected)
               this.NotifyCommingToEnd(true)
             }
-            else{
+            else{              
                this.RealoadNotifyselected(response.data);
                 this.$socket.emit('recieve_date',this.notify_selected)
                 this.NotifyCommingToEnd(true)
             }
-            console.log("RESPONSE",response)               
+                    
             })
         .catch(err =>{
                 console.log(err);
             })
-      }
-  },
-  sockets: {
-   connect: function () {
-     this.isConnected = true;
-        console.log('socket connected')      
-        
-        },
-    // customEmit: function (data) {
-    //     console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
-    // }, 
-    dissconnect() {
-      this.isConnected = false;
-      console.log('socket desconnected')
-    },
-    checkPingFromServer(data){
-      console.log("Check ping",data);
-      this.SendObject();
-    },
-    timeout_notify(data){
-      console.log(this.isNotifyCommingToEnd);
-      if(this.isNotifyCommingToEnd){
-        
-        data.status="LLEGANDO A TERMINO"
-        this.UpdateNotify(data)
-        .then(response =>{
-          console.log("CHECK UPDATE",response)
-          if(response.data.nModified == 1){
-             this.NotifyEndInterval(true);      
-          this.CheckIfNotifyIsTimeout(data);          
-          this.GetAllNotify()
-          this.GetAllNotifyInProcessStore()
-            this.NotifyCommingToEnd(false)
-            //this.CheckIfNotifyIsTimeout(data)
-          }
-          else{
-            this.NotifyCommingToEnd(false)
+      },
+      GetNotifyToEndFromAPI(data){
+         if(data.status == "LLEGANDO A TERMINO"){
+             this.NotifyCommingToEnd(false);
             this.CheckIfNotifyIsTimeout(data);
+            this.GetAllNotifyInProcessStore();
+            this.GetAllNotify();
             this.$q.notify({
             color: 'red-5',
             textColor: 'white',
             icon: 'warning',
             message: 'Conclusion de notificacion,Audiencia en curso...'
           })        
-          }
-         
-        })
-        .catch(err =>{
-          console.log(err);
-        })        
-        //this.SendObject();
-      }      
+        }
+        else{
+          data.status="LLEGANDO A TERMINO"
+          this.UpdateNotify(data)
+          .then((response) =>{
+            console.log("Res",response)
+            this.NotifyEndInterval(true);      
+            this.CheckIfNotifyIsTimeout(data);          
+            this.GetAllNotify()
+            this.NotifyCommingToEnd(false)
+            this.GetAllNotifyInProcessStore()
+            this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'warning',
+            message: 'Conclusion de notificacion,Audiencia en curso...'
+          })        
+          })
+          .catch(err =>{
+            console.log(err);
+          })        
+        }
+      }
+  },
+  sockets: {
+   connect: function () {
+     this.isConnected = true;
+        console.log('socket connected')
+    }, 
+    checkPingFromServer(data){   
+      this.SendObject();
+    },
+    postcreate_notify(){
+      this.GetAllNotify();
+    },
+    finished_notification(data){
+      console.log("Finalizando notificacion",data);
+      this.GetAllNotify();
+      this.GetAllNotifyInProcessStore()
+    },
+    timeout_notify(data){ 
+       this.GetNotifyToEndFromAPI(data)
     }
   },
   computed:{
     ...mapState('notify',['list_notify','notify_selected','isNotifyCommingToEnd'])
   },
-  mounted(){    
-    // this.SendObject();
-    // this.$socket.subscribe("recieve_date", function(data) {
-    //     console.log("This event was fired by eg. sio.emit('kebab-case')", data)
-    // })
+  mounted(){ 
   },
   destroyed(){
-    this.$socket.emit('dissconnect');
+    console.log("DESTROY")
+    this.$socket.disconnect();
   }
 }
 </script>

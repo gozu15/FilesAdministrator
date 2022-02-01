@@ -8,9 +8,10 @@
       :active="getitemactive === checkactive"
       active-class="my-menu-link"     
       @click="goToPath(pathLink)"
+      
     >
       <q-item-section v-if="icon" avatar>
-        <q-icon :name="icon" />
+        <q-icon color="positive" :name="icon" />
       </q-item-section>
 
       <q-item-section>
@@ -23,19 +24,21 @@
       v-if="type == 'array'"
         expand-separator
         :icon="icon"
-        :label="title"       
+        :label="title" 
       >
         <q-item
           v-for="(item, index) in new_array"
           :key="index"
           clickable
+          :active="getitemactivemodel == item.checkactivemodel"
+           active-class="my-menu-link"   
           tag="a"
           target="_blank"
-          @click="goToPath(item.pathLink)"
+          @click="goToPathModel(item.pathLink,item.checkactivemodel)"         
           
         >
           <q-item-section v-if="item.icon" avatar>
-            <q-icon :name="item.icon" />
+            <q-icon color="positive" :name="item.icon" />
           </q-item-section>
 
           <q-item-section>
@@ -94,10 +97,15 @@ export default {
     goToPath(path) {
       this.$router.push(path);
       this.getitemactive = this.checkactive
+     
+    },
+    goToPathModel(path,check){
+         this.$router.push(path);
+          this.getitemactivemodel = check
     }
   },
   computed:{
-    ...mapState('init_variables',['item_active']),
+    ...mapState('init_variables',['item_active','item_active_model']),
     getitemactive:{
       get:function(){
         return this.$store.state.init_variables.item_active;
@@ -105,21 +113,33 @@ export default {
       set:function(value){
       this.$store.commit("init_variables/CheckItemActive", value);
       }
+    },
+    getitemactivemodel:{
+       get:function(){
+        return this.$store.state.init_variables.item_active_model;
+      },
+        set:function(value){
+        this.$store.commit("init_variables/CheckItemActiveInModel", value);
+      }
     }
   }
 };
 </script>
-<style>
-.q-item-docs{
-  padding: 0 !important;
-}
-.q-item{
-  font-family: serif;
-  font-size: 20px;
-  height: 63px;
-}
-.my-menu-link{
-  color: white;
-  background-color: #0c7c02
-}
+<style lang="sass" scoped>
+@import '../css/quasar.variables.scss'
+.q-item-docs
+  padding: 0 !important
+
+.items-menu
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+  font-size: 17px
+  height: 75px
+
+.my-menu-link
+  color: white
+  background-color: rgb(9, 9, 9) !important
+
+.q-expansion-item
+  color: $positive !important
+
 </style>

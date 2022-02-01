@@ -9,9 +9,7 @@ module.exports = (app, multi,rutaProtegida) => {
     router.put('/update/:id',controllerDocument.updateDataDocument);
     router.post('/upload', multi, controllerDocument.RequestDocument)
     router.get('/read',controllerDocument.ReadDocumentToRelationship)
-    router.post('/search',controllerDocument.FindDataFromCoverInformationImage);
-    //RUTA DE USO DE MODULO MAMMOTH
-    router.get('/check',controllerDocument.ReadDocument);
+    router.get('/search/cover_image',controllerDocument.FindDataFromCoverInformationImage); 
     //GET IMAGE BY NAME
     router.get('/image/:name',controllerDocument.getImageByName);
     //router.get('/check-prod',controllerDocument.TexttractModuleRead);

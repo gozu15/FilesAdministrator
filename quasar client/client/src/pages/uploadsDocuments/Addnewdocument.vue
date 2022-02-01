@@ -30,6 +30,9 @@
             <img v-if="image != null" :src="imageUploaded" />
           </div>
         </div>
+        <q-page-sticky position="bottom-right" :offset="[18, 18]">
+            <q-btn @click="DeleteImageMap()" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
       </div>    
       <div v-if="step_two" class="dataimage-content">
         <div class="row">
@@ -91,9 +94,8 @@ export default {
         this.$axios
           .post(`documents/takeImage/${this.urlImage.url_uploaded}`)
           .then(response => {
-            console.log("soy datos imagen", response);
-            this.dataImage = {
-              id: this.id,
+            this.dataImage = {        
+              id:this.id,       
               url_uploaded:this.urlImage.url_uploaded,
               code_document: response.data.object.code_document,
               crime: response.data.object.crime,
@@ -104,19 +106,25 @@ export default {
               appellant: response.data.object.appellant,
               relevant_court: response.data.object.relevant_court,
               victim: response.data.object.victim
-            };
-            this.getDataCoverImage(this.dataImage);
-            this.changeStepTwo();
-            this.$q.loading.hide()
-            console.log("SOY DATA IMG", this.dataImage);
-          })
+            };       
+              
+             this.getDataCoverImage(this.dataImage);      
+             this.changeStepTwo();              
+              this.$q.loading.hide()          
+            this.NotifySucces("Solicitud concretada")})
           .catch(err => {
-            console.log("ocurrio un error", err);
+            //  this.dataImage = {
+            //   id: this.id            
+            // };
+            this.getDataCoverImage(this.dataImage);
+              this.changeStepTwo();
+            this.$q.loading.hide()
+            this.NotifyError("Error al realizar la operacion")            
           });
       }
     },
     uploadImage() {
-      console.log(this.files);
+      
       if (this.file != null || this.files != undefined) {
         const file = this.files[0];
         const formData = new FormData();
@@ -128,7 +136,7 @@ export default {
             }
           })
           .then(async response => {
-            console.log("this is image", response);
+            
             this.image = await response.data.image;
             this.urlImage = await response.data.data;
             this.id = await response.data.data._id;
@@ -139,11 +147,18 @@ export default {
             console.error(err);
           });
       } else {
-        console.log("NO EXISTEN DATOS");
+        
       }
     },
+    DeleteImageMap(){
+            this.$router.replace({
+                name:'UploadImage'
+            })
+        },
+
     ...mapMutations("upload_image", ['getDataCoverImage',"changeStepOne",
-"changeStepTwo",])
+"changeStepTwo",]),
+...mapActions("upload_image",['CreateCoverDocument'])
   },
   computed: {
     ...mapState("upload_image", [

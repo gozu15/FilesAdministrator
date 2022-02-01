@@ -27,7 +27,8 @@ const routes = [
       { path: 'memorials_models', component: () => import('src/pages/memoriales&decretos/MemorialsModels'), name:'MemorialDecretModel' },
       { path: 'memorials_models_create', component: () => import('src/components/MemorialsDecretsModels/Create.vue'), name:'MemorialDecretModelCreate' },
       { path: 'memorials_models_update', component: () => import('src/components/MemorialsDecretsModels/Update.vue'), name:'MemorialDecretModelUpdate' },
-      
+      { path: 'memorials_models_linking', component: () => import('src/components/MemorialsDecretsModels/JoinCoverImageTagsAndModels.vue'), name:'MemorialModelsLinking'},
+
       { path: 'library_laws', component: () => import('pages/library_laws/Index.vue'), name:'LibraryLaws' },
       { path: 'library_laws_create', component: () => import('src/components/LibraryLawsAndRegulations/CreateLibrary.vue'), name:'LibraryLawsAdd' },
       { path: 'library_laws_init', component: () => import('src/components/LibraryLawsAndRegulations/GetAll.vue'), name:'LibraryLawsList' },

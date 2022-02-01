@@ -51,7 +51,10 @@
                         <img :src="image_cover_image" alt="Cover image" style="width:90%">
                     </div>                    
                 </div>
-            </div>
+            </div>  
+          <q-page-sticky position="bottom-right" :offset="[18, 18]">
+            <q-btn @click="DeleteImageMap()" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
         </div>
     </div>
 </template>
@@ -70,15 +73,20 @@ export default {
         ...mapMutations('upload_image',[]),
         getImagePreview(){
             this.$axios.get(`documents/image/${this.cover_image_information.url_uploaded}`)
-             .then(response =>{         
-         console.log(response)
-         //this.onImage = true;
+             .then(response =>{    
           this.image_cover_image = response.data.image;
        })
        .catch(error =>{
          console.log(error);
        })
-        }
+        },
+        PreviewImage(){},
+        enableInputs(){},
+        DeleteImageMap(){
+            this.$router.replace({
+                name:'UploadImage'
+            })
+        },
     },
     computed:{
         ...mapState('upload_image',['cover_image_information'])

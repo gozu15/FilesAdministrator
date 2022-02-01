@@ -28,8 +28,13 @@
         :rules="[ val => val && val.length > 0 || 'Porfavor ingresa un dato valido']"
       />
         <div class="q-mt-md">
-        <q-btn label="Registrar" type="submit" color="primary"/>
-        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" />
+             <q-page-sticky position="bottom-right" :offset="[18, 122]">
+            <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
+          </q-page-sticky>         
+          <q-page-sticky position="bottom-right" :offset="[18, 70]">
+            <q-btn type="reset" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
+        
       </div>
         </q-form>
     </div>
@@ -45,7 +50,7 @@ export default {
         ...mapActions('diary_books',['CreateDiaryBook','GetListDiaryBooks','UpdateDiaryBook']),
         ...mapMutations('diary_books',[]),
         OnSubmit(){
-            console.log(this.diary_selected);
+           
             this.UpdateDiaryBook(this.diary_selected);
             this.GetListDiaryBooks();
             this.OnReset();

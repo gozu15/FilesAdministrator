@@ -22,8 +22,15 @@
       />     
 
       <div>
-        <q-btn label="Guardar" type="submit" color="primary"/>
-        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" />
+        
+          <q-page-sticky position="bottom-right" :offset="[18, 122]">
+            <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
+          </q-page-sticky>         
+          <q-page-sticky position="bottom-right" :offset="[18, 70]">
+            <q-btn type="reset" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
+        <!-- <q-btn label="Guardar" type="submit" color="primary"/>
+        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" /> -->
       </div>
     </q-form>
     </div>
@@ -39,12 +46,9 @@ export default {
     methods:{
          ...mapMutations('library',[]),
         ...mapActions('library',['UpdatePDFSelected']),
-        OnSubmit(){                          
-           
-            console.log(this.properties_bookpdf);
+        OnSubmit(){         
             this.UpdatePDFSelected(this.properties_bookpdf);
             this.onReset();
-            
         },
         OnReset(){
             this.$router.replace({

@@ -27,10 +27,19 @@
         </template>
       </q-file>     
 
-      <div class="btn-content">
-        <q-btn label="Guardar" type="submit" color="primary"/>
+      <div class="btn-content">         
+          <q-page-sticky position="bottom-right" :offset="[18, 122]">
+            <q-btn type="submit" fab icon="fas fa-save" color="blue" padding="10px" />
+          </q-page-sticky>
+          <q-page-sticky position="bottom-right" :offset="[18, 70]">
+            <q-btn  @click="ClearPropertiesBook" fab icon="fas fa-snowplow" color="green" padding="10px" />
+          </q-page-sticky>
+          <q-page-sticky position="bottom-right" :offset="[18, 18]">
+            <q-btn type="reset" fab icon="fas fa-times" color="red" padding="10px" />
+          </q-page-sticky>
+        <!-- <q-btn label="Guardar" type="submit" color="primary"/>
         <q-btn label="Limpiar" @click="ClearPropertiesBook" color="primary"/>
-        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" />
+        <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" /> -->
       </div>
     </q-form>
     </div>
@@ -53,8 +62,7 @@ export default {
         ...mapActions('library',['CreateandUploadPdf','GetAllPDFs']),
         async onSubmit(){
             if(this.model != null){               
-                this.library_properties.pdf_properties = this.model;       
-                console.log(this.library_properties);
+                this.library_properties.pdf_properties = this.model;   
                 await this.CreateandUploadPdf(this.library_properties);                
                 this.onReset();
             }

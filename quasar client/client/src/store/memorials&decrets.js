@@ -3,6 +3,8 @@ const vue = Vue.prototype;
 export const MemorialsDecretsStore ={
     namespaced:true,
     state:{
+        open_dialog:false,
+        models_list:[],
         memorials_list_searching:[],
         memorial_model_to_join:"Ingrese un dato",
         isReloadingModelWithTags:false,
@@ -24,7 +26,12 @@ export const MemorialsDecretsStore ={
         checkParamSearch:null,
     },
     mutations:
-    {   
+    {   OpenDialog(state){
+            state.open_dialog = true;
+        },
+        CloseDialog(state){
+            state.open_dialog = false;
+        },
         changeEditorViewer(state,payload){
             state.closeeditor = payload
         },
@@ -53,13 +60,11 @@ export const MemorialsDecretsStore ={
             }
         },
 
-        WritingDocumentText(state, payload){
+        async WritingDocumentText(state, payload){          
             state.memorial_text_doc = payload
             let check =  state.memorial_text_doc
             check = check.replace(/;/g,'ascii59');
-            let textInput = ""+ check
-            document.cookie = "text_memorial="+encodeURI(textInput);
-            console.log("MEMO",document.cookie)
+            window.localStorage.setItem('text_memorial',check)   
         },
         WritingDocumentTextToJoinModel(state, payload){
             state.memorial_model_to_join = payload
@@ -67,23 +72,36 @@ export const MemorialsDecretsStore ={
         AddTagInDocumentText(state,payload){
             let checkifitistheend = false
             let getlength = state.memorial_text_doc.length;
-            console.log(typeof state.memorial_text_doc)
-            console.log("LENGTH",getlength)
+           
             state.memorial_text_doc += payload;
-            console.log("CHECK DOC",state.memorial_text_doc);
-            //this.$refs.editor_ref.runCmd('insertText', payload)
+        
         },
+        ReloadModelsInList(state,payload){
+            payload.forEach(element =>{
+                state.models_list.push(element);
+            })
+        },     
         ReloadListMemorials(state,payload){
-            console.log("RELOAD",payload);//
-            if(state.memorials_list.length != 0 && state.pageauxiliar != state.page ){                      
-                payload.forEach(element => {
-                    state.memorials_list.push(element)
-                });       
-                state.pageauxiliar = state.page        
+          
+            let check = true;
+            if(state.memorials_list.length != 0){
+                for (let index = 0; index < payload.length; index++) {
+                    for (let j = 0; j < state.memorials_list.length; j++) {
+                        if(payload[index]._id == state.memorials_list[j]._id){
+                            check = false;
+                            break;
+                        }
+                    }
+              }
+              if(check){
+               state.memorials_list = [...state.memorials_list,...payload]
+              }                                 
             }
-            else{    
+            else{
                 state.memorials_list = payload;
-            }
+            }  
+           
+           // state.memorials_list = [...state.memorials_list,...payload];
                       
         },
         ReloadListToSearchMemorials(state,payload){           
@@ -101,18 +119,37 @@ export const MemorialsDecretsStore ={
             state.checkParamSearch = payload;
         },
         AddTagInToDocumentText(state,payload){
-            console.log("addtag")
+           
             state.memorial_properties.documents_text += payload;
         },
-        ReloadMemorialProperties(state,payload){
+        ReloadMemorialProperties(state,payload){                  
             state.memorial_properties={
-                id:payload._id || payload.id,
+                id: (payload._id != undefined ? payload._id : payload.id),
                 name:payload.name,                
                 type_document:payload.type_document,
                 description:payload.description,
                 documents_text:payload.documents_text,
-            }
+            }            
         },
+
+        IdPropertieMemorial(state,payload){
+            state.memorial_properties.id = payload;
+        },
+        NamePropertieMemorial(state,payload){
+            state.memorial_properties.name = payload;
+        },
+        TypePropertieMemorial(state,payload){
+            state.memorial_properties.type_document = payload;
+        },
+        DescriptionPropertieMemorial(state,payload){
+            state.memorial_properties.description = payload
+        },
+        DocumentTextPropertieMemorial(state,payload){
+            state.memorial_properties.documents_text = payload
+        },
+       
+
+
         IsSearching(state){
             state.isSearching = true;
         },
@@ -121,6 +158,11 @@ export const MemorialsDecretsStore ={
         },
         ChangePage(state,payload){
             state.page = payload;
+        },
+        ChangePrevPage(state){
+            if(state.page >0){
+                state.page -=1
+            }            
         },
         ChangeNextPage(state){
             state.page += 1;
@@ -135,29 +177,41 @@ export const MemorialsDecretsStore ={
             state.rowPerPage=5
         },
 
-        ClearData(state){
+        ClearData(state){            
+            state.models_list = []
             state.memorial_properties={
                 id:null,
                 name:null,               
                 description:null,
                 documents_text:null,
             }
+            state.isReloadingModelWithTags= false;
             state.page=1;
             state.rowPerPage=5,
-            state.memorial_text_doc='Editor de texto',
-            state.memorial_model_to_join = 'Editor de texto'
+            state.memorial_text_doc= window.localStorage.getItem('text_memorial') != undefined ? window.localStorage.getItem('text_memorial') : 'Editor de texto',
+            state.memorial_model_to_join = window.localStorage.getItem('text_memorial') != undefined ? window.localStorage.getItem('text_memorial') : 'Editor de texto',
+            state.memorials_list_searching = []
+            state.memorials_list = []
+            document.cookie ="text_memorial_model='ingrese texto'" 
+            state.memorial_text_doc = state.memorial_text_doc.replace(/ascii59/g,';'); 
+            state.memorial_model_to_join = state.memorial_model_to_join.replace(/ascii59/g,';');   
         }
 
     },
    
     actions:{
+        OpenDialogDelete({commit}){
+            commit('OpenDialog');
+        },
+        CloseDialogDelete({commit}){
+            commit('CloseDialog');
+        },
         FindDataFromMemorialsDocs({commit,state},payload){
             let check = payload.name;
             if(payload != undefined || payload != null)
             {
                 commit('ChangePage',payload.page);
-                commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+                commit('changeRowsPerPage',payload.rowPerPage);                
             }   
             if(state.checkParamSearch != check){
                 commit('ClearListFromSearch')
@@ -169,11 +223,10 @@ export const MemorialsDecretsStore ={
                         name:payload.name,
                         description:payload.description,
                         documents_text:payload.documents_text,
-                        type:'Decreto/Memorial'
+                        type:'Memorial'
                     }
                 })
-                .then(response =>{
-                    console.log(response)
+                .then(response =>{                   
                     commit('ReloadListToSearchMemorials',response.data.data);
                 })
                 .catch(err =>{
@@ -188,28 +241,270 @@ export const MemorialsDecretsStore ={
                         name:payload.name,
                         description:payload.description,
                         documents_text:payload.documents_text,
-                        type:'Decreto/Memorial'
+                        type:'Memorial'
                     }
                 })
                 .then(response =>{
-                    console.log(response)
+                  
                     commit('ReloadListToSearchMemorials',response.data.data);
                 })
                 .catch(err =>{
                     console.log(err)
                 })
             }
-            
-            
-
         },
+        
+        FindDataFromAcusationsDocs({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);                
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Acusations'
+                    }
+                })
+                .then(response =>{                   
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Acusations'
+                    }
+                })
+                .then(response =>{
+                  
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+
+        FindDataFromResolutionDocs({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);                
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Resolutions'
+                    }
+                })
+                .then(response =>{                   
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Resolutions'
+                    }
+                })
+                .then(response =>{
+                  
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+
+        FindDataFromDecretsDocs({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);                
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Decreto'
+                    }
+                })
+                .then(response =>{                   
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Decreto'
+                    }
+                })
+                .then(response =>{
+                  
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+
+        FindDataFromAutosDocs({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);                
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Autos'
+                    }
+                })
+                .then(response =>{                   
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Autos'
+                    }
+                })
+                .then(response =>{
+                  
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+
+        
+        FindDataFromSentencesDocs({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);                
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Sentence'
+                    }
+                })
+                .then(response =>{                   
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'Sentence'
+                    }
+                })
+                .then(response =>{
+                  
+                    commit('ReloadListToSearchMemorials',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+
+
+
+
         FindDataFromMemorialsModels({commit,state},payload){
             let check = payload.name;
             if(payload != undefined || payload != null)
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+               
             }   
             if(state.checkParamSearch != check){
                 commit('ClearListFromSearch')
@@ -221,11 +516,11 @@ export const MemorialsDecretsStore ={
                         name:payload.name,
                         description:payload.description,
                         documents_text:payload.documents_text,
-                        type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel'
+                        type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel/ResolucionesModel/SentenciasModel'
                     }
                 })
                 .then(response =>{
-                    console.log(response)
+                   
                     commit('ReloadListToSearchMemorials',response.data.data);
                 })
                 .catch(err =>{
@@ -244,7 +539,7 @@ export const MemorialsDecretsStore ={
                     }
                 })
                 .then(response =>{
-                    console.log(response)
+                   
                     commit('ReloadListToSearchMemorials',response.data.data);
                 })
                 .catch(err =>{
@@ -255,12 +550,62 @@ export const MemorialsDecretsStore ={
             
 
         },
+        GetDataFromMemorialsModelsSearch({commit,state},payload){
+            let check = payload.name;
+            if(payload != undefined || payload != null)
+            {
+                commit('ChangePage',payload.page);
+                commit('changeRowsPerPage',payload.rowPerPage);
+               
+            }   
+            if(state.checkParamSearch != check){
+                commit('ClearListFromSearch')
+                commit('OnLoadParamToSearch',check)
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel/ResolucionesModel/SentenciasModel'
+                    }
+                })
+                .then(response =>{
+                
+                    commit('ReloadModelsInList',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+            else{
+                vue.$axios.get('memorials_decrets/read/memorials/from/search',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        name:payload.name,
+                        description:payload.description,
+                        documents_text:payload.documents_text,
+                        type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel/ResolucionesModel/SentenciasModel'
+                    }
+                })
+                .then(response =>{
+              
+                    commit('ReloadModelsInList',response.data.data);
+                })
+                .catch(err =>{
+                    console.log(err)
+                })
+            }
+        },
+        
         async GetMemorialsFromApi({commit,state},payload){
             if(payload != undefined || payload != null)
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+             
             }   
            
             vue.$axios.get('memorials_decrets/read/typememorials/from',{
@@ -271,13 +616,25 @@ export const MemorialsDecretsStore ={
                 }
             })
             .then(async response =>{
-                console.log("RESULTADO",response)
+              
                 commit('ReloadListMemorials',await response.data.data);
             })
             .catch(error =>{
                 console.log(error);
             })
             
+        },
+        //OBTENER LISTA DE LOS MODELOS
+        GetMemorialsModelInList({commit,state},payload){
+
+           return vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                params:{                    
+                    page:payload.page || 1,
+                    size:payload.rowPerPage || 5,
+                    type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel/ResolucionesModel/SentenciasModel'
+                }
+            })
+         
         },
 
         async GetMemorialsFromApiAutos({commit,state},payload){
@@ -285,48 +642,59 @@ export const MemorialsDecretsStore ={
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+               
             }   
-           
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
-                params:{
-                    page:state.page,
-                    size:state.rowPerPage,
-                    type:'Autos'
-                }
-            })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+           let promise;
+           return promise = new Promise((resolve,reject) =>{
+                vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        type:'Autos'
+                    }
+                })
+                .then(response =>{
+                    commit('ReloadListMemorials', response.data.data);
+                    resolve(response.data)
+                })
+                .catch(err =>{
+                    console.log(err);
+                    reject(err)
+                })
+           })
+          
+            
             
         },
 
-        async GetMemorialsFromApiMemorials({commit,state},payload){
+        async GetMemorialsFromApiMemorials({commit,state},payload){   
             if(payload != undefined || payload != null)
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+               
             }   
-           
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+            let promise;
+        return promise = new Promise((resolve,reject) =>{
+             vue.$axios.get('memorials_decrets/read/typememorials/from',{
                 params:{
                     page:state.page,
                     size:state.rowPerPage,
                     type:'Memorial'
                 }
             })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
+            .then(response =>{
+              
+                commit('ReloadListMemorials', response.data.data);
+                resolve(response.data)
             })
-            .catch(error =>{
-                console.log(error);
+            .catch(err =>{
+                console.error(err);
+                reject()
             })
+        })
+        
+            
             
         },
 
@@ -335,23 +703,28 @@ export const MemorialsDecretsStore ={
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+               
             }   
-           
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+            let promise
+            return promise = new Promise((resolve,reject)=>{
+                  vue.$axios.get('memorials_decrets/read/typememorials/from',{
                 params:{
                     page:state.page,
                     size:state.rowPerPage,
                     type:'Decreto'
                 }
             })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
+            .then(response =>{
+                commit('ReloadListMemorials', response.data.data);
+                resolve(response.data)
             })
-            .catch(error =>{
-                console.log(error);
+            .catch(err =>{
+                console.log(err)
+                reject()
             })
+            })
+           
+           
             
         },      
         async GetMemorialsFromApiResolutions({commit,state},payload){
@@ -359,23 +732,26 @@ export const MemorialsDecretsStore ={
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+             
             }   
-           
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
-                params:{
-                    page:state.page,
-                    size:state.rowPerPage,
-                    type:'Resolutions'
-                }
-            })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+            let promise
+            return promise = new Promise((resolve,reject)=>{
+                vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        type:'Resolutions'
+                    }
+                })
+                .then(response =>{
+                    commit('ReloadListMemorials', response.data.data);
+                    resolve(response.data)
+                })  
+                .catch(err =>{
+                    console.log(err)
+                    reject()
+                })  
+            })  
             
         },
 
@@ -384,23 +760,27 @@ export const MemorialsDecretsStore ={
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+             
             }   
-           
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
+           let promise
+           return promise = new Promise((resolve,reject) =>{
+                vue.$axios.get('memorials_decrets/read/typememorials/from',{
                 params:{
                     page:state.page,
                     size:state.rowPerPage,
                     type:'Sentence'
                 }
             })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
+            .then(response =>{
+                commit('ReloadListMemorials', response.data.data);
+                resolve(response.data)
             })
-            .catch(error =>{
-                console.log(error);
+            .catch(err =>{
+                console.err(err)
+                reject()
             })
+           })
+           
             
         },
 
@@ -409,71 +789,98 @@ export const MemorialsDecretsStore ={
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+             
             }   
+           let promise 
+           return promise = new Promise((resolve, reject) =>{
+                    vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                    params:{
+                        page:state.page,
+                        size:state.rowPerPage,
+                        type:'Acusations'
+                    }
+                })
+                .then(response =>{                
+                    commit('ReloadListMemorials', response.data.data);
+                    resolve(response.data)
+                })
+                .catch(error =>{
+                    console.log(error);
+                    reject()
+                })
+           })
            
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
-                params:{
-                    page:state.page,
-                    size:state.rowPerPage,
-                    type:'Acusations'
-                }
-            })
-            .then(async response =>{
-                console.log("RESULTADO",response)
-                commit('ReloadListMemorials',await response.data.data);
-            })
-            .catch(error =>{
-                console.log(error);
-            })
             
+        },
+
+        GetMemorialProperties({commit},payload){
+            commit('ReloadMemorialProperties',payload)
         },
 
         CreateMemorialNewDocument({commit,state},payload){
             
-            commit('ReloadMemorialProperties',payload)
-            vue.$axios.post('memorials_decrets/create',state.memorial_properties)
-            .then(response =>{
-                console.log(response)
+            let promise
+            return promise = new Promise((resolve,reject) =>{
+                vue.$axios.post('memorials_decrets/create',payload)
+                .then(response =>{
+                    //commit('ReloadMemorialProperties',payload)
+                    resolve(payload)
+                })
+                .catch(err =>{
+                    reject(err)
+                })
             })
-            .catch(err =>{
-                console.log(err);
-            })
+            
+           
         },
         GetModelsMemorials({commit,state},payload){
             if(payload != undefined || payload != null)
             {
                 commit('ChangePage',payload.page);
                 commit('changeRowsPerPage',payload.rowPerPage);
-                console.log("memopayload",payload);
+             
             }   
-            vue.$axios.get('memorials_decrets/read/typememorials/from',{
-                params:{
-                    page:state.page,
-                    page:state.page,
-                    size:state.rowPerPage,
-                    type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel'
-                }
+            let promise;
+            return promise = new Promise((resolve,reject)=>{
+                vue.$axios.get('memorials_decrets/read/typememorials/from',{
+                    params:{
+                        page:state.page,
+                        page:state.page,
+                        size:state.rowPerPage,
+                        type:'DecretosModel/MemorialesModel/AcusacionesModel/AutosModel/ResolucionesModel/SentenciasModel'
+                    }
+                })
+                .then(response =>{                  
+                    commit('ReloadListMemorials',response.data.data);
+                    resolve(response.data)
+                })
+                .catch(error =>{
+                    console.log(error);
+                    reject()
+                })
             })
-            .then(response =>{
-                console.log(response.data)
-                commit('ReloadListMemorials',response.data.data);
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+           
         },
 
         UpdateModelMemorial({commit,state},payload){
             commit('ReloadMemorialProperties',payload);
             let id = state.memorial_properties.id
-            vue.$axios.put(`memorials_decrets/update/${id}`,state.memorial_properties)
-            .then(response =>{   
-               
+           return  vue.$axios.put(`memorials_decrets/update/${id}`,payload)
+          
+        },
+        DeleteMemorial({commit},payload){
+            let id = payload.id != undefined ? payload.id : payload._id;
+            let promise;
+            return promise = new Promise((resolve,reject) =>{
+                vue.$axios.delete(`memorials_decrets/delete/${id}`)
+                .then(()  =>{
+                    resolve(payload)
+                })
+                .catch(err =>{
+                    reject(err)
+                })
             })
-            .catch(error =>{
-                console.log(error);
-            })
+            
         }
     }
 }

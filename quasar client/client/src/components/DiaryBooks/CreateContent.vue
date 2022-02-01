@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md">
-    <q-page-container>
-      <q-page>
+    <div>
+      
           <div class="text-h6 text-center" style="text-decoration: underline black;">
               REGISTRO DE CONTENIDO PARA EL LIBRO
           </div>
@@ -12,15 +12,15 @@
           <div class="q-ma-md" style="font-size:15px;">
             Seleccione la fecha de entrada *:
             <div class="q-gutter-md row items-start">
-              <q-date v-model="date" mask="YYYY-MM-DD HH:mm" color="purple" />
-              <q-time v-model="date" mask="YYYY-MM-DD HH:mm" color="purple" />
+              <q-date v-model="date_enter" mask="YYYY-MM-DD HH:mm" color="purple" />
+              <q-time v-model="time_enter" mask="YYYY-MM-DD HH:mm" color="purple" />
             </div>
           </div>
           <div class="q-ma-md" style="font-size:15px;">
             Seleccione la fecha de salida *:
             <div class="q-gutter-md row items-start">
-              <q-date v-model="date" mask="YYYY-MM-DD HH:mm" color="purple" />
-              <q-time v-model="date" mask="YYYY-MM-DD HH:mm" color="purple" />
+              <q-date v-model="date_end" mask="YYYY-MM-DD HH:mm" color="purple" />
+              <q-time v-model="time_end" mask="YYYY-MM-DD HH:mm" color="purple" />
             </div>
           </div>
 
@@ -122,8 +122,8 @@
           </q-btn>
         </q-page-sticky>
         </q-form>
-      </q-page>
-    </q-page-container>
+      
+    </div>
   </div>
 </template>
 <script>
@@ -131,12 +131,12 @@ let year = new Date().getUTCFullYear();
 let month = new Date().getUTCMonth() + 1;
 month = month < 10 ? "0" + month : month;
 let day = new Date().getUTCDate();
-let hour = new Date().getUTCHours() - 4;
-hour = hour >= 10 ? hour : "0" + hour;
+let hour = new Date().getHours();
+hour = hour > 10 ? hour : "0" + hour;
 let min = new Date().getUTCMinutes();
-min = min >= 10 ? min : "0" + min;
+min = min > 10 ? min : "0" + min;
 let newDateFull = year + "-" + month + "-" + day + " " + hour + ":" + min;
-console.log(newDateFull);
+
 import { mapState, mapMutations, mapActions } from "vuex";
 export default {
   data() {
@@ -155,7 +155,10 @@ export default {
       accused: null,
       victim: null,
       appellant: null,
-      date: newDateFull
+      date_enter: newDateFull,
+      date_end:newDateFull,
+      time_enter:newDateFull,
+      time_end:newDateFull
     };
   },
   methods: {
@@ -175,15 +178,12 @@ export default {
       this.diary_book_properties.accused = newaccused;
       this.diary_book_properties.victim = newvictim;
       this.diary_book_properties.appellant = newappellant;
-      let dateinit = new Date(this.date);
-      let dateend = new Date(this.date);
+      let dateinit = new Date(this.date_enter);
+      let dateend = new Date(this.date_end);
       this.diary_book_properties.entry_date = dateinit;
-      this.diary_book_properties.departure_date = dateend;
-      console.log("diary selected", this.diary_selected);
-      console.log("diary properties", this.diary_book_properties);
+      this.diary_book_properties.departure_date = dateend;  
       this.CreateContentToDiaryBook(this.diary_book_properties)
-        .then(response => {
-          console.log(response);
+        .then(response => {         
           this.GetDiaryBookById(this.diary_book_properties);
           this.OnReset();
         })

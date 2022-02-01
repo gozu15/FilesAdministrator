@@ -229,7 +229,9 @@ export default {
        {label:'Decreto', value:'DecretosModel'}, 
        {label:'Memorial', value:'MemorialesModel'},
        {label:'Acusaciones', value:'AcusacionesModel'},
-       {label:'Autos de inicio', value:'AutosModel'}   
+       {label:'Autos de inicio', value:'AutosModel'},  
+        {label:'Resoluciones',value:'ResolucionesModel'},
+        {label:'Sentencias',value:'SentenciasModel'}   
       ],
       save_change:false,
       file: null,
@@ -244,28 +246,30 @@ export default {
       "ClearData",
       "AddTagInToDocumentText"
     ]),
+    ...mapMutations("tags_info",['IstagInModel']),
     ...mapActions("memorials_decrets", ['CreateMemorialNewDocument']),
     InputText(e){      
       if(e.key === 9 || e.key === 11){
-        console.log('TAB')
       }
     },
     Open() {
       document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-tabs").style.display = "block";
       document.getElementById("content-tabs").style.width = "35%";
-      console.log("Opem");
+      this.IstagInModel(true);
+      
     },
     Close() {
       document.getElementById("content-tabs").style.display = "none";
       document.getElementById("content-editor").style.width = "100%";
-      console.log("close");
+      this.IstagInModel(false);
+      
     },
     getMemorialList() {},
     VerifyDocument() {      
       //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")
-      console.log(this.memorial_text_doc);
-      console.log("TAG SELECTED",this.tag_selected);
+      
+      
       this.save_change = true;
       //this.pasteCapture();
     },    
@@ -273,40 +277,41 @@ export default {
       let typevalue= this.memorial_object.type_document.value;      
       this.memorial_object.documents_text=this.memorial_text_doc
       this.memorial_object.type_document = typevalue;
-      console.log("MEMORIALS OBKJECT",this.memorial_object);
-      this.CreateMemorialNewDocument(this.memorial_object);   
-      this.GoToMemorialsTable();
+      
+      this.CreateMemorialNewDocument(this.memorial_object)
+      .then(response =>{          
+          this.GobackInit();
+      })
+      .catch(err =>{
+        console.log(err);
+      })
+     
     }, 
-    GobackInit(){
+    GobackInit(){      
         this.GoToMemorialsTable()
+        this.IstagInModel(false);
     },
-    GoToMemorialsTable(){
-      document.cookie ="text_memorial_model='ingrese texto'"
+    GoToMemorialsTable(){     
       this.$router.replace({
         name:'MemorialDecretModel'
       })
+      .then(response =>{
+        window.localStorage.clear();
+         document.cookie ="text_memorial_model='ingrese texto'"   
+        this.document_writing="ingrese texto";
+      })
     },
-    ReadCookie(name){
-      if(document.cookie!= null || document.cookie != undefined){
-          let nameEQ = name + "="; 
-          let ca = document.cookie.split(';');
-
-          for(let i=0;i < ca.length;i++) {
-
-            let c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1,c.length);
-            if (c.indexOf(nameEQ) == 0) {
-              return decodeURIComponent( c.substring(nameEQ.length,c.length) );
-            }
-
-          }
-      }
-      else{
-        document.cookie = "text_memorial_model=' '";        
-      }
-      return 'texto nuevo';      
+    CheckDataFromStorage(){
+    let checkascii = window.localStorage.getItem("text_memorial");
+      checkascii = checkascii.replace(/ascii59/g,';');
+      this.document_writing = checkascii
+      
     },
-    onReset() {},
+   
+    onReset() {
+      
+     
+    },
     getImage() {},
     CheckFile() {
       this.$q.notify({
@@ -323,7 +328,7 @@ export default {
       "memorial_properties",
       "memorial_text_doc"
     ]),
-    ...mapState("tags_info",['tag_selected']),
+    ...mapState("tags_info",['tag_selected','tagsinmodel']),
     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
@@ -339,15 +344,13 @@ export default {
     }
   },
   mounted() {
+    this.CheckDataFromStorage();
      this.ClearData();
-      let checkascii = this.ReadCookie("text_memorial_model");
-    checkascii = checkascii.replace(/ascii59/g,';');
-    this.document_writing = checkascii
-    console.log(this.$store);
+    
   },
   beforeDestroy(){
     //this.ClearData();
-    console.log("Destroyed");
+    
   }
   
 };

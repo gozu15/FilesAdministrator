@@ -29,7 +29,7 @@ export default {
         DeleteCoverImageSelected(){            
             this.$axios.delete(`documents/delete/${this.id_cover}`)
             .then(response =>{
-                console.log(response);
+              
                 this.GetDataFromApi();
             })
             .catch(err =>{

@@ -120,7 +120,7 @@ export default {
       this.$axios
         .get("models_documents")
         .then((result) => {
-          console.log(result);
+        
           this.caratulas = result.data;
         })
         .catch((err) => {
@@ -131,7 +131,7 @@ export default {
       this.$axios
         .get("documents/read")
         .then((result) => {
-          console.log("documents", result);
+       
           this.documents = result.data;
           this.imputados = result.data.imputados;
           this.querellantes = result.data.querellantes;
@@ -154,9 +154,6 @@ export default {
           this.relasionshipData.jsondata[index]
         );
       }
-      console.log("Soy data", this.relasionshipData);
-
-      console.log("relation", data);
     },
   },
   computed: {

@@ -20,21 +20,11 @@
         hint="descripcion para la notificacion"       
       />
       <div class="q-gutter-md row items-start">
-      <q-date v-model="getDatefull" mask="YYYY-MM-DD HH:mm" color="blue" />
-      <q-time v-model="getDatefull" mask="YYYY-MM-DD HH:mm" color="blue" />
+      <q-date v-model="model" mask="YYYY-MM-DD HH:mm" color="blue" />
+      <q-time v-model="model" mask="YYYY-MM-DD HH:mm" color="blue" />
     </div>
 
-      <q-input
-        filled
-        type="number"
-        v-model="getIntervalo"
-        label="Ingrese cantidad de minutos antes de mandar notificacion *"
-        lazy-rules
-        :rules="[
-          val => val !== null && val !== '' || 'Ingrese un numero valido',
-          val => val > 0 && val < 60 || 'Ingrese un numero valido'
-        ]"
-      />     
+      
       <div>
         <q-btn label="Guardar" type="submit" color="primary"/>
         <q-btn label="Cancelar" type="reset" color="red" flat class="q-ml-sm" />
@@ -44,6 +34,16 @@
 </template>
 <script>
 import {mapState,mapActions,mapMutations} from 'vuex'
+ let year = new Date().getUTCFullYear()
+let month = new Date().getUTCMonth()+1
+  month = month < 10 ? "0"+month : month ;
+let day = new Date().getUTCDate()               
+let hour = new Date().getHours()
+hour = hour >= 10 ? hour : "0" + hour;
+let min = new Date().getMinutes()
+min = min >= 10 ? min : "0" + min;
+let newDateFull = year+"-"+month+"-"+day+" "+hour+":"+min   
+const getTimeNow = newDateFull     
 export default {
     data(){
         return{
@@ -54,24 +54,29 @@ export default {
                 date_init:null,
                 lapso:null,
             },
-            model: '2021-02-22 21:02'
+            model: getTimeNow
         }
     },
     methods:{
         ...mapMutations('nofity',['getNameNotify']),
-        ...mapActions('notify',['CreateNotify','UpdateNotify']),
+        ...mapActions('notify',['CreateNotify','UpdateNotify','getStatus','getnewDateEnd']),
         onSubmit(){   
             //this.CreateNotify(this.notify_properties)
-            this.UpdateNotify(this.notify_selected)
+            this.getStatus("EN PROCESO");
+            this.getnewDateEnd(this.model)
+            
+  
+            
+            this.UpdateNotify(this.notify_viewmore)
              .then(response =>{
-                console.log(response)
+                this.$socket.emit('recieve_date',this.notify_viewmore);
                 this.onReset();
             })
             .catch(err =>{
                 console.log(err)
                  this.onReset();
             })
-            console.log(this.notify_selected);
+            
         },
         onReset(){
           this.$router.replace({
@@ -80,13 +85,13 @@ export default {
         },
     },  
     computed:{
-        ...mapState('notify',['notify_selected']),
+        ...mapState('notify',['notify_viewmore']),
         getDate(){
 
         },
         getNameNoti:{       
             get: function() {
-            return this.$store.state.notify.notify_selected.name;
+            return this.$store.state.notify.notify_viewmore.name;
             },
             set: function (newTitle) {
                 this.$store.commit("notify/getNameNotify", newTitle);
@@ -94,7 +99,7 @@ export default {
         },
          getDescriptionNoti:{       
             get: function() {
-            return this.$store.state.notify.notify_selected.description;
+            return this.$store.state.notify.notify_viewmore.description;
             },
             set: function (newTitle) {
                 this.$store.commit("notify/getDescriptionNotify", newTitle);
@@ -102,31 +107,12 @@ export default {
         },
          getIntervalo:{       
             get: function() {
-            return this.$store.state.notify.notify_selected.lapso;
+            return this.$store.state.notify.notify_viewmore.lapso;
             },
             set: function (newTitle) {
                 this.$store.commit("notify/getLapsoNotify", newTitle);
             }
-        },
-         getDatefull:{       
-            get: function() {
-                let year = new Date(this.notify_selected.date_end).getUTCFullYear()
-                let month = new Date(this.notify_selected.date_end).getUTCMonth()+1
-                 month = month < 10 ? "0"+month : month ;
-                console.log(month);
-                let day = new Date(this.notify_selected.date_end).getUTCDate()               
-                let hour = new Date(this.notify_selected.date_end).getUTCHours()
-                hour = hour >= 10 ? hour : "0" + hour;
-                let min = new Date(this.notify_selected.date_end).getUTCMinutes()
-                min = min >= 10 ? min : "0" + min;
-                let newDateFull = year+"-"+month+"-"+day+" "+hour+":"+min
-                console.log(newDateFull);
-            return newDateFull
-            },
-            set: function (newTitle) {
-                this.$store.commit("notify/getDateFullNotify", newTitle);
-            }
-        }
+        },       
     }
 }
 </script>

@@ -9,7 +9,7 @@
           <div class="col-4">
             <section>
               <h3>Crimen</h3>
-              <p>{{ cover_image_information.crime || 'No se pudo obtener el dato correctamente'}}</p>
+              <p>{{ cover_image_information.crime != null  || 'No se pudo obtener el dato correctamente'}}</p>
             </section>
           </div>
           <div class="col-8">
@@ -125,6 +125,52 @@
             </div>
           </div>
           <!-- FIN NOVENA ENTRADA -->
+           <!-- FECHA DEL DOCUMENTO -->
+           <div class="col-4">
+            <section>
+              <h3>Fecha de ingreso</h3>
+              <p>
+                <ul v-if="cover_image_information.date_admission != null">
+                  <li>
+                    {{cover_image_information.date_admission}}
+                  </li>
+                </ul>
+                <ul v-if="cover_image_information.date_admission == null">
+                  <li>No se pudo obtener los datos correctamente</li>
+                </ul>
+                
+                </p>
+            </section>
+          </div>
+          <div class="col-8">
+           <div class="q-gutter-md row items-start">
+            <q-input v-model="data.date_admission" filled type="date" hint="Fecha de ingreso del documento" :disable="disable"/>    
+            <!-- <q-btn flat color="primary" label="clickme" @click="check"></q-btn>          -->
+          </div>
+          </div>
+         <!-- FIN FECHA DOCUMENTO -->
+          <div class="col-4">
+            <section>
+              <h3>Hora de ingreso</h3>
+              <p>
+                <ul v-if="cover_image_information.hours_admission != null">
+                  <li>
+                    {{cover_image_information.hours_admission}}
+                  </li>
+                </ul>
+                <ul v-if="cover_image_information.hours_admission == null">
+                  <li>No se pudo obtener los datos correctamente</li>
+                </ul>
+                
+                </p>
+            </section>
+          </div>
+          <div class="col-8">
+           <div class="q-gutter-md row items-start">            
+            <q-input v-model="data.hours_admission" filled type="time" hint="Hora de ingreso" :disable="disable"/>    
+          </div>
+          </div>
+          
         </div>
       </div>
 
@@ -348,24 +394,8 @@ export default {
   methods: {
     onSubmit() {
       let isUpdatable = false;
-      for (let element in this.data)
-      {
-        console.log(this.data[element])
-        let check_data = this.data[element] != null ? true : false
-        if(check_data)
-        {                    
-          isUpdatable = true;  
-        }  
-      }
-      if(isUpdatable == true){
-        this.BuildObjectToUpdateCover();
-        this.UpdateImageMap()
-        console.log(this.cover_image_information);
-      }
-      else{
-        this.BuildObjectToUpdateCoverInitial();       
-        this.UpdateImageMap();
-      }
+     
+      this.CreateDocumentObject()
     },
      onReset() {
       this.data = {
@@ -383,24 +413,41 @@ export default {
       };
       this.disable = true;
     },
+    check(){
+     
+    },
     enableInputs() {
          this.disable = false;
          this.GetInformationToEdit();
     },
     GetInformationToEdit(){
+      let formatdate = null;
+      if(this.cover_image_information.date_admission != null){
+         let baddate = this.DeleteEmptyChar(this.cover_image_information.date_admission)
+        baddate = baddate.split('/');
+        let rebuilddate= baddate[2]+"-"+baddate[1]+"-"+baddate[0]
+        let aux= new Date(rebuilddate)
+        let year = aux.getFullYear()
+        let month = aux.getMonth() +1
+        month = (month < 10 ? "0"+month : ""+month)
+        let date = aux.getDate() +1
+        date = (date < 10 ? "0"+date : ""+date);
+        formatdate = year+"-"+month+"-"+date; 
+      }      
       this.data = {
-            id: this.DeleteEmptyChar(this.cover_image_information.id),
-            url_uploaded: this.DeleteEmptyChar(this.cover_image_information.url_uploaded),
-            code_document: this.DeleteEmptyChar(this.cover_image_information.code_document),
-            crime: this.DeleteEmptyChar(this.cover_image_information.crime),
-            date_admission: this.DeleteEmptyChar(this.cover_image_information.date_admission),
-            hours_admission: this.DeleteEmptyChar(this.cover_image_information.hours_admission),
-            appellant: this.DeleteEmptyChar(this.cover_image_information.appellant), //QUERELLANTES
-            process_type: this.DeleteEmptyChar(this.cover_image_information.process_type),
-            accused: this.DeleteEmptyChar(this.cover_image_information.accused), //IMPUTADO
-            relevant_court: this.DeleteEmptyChar(this.cover_image_information.relevant_court),
-            victim: this.DeleteEmptyChar(this.cover_image_information.victim), //VICTIMAS
-      };      
+            id:(this.cover_image_information.id != null ? this.DeleteEmptyChar(this.cover_image_information.id) : null),
+            url_uploaded: this.cover_image_information.url_uploaded != null ? this.DeleteEmptyChar(this.cover_image_information.url_uploaded) : null,
+            code_document: this.cover_image_information.code_document != null ? this.DeleteEmptyChar(this.cover_image_information.code_document) :null,
+            crime: this.cover_image_information.crime != null ? this.DeleteEmptyChar(this.cover_image_information.crime) : null,
+            date_admission: formatdate,
+            hours_admission:this.cover_image_information.hours_admission != null ? this.DeleteEmptyChar(this.cover_image_information.hours_admission):null,
+            appellant: (this.cover_image_information.appellant != null ? this.DeleteEmptyChar(this.cover_image_information.appellant) : new Array(0)), 
+            process_type: this.cover_image_information.process_type != null ? this.DeleteEmptyChar(this.cover_image_information.process_type) : null,
+            accused: (this.cover_image_information.accused != null ? this.DeleteEmptyChar(this.cover_image_information.accused) : new Array(0)),
+            relevant_court:this.cover_image_information.relevant_court != null ? this.DeleteEmptyChar(this.cover_image_information.relevant_court) : null,
+            victim: (this.cover_image_information.victim != null ? this.DeleteEmptyChar(this.cover_image_information.victim) : new Array(0)) ,
+      };   
+      console.log("DATA",this.data)   
     },
 
     async BuildObjectToUpdateCover(){ 
@@ -428,7 +475,7 @@ export default {
       //Setting the variable only when submitted
         //TODO press with enter function
       //this.disabledIO = true;
-      console.log();
+     
     },   
     getVictim(index, criterio, texto) {
       this.disabledIO = false;
@@ -453,11 +500,11 @@ export default {
       console.log(index, texto);
     },
     PreviewImage(){
-      console.log()
+     
       let image_name= this.cover_image_information.url_uploaded;
        this.$axios.get(`documents/image/${image_name}`)
        .then(response =>{         
-         console.log(response)
+       
          this.onImage = true;
           this.image_cover = response.data.image;
        })
@@ -465,38 +512,54 @@ export default {
          console.log(error);
        })
     },
-    UpdateImageMap() {
-      this.$axios
-        .put(`documents/update/${this.cover_image_information.id}`, this.cover_image_information)
-        .then(result => {
-          console.log("Respuesta actualizar", result);
-          this.onReset();
-          this.changeStepOne();
-          this.clearCoverInformation();
-           this.$router.replace({
-            name:'UploadImage'
-          })
+
+    CreateDocumentObject(){       
+      this.UpdateDataFromApi(this.data)
+      .then(response =>{
+        this.onReset();
+        this.changeStepOne();
+        this.clearCoverInformation();
+        this.$router.replace({
+          name:'UploadImage'
         })
-        .catch(err => {
-          console.error(err);
-        });
+       
+      })
+      .catch(err =>{
+        console.log(err)
+      })
     },
 
-    DeleteImageMap(){
-      console.log("entro delete")
-        this.$axios.delete(`documents/delete/${this.cover_image_information.id}`)
-        .then(result => {
-          console.log("Respuesta actualizar", result);
-          this.onReset();
-          this.changeStepOne();
-          this.clearCoverInformation();
-          this.$router.replace({
-            name:'UploadImage'
-          })
+    UpdateImageMap() {
+    
+     this.UpdateDataFromApi(this.cover_image_information)
+         .then(result => {
+         
+           this.onReset();
+           this.changeStepOne();
+           this.clearCoverInformation();
+            this.$router.replace({
+             name:'UploadImage'
+           })
+         })
+         .catch(err => {
+           console.error(err);
+         });
+    },
+
+    DeleteImageMap(){     
+       this.DeleteData(this.cover_image_information)
+      .then(response =>{
+        this.onReset();
+        this.changeStepOne();
+        this.clearCoverInformation();
+        this.$router.replace({
+          name:'UploadImage'
         })
-        .catch(err => {
-          console.error(err);
-        });
+       
+      })
+      .catch(err =>{
+        console.log(err)
+      }) 
     },
 
 
@@ -514,17 +577,21 @@ export default {
       if(typeof text == 'string'){
          text = "" + text;
          let newtext = text.trim();
-          console.log(newtext)
+        
           return newtext;
       }
     },
     ...mapMutations('upload_image',['getDataCoverImage',
-'changeStepOne',
-'changeStepTwo',
-'clearCoverInformation'])
+      'changeStepOne',
+      'changeStepTwo',
+      'clearCoverInformation']),
+    ...mapActions('upload_image',['UpdateDataFromApi','CreateCoverDocument','DeleteData'])
   },
   computed:{
     ...mapState('upload_image',['cover_image_information'])
+  },
+  created(){
+    console.log(this.cover_image_information)
   },
   destroyed(){
     this.onReset();

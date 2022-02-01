@@ -3,7 +3,7 @@
     <q-table
       grid
       ref="TableReference"
-      title="Memoriales y Decretos"
+      title="Modelos de Documentos"
       :data="isSearching == false ? memorials_list : memorials_list_searching"
       :columns="columns"
       row-key="name"     
@@ -32,7 +32,7 @@
               <q-btn
                 @click="GoToRegisterAnImageTag()"
                 round
-                color="primary"
+               color="positive"
                 icon="add"
               />
             </div>
@@ -46,7 +46,7 @@
             <q-card-section class="text-center">
               <strong>{{ props.row.name }}</strong>
             </q-card-section>
-            <q-separator />
+            <q-separator color="white" />
             <q-card-section class="flex flex-center">
               <div style="width:100%">
                 TIPO DE DOCUMENTO: {{ props.row.type_document }}
@@ -60,15 +60,27 @@
               <div class="row justify-end btn-content-docs">               
                 <q-btn
                   round
-                  color="dark"
+                  flat
+                  size="10px"
+                  color="positive"
                   icon="far fa-eye"
                   @click="ViewMore(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="green"
+                  flat
+                  size="10px"
+                  color="positive"
                   icon="far fa-edit"
                   @click="GetDocumentToEdit(props.row)"
+                ></q-btn>
+                 <q-btn
+                  round
+                  flat
+                  size="10px"
+                  color="positive"
+                  icon="fas fa-trash-alt"
+                  @click="Delete(props.row)"
                 ></q-btn>
               </div>
             </q-card-section>
@@ -104,16 +116,18 @@
     </q-table>
     <q-dialog v-model="view_more" full-width>
       <ViewMore />
+    </q-dialog> <q-dialog v-model="open_dialog">
+      <DeleteMemorial/>
     </q-dialog>
   </div>
 </template>
 <script>
-import ViewMore from "../../../components/MemorialsDecrets/ViewMore";
+import ViewMore from "../../../components/MemorialsDecrets/ViewMore";import DeleteMemorial from "../../../components/MemorialsDecrets/Delete.vue"
 import { mapState, mapMutations, mapActions } from "vuex";
 const stringOptions = ["5", "8", "10", "15", "20", "30"];
 export default {
   name:"MemorialsModel",
-  components:{ViewMore},
+  components:{ViewMore,DeleteMemorial},
   data() {
     return {      
       filter: "",
@@ -161,10 +175,18 @@ export default {
       "ClearData",
       "ReloadMemorialProperties",
       "OpenPreviewDocument",
+      "ChangePrevPage",
       "IsSearching",
       "IsNotSearching",
-      "ClearListFromSearch"]),
-    ...mapActions("memorials_decrets", ["GetModelsMemorials",'FindDataFromMemorialsModels']),
+      "ClearListFromSearch",
+      "WritingDocumentText",
+       "IdPropertieMemorial",
+      "NamePropertieMemorial",
+      "TypePropertieMemorial",
+      "DescriptionPropertieMemorial",
+      "DocumentTextPropertieMemorial",
+      ]),
+    ...mapActions("memorials_decrets", ["GetModelsMemorials",'FindDataFromMemorialsModels',"OpenDialogDelete"]),
     GetPressEnter(e){
       //TODO BUSCADOR
        if (e.keyCode === 13) {
@@ -176,42 +198,54 @@ export default {
                 documents_text:this.filter,
          }        
           this.FindDataFromMemorialsModels(querys)
-         console.log("SEARCH",this.memorials_list_searching)
+         
           this.IsSearching()
       }  
     },
-    CheckEmpty(e){   
-      console.log("No empty",e)   
+     Delete(props){
+      this.OpenDialogDelete()
+      this.TypePropertieMemorial("ModelDocument")
+      this.IdPropertieMemorial(props._id)
+    },
+    CheckEmpty(e){ 
+      
       if(e == ''){
-        console.log("THIS IS EMPTY",e);
-         this.ClearListFromSearch()
+        
+        this.ClearListFromSearch()
         this.GetModelsMemorials()
         this.IsNotSearching()
       }
     },    
     nextPage: async function() {
       if(this.isSearching == false){
-          let params;
-      if (this.data_per_page >= this.memorials_list.length) {
-        console.log("ENTRO IF");
-        this.ChangeNextPage();
-        params = {
-          page: this.page,
-          rowPerPage: this.data_per_page
-        };
-        await this.GetModelsMemorials(params);   
-        setTimeout(()=>{
-          this.$refs.TableReference.nextPage();
-        },1000)   
-        
-      } else {
-        this.$refs.TableReference.nextPage();
-      }
+        let params;
+       // if (this.data_per_page >= this.memorials_list.length) {
+          
+           this.ChangeNextPage();        
+          params = {
+            page: this.page,
+            rowPerPage: this.data_per_page
+          };
+          this.GetModelsMemorials(params)
+          .then(response =>{
+            
+            if(response.length == 0){
+                 this.ChangePrevPage()
+            }     
+            else{
+              this.$refs.TableReference.nextPage();
+            }
+             
+          })
+          .catch(err =>{
+            console.error(err)
+          })    
+      
       }
       else{
           let params;
         if (this.data_per_page >= this.memorials_list_searching.length) {
-          console.log("ENTRO IF");
+          
           this.ChangeNextPage();
           params = {
             page: this.page,
@@ -227,11 +261,12 @@ export default {
           this.$refs.TableReference.nextPage();
         }
       }
-      console.log("NEXT");
+      
     },
-    prevPage() {
+    prevPage() {      
+      this.ChangePrevPage()
       this.$refs.TableReference.prevPage();
-      console.log("PREF");
+      
     },
 
     changeRowsPerPage() {
@@ -241,17 +276,23 @@ export default {
       };
       let params;
       if (this.data_per_page >= this.memorials_list.length) {
-        console.log("ENTRO IF");
-        this.ChangeNextPage();
+        
+       
         params = {
           page: this.page,
           rowPerPage: this.data_per_page
         };
-        this.GetModelsMemorials(params);
-        this.data = this.memorials_list;
-        this.$refs.TableReference.setPagination(pagination);
+        this.GetModelsMemorials(params)
+        .then(response =>{          
+           this.data = this.memorials_list;
+           this.ChangeNextPage();
+            this.$refs.TableReference.setPagination(pagination);
+        })
+        .catch(err =>{
+
+        }) 
       } else {
-        console.log("ENTRO ELSE");
+        
         this.$refs.TableReference.setPagination(pagination);
       }
       }
@@ -261,7 +302,7 @@ export default {
       };
       let params;
       if (this.data_per_page >= this.memorials_list_searching.length) {
-        console.log("ENTRO IF");
+        
         this.ChangeNextPage();
         params = {
           page: this.page,
@@ -274,7 +315,7 @@ export default {
         this.data = this.memorials_list_searching;
         this.$refs.TableReference.setPagination(pagination);
       } else {
-        console.log("ENTRO ELSE");
+        
         this.$refs.TableReference.setPagination(pagination);
       }
       }
@@ -291,47 +332,60 @@ export default {
     ViewMore(doc_selected) {
       this.OpenPreviewDocument(doc_selected);
     },
-    GetDocumentToEdit(doc_selected) {
-      console.log("EDIT",doc_selected);
-      this.ReloadMemorialProperties(doc_selected);
+    async GetDocumentToEdit(doc_selected) {
       this.$router.push({
         name: "MemorialDecretModelUpdate"
-      });
+      })
+       .then(async () =>{
+        await this.WritingDocumentText(doc_selected.documents_text);
+        await this.IdPropertieMemorial(doc_selected._id);
+        await this.NamePropertieMemorial(doc_selected.name)
+        await this.TypePropertieMemorial(doc_selected.type_document)
+        await this.DescriptionPropertieMemorial(doc_selected.description)
+        await this.DocumentTextPropertieMemorial(doc_selected.documents_text) 
+      })
+      .catch((err)=>{
+        console.error(err)
+      })
     },
     GetRowToDelete(row) {}
   },
   computed: {
     ...mapState("memorials_decrets", ['memorials_list','memorial_properties',
-    'isSearching','view_more','memorials_list_searching','page','rowPerPage'])
+    'isSearching','view_more','memorials_list_searching','page','rowPerPage',"open_dialog"])
   },
   created() {
        
   },
   mounted() {
+    //this.ClearData();
+    this.ClearData()
+    this.GetMemorials();
     
-   this.GetMemorials();
-    console.log("MEMO",this.memorials_list);
   },
   destroyed(){
     //this.ClearListFromSearch();
   }
 }
 </script>
-<style scoped>
-.my-card {
-  height: 100%;
-}
-.text-doc {
-  height: 220px;
-  overflow: hidden;
-}
-.btn-content-docs .q-btn {
-  margin-right: 10px;
-}
-.bottom-table{
-  width: 100% !important ;
-}
-.row-btn .q-btn{
-  margin-left: 10px;
-}
+<style lang="sass" scoped>
+@import '../../../css/quasar.variables.scss'
+.my-card 
+  height: 100%
+  background-color:$bluedark !important
+  color: white
+
+.text-doc 
+  height: 220px
+  overflow: hidden
+
+.btn-content-docs .q-btn 
+  margin-right: 10px
+
+.bottom-table
+  width: 100% !important 
+
+.row-btn .q-btn
+  margin-left: 10px
+
 </style>

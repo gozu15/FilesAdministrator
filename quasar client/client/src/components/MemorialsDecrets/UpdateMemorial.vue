@@ -179,18 +179,19 @@
     >
       <q-input
         filled
-        v-model="memorial_object.name"
+        v-model="name_object_properties"
         label="Ingrese nombre del documento *"
         hint="Name and surname"
         lazy-rules
         :rules="[ val => val && val.length > 0 || 'Please type something']"
       />
 
-       <q-select outlined v-model="memorial_object.type_document" :options="options" label="Selecciona tipo de documento"
-       />      
+       <q-select outlined v-model="memorial_selected"  :options="options" label="Selecciona tipo de documento">
+             
+        </q-select>      
       <q-input
         filled        
-        v-model="memorial_object.description"
+        v-model="description_object_properties"
         label="Una descripcion "              
       />     
 
@@ -226,6 +227,7 @@
 import TagsInformation from "../../components/TagsFromImage/GetAllTags";
 import MemorialModelList from "../../components/MemorialsDecretsModels/ListToUse";
 import { mapState, mapMutations, mapActions, mapGetters } from "vuex";
+
 export default {
   components: { TagsInformation, MemorialModelList },
   data() {
@@ -237,11 +239,16 @@ export default {
         description: null,
         documents_text: " "
       },
+      memorial_selected:"Decreto",
       confirm:false,
-      options:['Decreto',
-'Memorial',
-'Acusacion',
-'Autos de inicio',        
+      
+      options:[
+        {label:'Decreto', value:'Decreto'}, 
+        {label:'Memorial', value:'Memorial'},
+        {label:'Acusaciones', value:'Acusations'},
+        {label:'Autos de inicio', value:'Autos'},
+        {label:'Resoluciones', value:'Resolutions'},
+        {label:'Sentencias', value:'Sentence'} 
       ],
       save_change:false,
       file: null,
@@ -254,55 +261,43 @@ export default {
       "ReloadMemorialProperties",
       "ChangeNextPage",
       "ClearData",
-      "AddTagInToDocumentText",      
+      "AddTagInToDocumentText",    
+      "TypePropertieMemorial"  
     ]),
     ...mapActions("memorials_decrets", ['CreateMemorialNewDocument',"UpdateModelMemorial"]),
     Open() {
       document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-tabs").style.display = "block";
       document.getElementById("content-tabs").style.width = "35%";
-      console.log("Opem");
     },
     Close() {
       document.getElementById("content-tabs").style.display = "none";
       document.getElementById("content-editor").style.width = "100%";
-      console.log("close");
     },
     getMemorialList() {},
     VerifyDocument() {      
-      //this.$refs.editor_ref.runCmd('insertText', "THIS IS A EXAMPLE")
-      console.log(this.memorial_text_doc);
-      console.log("TAG SELECTED",this.tag_selected);
       this.save_change = true;
-      //this.pasteCapture();
+   
     },    
-    onSubmit(){      
-      let isUpdatable = false; 
-      let typevalue= this.memorial_object.type_document;
-      this.memorial_object.documents_text=this.memorial_text_doc
-      this.memorial_object.type_document = typevalue;
-      for (const key in this.memorial_properties) {
-          if(this.memorial_properties[key] != this.memorial_object[key]){
-            isUpdatable = true;
-          }
-      }
-      if(isUpdatable){
-        this.UpdateModelMemorial(this.memorial_object);
+    onSubmit(){           
+      this.document_object_properties = this.document_writing;      
+      this.UpdateModelMemorial(this.memorial_properties)
+      .then(response =>{
         this.GoToMemorialsTable();
-      }
-      else{
-        this.GoToMemorialsTable();
-      }    
-      console.log("MEMORIAL",this.memorial_object);
-      
+        this.ClearData()
+      })
+      .catch(err =>{
+        console.error(err);
+      })
     }, 
     GobackInit(){
         this.GoToMemorialsTable()
     },
     GoToMemorialsTable(){
-      this.$router.replace({
-        name:'MemorialsDocuments'
-      })
+      this.$router.back()
+      // this.$router.replace({
+      //   name:'MemorialsDocuments'
+      // })
     },
     onReset() {},
     getImage() {},
@@ -313,7 +308,10 @@ export default {
         textColor: "white",
         icon: "cloud_done"
       });
-    }
+    },
+     chek(dt){
+      this.memorial_selected = dt
+    },
   },
   computed: {
     ...mapState("memorials_decrets", [
@@ -322,6 +320,7 @@ export default {
       "memorial_text_doc"
     ]),
     ...mapState("tags_info",['tag_selected']),
+   
     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
@@ -329,22 +328,37 @@ export default {
       set: function(newTitle) {
         this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);
       }
-    }
-  },
-  mounted() {
-    console.log(this.$store);
-    this.document_writing = this.memorial_properties.documents_text
-    this.memorial_object = {
-      id: this.memorial_properties.id,
-      name :this.memorial_properties.name,
-      type_document:this.memorial_properties.type_document,
-      description:this.memorial_properties.description
+    },
+    name_object_properties:{
+       get: function() {
+        return this.$store.state.memorials_decrets.memorial_properties.name;
+      },
+      set: function(data) {
+        this.$store.commit("memorials_decrets/NamePropertieMemorial", data);
       }
-    console.log("update",this.memorial_object);
+    },  
+    description_object_properties:{
+         get: function(){
+        return this.$store.state.memorials_decrets.memorial_properties.description;
+      },
+      set:function(data){
+        this.$store.commit("memorials_decrets/DescriptionPropertieMemorial",data)
+      }
+    },
+    document_object_properties:{
+      get: function(){
+        return this.$store.state.memorials_decrets.memorial_properties.documents_text;
+      },
+      set:function(data){
+        this.$store.commit("memorials_decrets/DocumentTextPropertieMemorial",data)
+      }
+    },   
+  },
+  mounted() {    
+  
   },
   beforeDestroy(){
-    this.ClearData();
-    console.log("Destroyed");
+    //this.ClearData();
   }
   
 };

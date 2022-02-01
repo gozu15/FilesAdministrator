@@ -24,71 +24,48 @@ let io = require('socket.io')(server,
   }
   );  
 
-let messages = [
-  {
-    author: "Carlos",
-    text: "Hola! que tal?",
-  },
-  {
-    author: "Pepe",
-    text: "Muy bien! y tu??",
-  },
-  {
-    author: "Paco",
-    text: "Genial!",
-  },
-];
 let check = null;
-let cont= 0;
-let date = new Date();
-io.on('connection', socket => {
+io.on('connection', (socket) => {  
   console.log("Se conecto un cliente¡¡")
   let job = nodecron.schedule("*/4 * * * * *", () =>{
-    console.log("My First Cron Job task run at: " + new Date()); 
-    cont++;
-    if(check != null){    
-      console.log("NO ESTA VACIO",check);
-      let id = check._id || check.id;
+    console.log("My First Cron Job task run at: " + new Date());     
+    console.log("DATA",check)
+     if(check != null){    
+      let id = (check._id != undefined ? check._id : check.id);
       let getTimefromClient = new Date(check.date_end).getTime()
-      let timeNow = new Date().getTime()
-      let rest =  getTimefromClient - timeNow
-      let result_time = new Date(timeNow - rest)
-      let check_date_to_notify= (result_time >= new Date(getTimefromClient)) ? true : false
-      
-      console.log("restDATE",result_time)
-      console.log("check",check_date_to_notify)
-      if(check_date_to_notify){
-        console.log("TIMEOUT ",result_time);
-        if(id == null){
-          console.log("No existen datos")
-        }
-        else{
-          socket.emit('timeout_notify',check)
-        }
-        
-        check = null;
-        cont = 0;
-        job.stop()
-
-      }
+      let timeNow = new Date().getTime()    
+      let check_date_to_notify= (timeNow >= getTimefromClient) ? true : false  
+      console.log(check_date_to_notify);    
+      if(check_date_to_notify){      
+        if(id != null){
+          io.emit('timeout_notify',check)
+          console.log("DATO ENVIADO AL CLIENT",check)   
+        }       
+      }  
     }
-    if(cont == 1){
-      socket.emit('checkPingFromServer',{messages:"Hello client, i am server"});
-    }
-    // else{
-    //   cont = (check.date_end - date);
-    //   console.log("CONTADOR:",cont);
-    // }
-            
+     else{
+       socket.emit('checkPingFromServer',{messages:"Hello client, i am server"});
+     }  
   });   
-  socket.on('recieve_date',(data) =>{
-    console.log(data); 
-    check = data;           
+  socket.on('recieve_date',(data) =>{    
+    check = data;          
   })     
-  socket.on('disconnect', () => {
-      console.log("DESCONECTADO")
+  socket.on('disconnect-from-server', () => {
+      socket.emit('disconnected',"DESCONECTANDO")
   });
-
+  socket.on('disconnect',() =>{
+    console.log("SE DESCONECTO UN USUARIO")
+  })
+  socket.on('created-notify', () =>{
+    let check = {
+      status:true
+    };
+    socket.broadcast.emit('postcreate_notify',check);
+  })
+  socket.on('closing_notification',()=>{
+    check = null
+    socket.broadcast.emit('finished_notification',check);
+  })
   
 });
 
@@ -121,28 +98,28 @@ app.use(
 app.use(body_parser.json());
 
 // //CORS CONFIG
-// app.use(cors_config());
+app.use(cors_config());
 
-// app.use(function (req, res, next) {
+app.use(function (req, res, next) {
 
-//   // Website you wish to allow to connect
-//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
 
-//   // Request methods you wish to allow
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-//   // Request headers you wish to allow
-//   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 
-//   // Set to true if you need the website to include cookies in the requests sent
-//   // to the API (e.g. in case you use sessions)
-//   res.setHeader('Access-Control-Allow-Credentials', true);
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
 
-//   // Pass to next layer of middleware
-//   next();
-// });
+  // Pass to next layer of middleware
+  next();
+});
 
-
+//AUTENTIFICACION POR TOKEN
 routerMiddleware.use((req,res,next)=>{
   const token = req.headers['access-token'];
   if (token) {
@@ -166,7 +143,6 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = config.GOOGLE_APLICATION_CREDENTIAL
 
 require("./routes/documents.route")(app, multiPartyMiddelwere,routerMiddleware);
 require("./routes/auth.route")(app, jwt);
-require("./routes/models_documents.route")(app,multiPartyMiddelwere,jwt);
 require("./routes/diary_books.route")(app,multiPartyMiddelwere,jwt);
 require("./routes/memorials_decrets.route")(app,multiPartyMiddelwere,jwt);
 require("./routes/lawsandregulations.route")(app,multiPartyMiddelwere,jwt)

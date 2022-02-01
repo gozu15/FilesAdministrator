@@ -1,9 +1,18 @@
 <template>
     <div class="q-pa-md">
-        <div class="row justify start">
+        <q-form>
+        <!-- <div class="row justify start">
             <q-btn round flat color="red" icon="fas fa-arrow-left" @click="CloseDialog"></q-btn>
-        </div>    
-        <LibraryOfLaws/>    
+        </div>     -->
+          <q-page-sticky position="bottom-right" :offset="[18, 122]">
+            <q-btn @click="CloseDialog" fab icon="fas fa-arrow-left" color="red" padding="10px" />
+          </q-page-sticky>   
+        <div class="library-box">
+            <LibraryOfLaws/> 
+        </div>
+        
+        </q-form>
+          
     </div>
 </template>
 <script>
@@ -33,3 +42,8 @@ export default {
     
 }
 </script>
+<style lang="sass" scoped>
+.library-box
+    padding-right:60px
+
+</style>

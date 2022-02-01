@@ -165,7 +165,7 @@
         :rules="[ val => val && val.length > 0 || 'Please type something']"
       />
 
-       <q-select ref="SelectInput" outlined v-model="memorial_object.type_document" :options="options" label="Selecciona tipo de documento"
+       <q-select ref="SelectInput" outlined v-model="memorial_selected" :options="options" label="Selecciona tipo de documento"
        />      
       <q-input
         filled        
@@ -214,12 +214,15 @@ export default {
         description: null,
         documents_text: " "
       },
+       memorial_selected:"Decreto",
       confirm:false,
       options:[
-       {label:'Decreto', value:'DecretosModel'}, 
-       {label:'Memorial', value:'MemorialesModel'},
-       {label:'Acusaciones', value:'AcusacionesModel'},
-       {label:'Autos de inicio', value:'AutosModel'}   
+      {label:'Decreto', value:'DecretosModel'}, 
+        {label:'Memorial', value:'MemorialesModel'},
+        {label:'Acusaciones', value:'AcusacionesModel'},
+        {label:'Autos de inicio', value:'AutosModel'},
+        {label:'Resoluciones', value:'ResolucionesModel'},
+        {label:'Sentencias', value:'SentenciasModel'}   
       ],
       save_change:false,
       file: null,
@@ -239,40 +242,31 @@ export default {
       document.getElementById("content-editor").style.width = "65%";
       document.getElementById("content-tabs").style.display = "block";
       document.getElementById("content-tabs").style.width = "35%";
-      console.log("Opem");
+      
     },
     Close() {
       document.getElementById("content-tabs").style.display = "none";
       document.getElementById("content-editor").style.width = "100%";
-      console.log("close");
+      
     },
     getMemorialList(){
 
     },
     VerifyDocument(){  
-      console.log(this.memorial_text_doc);
-      console.log("TAG SELECTED",this.tag_selected);
+      
+      
       this.save_change = true;  
     },    
     onSubmit(){
-      let isUpdatable = false;
-      let typevalue= this.memorial_object.type_document.value;
-      this.memorial_object.documents_text=this.memorial_text_doc
-      this.memorial_object.type_document = typevalue;
-      for (const key in this.memorial_properties){
-          if(this.memorial_properties[key] != this.memorial_object[key]){
-            isUpdatable = true;
-          }
-      }
-      if(isUpdatable){
-        this.UpdateModelMemorial(this.memorial_object);
+      this.document_object_properties = this.document_writing;      
+      this.UpdateModelMemorial(this.memorial_properties)
+      .then(response =>{
         this.GoToMemorialsTable();
-      }
-      else{
-        this.GoToMemorialsTable();
-      }    
-      console.log("MEMORIAL",this.memorial_object);
-      
+        this.ClearData()
+      })
+      .catch(err =>{
+        console.error(err);
+      })     
     },
     GobackInit(){
         this.GoToMemorialsTable()
@@ -300,28 +294,45 @@ export default {
       "memorial_text_doc"
     ]),
     ...mapState("tags_info",['tag_selected']),
-    document_writing: {
+     document_writing: {
       get: function() {
         return this.$store.state.memorials_decrets.memorial_text_doc;
       },
       set: function(newTitle) {
         this.$store.commit("memorials_decrets/WritingDocumentText", newTitle);
       }
+    },
+    name_object_properties:{
+       get: function() {
+        return this.$store.state.memorials_decrets.memorial_properties.name;
+      },
+      set: function(data) {
+        this.$store.commit("memorials_decrets/NamePropertieMemorial", data);
+      }
+    },  
+    description_object_properties:{
+         get: function(){
+        return this.$store.state.memorials_decrets.memorial_properties.description;
+      },
+      set:function(data){
+        this.$store.commit("memorials_decrets/DescriptionPropertieMemorial",data)
+      }
+    },
+    document_object_properties:{
+      get: function(){
+        return this.$store.state.memorials_decrets.memorial_properties.documents_text;
+      },
+      set:function(data){
+        this.$store.commit("memorials_decrets/DocumentTextPropertieMemorial",data)
+      }
     }
   },
   mounted() {    
-    this.document_writing = this.memorial_properties.documents_text    
-    this.memorial_object = {
-      id: this.memorial_properties.id,
-      name :this.memorial_properties.name,
-      type_document:this.memorial_properties.type_document,
-      description:this.memorial_properties.description
-    }
-    console.log("update",this.memorial_object);
+       console.log(this.memorial_properties)
   },
   beforeDestroy(){
     this.ClearData();
-    console.log("Destroyed");
+    
   }
   
 };

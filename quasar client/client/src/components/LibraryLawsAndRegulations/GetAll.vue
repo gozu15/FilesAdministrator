@@ -17,7 +17,7 @@
           </template>
         </q-input>
         <div class="q-pl-md">
-            <q-btn round color="primary" icon="add" @click="GotoCreate"></q-btn>
+            <q-btn round color="positive" icon="add" @click="GotoCreate"></q-btn>
         </div>
         
       </template>
@@ -25,35 +25,41 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-3 col-md-3">
           <q-card class="my-card">
-            <img src="../../../public/image/book.png" alt="">
+            <div class="icon-box">
+              <q-icon name="fas fa-gavel" class="text-red" style="font-size: 4rem;" />               
+            </div>           
             <q-card-section class="text-center tittle">              
               <br>
-              <strong>{{ props.row.name | truncate(35)}}</strong>
+              <div style="font-size:12px; color:white;"><strong>{{ props.row.name | truncate(35)}}</strong></div>
+              
             </q-card-section>            
             <q-card-section class="flex flex-center">
-              <div>{{ props.row.description | truncate(20) }}</div>
+              <div>{{ props.row.description | truncate(15) }}</div>
             </q-card-section>
-            <q-separator />
+            <q-separator color="white"/>
             <q-card-section>
               <div class="row justify-end btn-content-docs">                
                 <q-btn
                   round
-                  color="dark"
+                  flat
+                  color="positive"
                   icon="far fa-eye"
                   size="10px"
                   @click="ViewMore(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="green"
+                  flat
+                  color="positive"
                   icon="far fa-edit"
                   size="10px"
                   @click="GetDocumentToEdit(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="red"
-                  icon="fas fa-times"
+                  flat
+                  color="positive"
+                  icon="fas fa-trash-alt"
                   size="10px"
                   @click="Delete(props.row)"
                 ></q-btn>
@@ -90,12 +96,11 @@ export default {
         ...mapMutations('library',['getPdf','OpenCloseDialog','GetPropertiesbookPDF']),
         ...mapActions('library',['GetAllPDFs','GetPDFSelected']),
         Delete(book_selected){
-          console.log(book_selected);
           this.GetPropertiesbookPDF(book_selected);
           this.OpenCloseDialog(true)
         },
         ViewMore(book_selected){
-          console.log(book_selected);          
+            
           this.GetPDFSelected(book_selected)
           this.$router.push({
             path:'library_laws_preview'
@@ -107,8 +112,7 @@ export default {
           this.$router.push({
             name:'LibraryLawsUpdatePDF'
           })
-          console.log(book_selected);
-        },
+           },
         GotoCreate(){
           this.$router.push({
             name:'LibraryLawsAdd'
@@ -134,21 +138,29 @@ export default {
     }
 }
 </script>
-<style scoped>
-.my-card img{
-    background-size: 100% 100%;
-    width: 50%;    
-    height: 100px;
-    margin: auto;
-}  
-.my-card{
-  width: 100%;
+<style lang="sass" scoped>
+@import '../../css/quasar.variables.scss'
+.my-card img
+    background-size: 100% 100%
+    width: 50%    
+    height: 100px
+    margin: auto
   
-}
-.btn-content-docs .q-btn {
-  margin-right: 10px;
-}
-.tittle{
-  height: 80px;
-}
+.my-card
+  width: 100%
+  color: white !important
+  background-color: $bluedark
+
+.btn-content-docs .q-btn 
+  margin-right: 10px
+
+.tittle
+  height: 80px
+
+.icon-box .q-icon
+  text-align: center
+  padding: 10px
+  width: 100%  
+  color: $positive !important
+
 </style>

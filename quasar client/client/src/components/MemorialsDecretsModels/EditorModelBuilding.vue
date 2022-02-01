@@ -1,7 +1,7 @@
 <template>
     <div class="q-pa-md">
         <div class="content-editor" id="content-editor">
-            <q-btn label="goback" @click="Goback()"></q-btn>
+            
             <q-editor
               ref="editor_ref"
               v-model="text"

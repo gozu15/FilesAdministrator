@@ -17,50 +17,57 @@
           </template>
         </q-input>
         <div class="q-pl-md">
-            <q-btn round color="primary" icon="add" @click="GotoCreate"></q-btn>
+            <q-btn round color="positive" icon="add" @click="GotoCreate"></q-btn>
         </div>
         
       </template>
 
       <template v-slot:item="props">
+       
         <div class="q-pa-xs col-xs-12 col-sm-3 col-md-3">
           <q-card class="my-card">
-            <img src="../../../public/image/book.png" alt="">
+            <div class="icon-box">
+              <q-icon name="fas fa-book" class="text-red" style="font-size: 4rem;" />               
+            </div>
             <q-card-section class="text-center tittle">              
               <br>
-              <strong>{{ props.row.book_name | truncate(30)}}</strong>
+              <div style="font-size:12px;"><strong>{{ props.row.book_name | truncate(30)}}</strong></div>
+              
             </q-card-section>            
             <q-card-section class="flex flex-center">
-              <div>{{ props.row.year_of_management | truncate(20) }}</div>
+              <div style="font-size:12px;color:white;">{{ props.row.year_of_management | truncate(20) }}</div>
             </q-card-section>
-            <q-separator />
+            <q-separator color="white"/>
             <q-card-section>
               <div class="row justify-end btn-content-docs">                
                 <q-btn
                   round
-                  color="dark"
+                  flat
+                  color="positive"
                   icon="far fa-eye"
                   size="10px"
                   @click="ViewMore(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="green"
+                  flat
+                  color="positive"
                   icon="far fa-edit"
                   size="10px"
                   @click="GetDocumentToEdit(props.row)"
                 ></q-btn>
                 <q-btn
                   round
-                  color="red"
-                  icon="fas fa-times"
+                  flat
+                  color="positive"
+                  icon="fas fa-trash-alt"
                   size="10px"
                   @click="Delete(props.row)"
                 ></q-btn>
               </div>
             </q-card-section>
           </q-card>
-        </div>
+        </div>        
       </template>
     </q-table>    
     <q-dialog v-model="delete_open">
@@ -125,7 +132,7 @@ export default {
           ? new Date().getDate()
           : "0" + new Date().getDate();
       let date_complete = "" + year + "/" + month + "/" + date;
-      console.log(date_complete);
+     
       return date_complete;
     },
     ViewMore(row_selected){
@@ -134,8 +141,7 @@ export default {
         name:'GetContentDiarybook'
       })
     },
-    GetDocumentToEdit(row_selected){      
-      console.log("EDIT",row_selected);
+    GetDocumentToEdit(row_selected){           
       this.ReloadDiarySelected(row_selected);
       this.$router.push({
         name:'UpdateDiarybooks'
@@ -163,3 +169,23 @@ export default {
   },
 };
 </script>
+<style lang="sass" scoped>
+@import '../../css/quasar.variables.scss'
+.my-card
+  width: 100% 
+  background-color: $bluedark
+  color:white
+
+.btn-content-docs .q-btn 
+  margin-right: 10px
+
+.tittle
+  height: 80px
+  color: white !important
+
+.icon-box .q-icon
+  text-align: center
+  padding: 10px
+  width: 100%  
+  color: $positive !important
+</style>
